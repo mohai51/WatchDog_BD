@@ -68,14 +68,28 @@ This application is ready to deploy directly on [Vercel](https://vercel.com):
 
 ---
 
+## 🔒 Dedicated Admin Portal (`/admin`)
+
+The Admin control interface is **completely separated** from the public citizen interface:
+- **Zero Public Exposure**: The main public website (`/`) contains NO "Admin" button, links, or login modals.
+- **Dedicated URL**: Only reachable by directly browsing to `/admin`.
+- **Protected Workspace**:
+  - Secure password gate (default: `admin123`).
+  - **Report Moderation**: Real-time queue to approve or reject submitted community incident reports.
+  - **Site Analytics**: Total & today visits, report counts, approval breakdown, and 7-day traffic chart.
+
+---
+
 ## Files
 
-- `server.js` — Node.js / Express backend with MongoDB Atlas & Vercel serverless support
+- `server.js` — Node.js / Express backend with MongoDB Atlas, `/admin` route & Vercel serverless support
 - `vercel.json` — Vercel serverless function routing configuration
 - `package.json` — Node.js project manifest & dependencies
-- `public/index.html` — UI with Public Stats & Admin Analytics dashboard
-- `public/style.css` — Responsive design with tabbed admin view & analytics grid
-- `public/app.js` — Interactions, visitor recording, moderation & analytics charts
-- `public/districts.geojson` — authentic 64-district boundaries
-- `.env.example` — environment configuration template (Port, Admin password, MongoDB URI)
+- `public/index.html` — Public citizen map & report UI (clean, no admin links)
+- `public/app.js` — Public frontend interactions, map rendering, and citizen submissions
+- `public/admin.html` — Isolated Admin Portal (moderation queue & analytics dashboard)
+- `public/admin.js` — Admin portal logic, session management, and Chart.js analytics
+- `public/style.css` — Responsive design for public app and admin portal
+- `public/districts.geojson` — Authentic 64-district boundaries
+- `.env.example` — Environment configuration template
 

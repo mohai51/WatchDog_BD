@@ -321,6 +321,11 @@ app.use(express.json({ limit: '16kb' }));
 // Static files
 app.use(express.static(PUBLIC_DIR));
 
+// Dedicated Admin Portal
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'admin.html'));
+});
+
 // 1. Metadata endpoint
 app.get('/api/meta', (req, res) => {
   res.json({

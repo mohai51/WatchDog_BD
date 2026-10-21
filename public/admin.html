@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#121e35">
+  <title>Bangladesh SafeMap — Admin Control Center</title>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <span class="brand-icon">🛡️</span>
+      <div>
+        SafeMap <em>Admin Portal</em>
+        <small>INTERNAL CONTROL & ANALYTICS</small>
+      </div>
+    </div>
+    <div class="header-actions">
+      <span class="admin-badge-live">Live MongoDB</span>
+      <button class="button ghost" id="langBtn">EN</button>
+      <button class="button ghost" id="themeBtn" aria-label="Theme">☾</button>
+      <a href="/" class="admin-public-link" target="_blank" rel="noopener">পাবলিক সাইট ↗</a>
+    </div>
+  </header>
+
+  <main class="admin-portal-wrap">
+    <!-- 1. Centered Login Screen -->
+    <div id="adminAuthSection" class="admin-login-card">
+      <div class="admin-login-icon">🔒</div>
+      <h2 id="loginTitle">অ্যাডমিন প্রবেশদ্বার</h2>
+      <p id="loginSubtitle">রিপোর্ট যাচাই এবং লাইভ সাইট ট্রাফিকের বিস্তারিত দেখতে অ্যাডমিন পাসওয়ার্ড দিন।</p>
+      
+      <form id="loginForm">
+        <label>
+          <span style="font-weight:700;font-size:12px;display:block;margin-bottom:6px">Admin Password</span>
+          <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••" style="padding:12px;font-size:14px">
+        </label>
+        <div id="adminLoginError" class="form-message" style="color:#df5a65;margin:10px 0;text-align:left;font-weight:600"></div>
+        <button class="button primary" type="submit" id="loginBtnSubmit" style="margin-top:8px">লগইন করুন (Login)</button>
+      </form>
+    </div>
+
+    <!-- 2. Admin Workspace Dashboard -->
+    <div id="adminDashboardSection" class="admin-dashboard-card" hidden>
+      <div class="admin-header-title">
+        <div>
+          <h1 id="dashboardHeading">অ্যাডমিন কন্ট্রোল সেন্টার</h1>
+          <p style="color:var(--muted);font-size:12px;margin:4px 0 0">সরাসরি নাগরিক রিপোর্ট যাচাই করুন এবং সাইটের লাইভ অ্যানালিটিক্স পর্যবেক্ষণ করুন।</p>
+        </div>
+        <button class="button ghost" id="logoutBtn" style="color:#df5a65;border-color:#df5a6550">লগআউট (Logout)</button>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <div class="admin-tabs">
+        <button class="button active" id="tabReportsBtn">📋 রিপোর্ট মডারেশন</button>
+        <button class="button ghost" id="tabAnalyticsBtn">📊 সাইট অ্যানালিটিক্স</button>
+      </div>
+
+      <!-- Tab 1: Moderation Queue -->
+      <div id="adminReportsView">
+        <div class="admin-toolbar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:12px;color:var(--muted);font-weight:700">ফিল্টার:</span>
+            <select id="moderationStatus" style="max-width:160px">
+              <option value="pending">Pending (পেন্ডিং)</option>
+              <option value="approved">Approved (অনুমোদিত)</option>
+              <option value="rejected">Rejected (বাতিল)</option>
+            </select>
+          </div>
+          <button class="button ghost" id="refreshAdminBtn">🔄 Refresh Queue</button>
+        </div>
+        
+        <div id="reportQueue" style="margin-top:15px"></div>
+      </div>
+
+      <!-- Tab 2: Live Analytics & Traffic -->
+      <div id="adminAnalyticsView" hidden>
+        <div class="analytics-grid">
+          <div class="analytics-card">
+            <small>মোট সাইট ভিজিট</small>
+            <strong id="analyticsTotalVisits">0</strong>
+            <span>লাইভ ট্রাফিক</span>
+          </div>
+          <div class="analytics-card">
+            <small>আজকের ভিজিট</small>
+            <strong id="analyticsTodayVisits">0</strong>
+            <span>গত ২৪ ঘণ্টা</span>
+          </div>
+          <div class="analytics-card">
+            <small>মোট রিপোর্ট জমা</small>
+            <strong id="analyticsTotalReports">0</strong>
+            <span>সর্বমোট নাগরিক রিপোর্ট</span>
+          </div>
+          <div class="analytics-card">
+            <small>পেন্ডিং রিভিউ</small>
+            <strong id="analyticsPendingReports" style="color:#ed9155">0</strong>
+            <span>পর্যালোচনা প্রয়োজন</span>
+          </div>
+        </div>
+
+        <div class="analytics-subgrid">
+          <div class="analytics-card-mini">
+            <span>অনুমোদিত রিপোর্ট:</span>
+            <b id="analyticsApprovedReports" style="color:#2aa579">0</b>
+          </div>
+          <div class="analytics-card-mini">
+            <span>প্রত্যাখ্যাত রিপোর্ট:</span>
+            <b id="analyticsRejectedReports" style="color:#df5a65">0</b>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin:24px 0 10px">
+          <h3 style="margin:0;font-size:14px">গত ৭ দিনের ভিজিটর ট্রেন্ড (Daily Traffic)</h3>
+          <button class="button ghost" id="refreshAnalyticsBtn" style="font-size:11px;padding:6px 10px">🔄 Refresh</button>
+        </div>
+        
+        <div class="chart-wrap" style="height:220px;background:var(--sub);border-radius:12px;padding:12px;border:1px solid var(--line)">
+          <canvas id="adminVisitChart"></canvas>
+        </div>
+      </div>
+
+      <div id="adminMessage" class="form-message" style="margin-top:15px"></div>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/admin.js"></script>
+</body>
+</html>

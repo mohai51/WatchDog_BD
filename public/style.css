@@ -34,5 +34,20 @@
 .analytics-card span{font-size:10px;color:var(--muted)}
 .analytics-subgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .analytics-card-mini{background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:10px 14px;display:flex;justify-content:space-between;font-size:12px}
+.admin-portal-wrap{max-width:1100px;margin:30px auto;padding:0 20px}
+.admin-login-card{max-width:440px;margin:80px auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:36px;box-shadow:0 12px 40px #00000010;text-align:center}
+.admin-login-card h2{margin:14px 0 6px;font-size:22px}
+.admin-login-card p{color:var(--muted);font-size:13px;line-height:1.5;margin-bottom:22px}
+.admin-login-icon{width:56px;height:56px;background:var(--sub);border-radius:16px;display:inline-grid;place-items:center;font-size:28px;border:1px solid var(--line);color:var(--blue)}
+.admin-login-card form label{text-align:left;margin-bottom:18px}
+.admin-login-card .button{width:100%;padding:12px;font-size:14px}
+.admin-badge-live{background:#2aa57920;color:#2aa579;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;display:inline-flex;align-items:center;gap:6px}
+.admin-badge-live::before{content:'';width:7px;height:7px;border-radius:50%;background:#2aa579;display:inline-block}
+.admin-dashboard-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px}
+.admin-header-title{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:20px;flex-wrap:wrap}
+.admin-header-title h1{font-size:22px;margin:0}
+.admin-public-link{color:var(--muted);font-size:12px;text-decoration:none;display:inline-flex;align-items:center;gap:4px;padding:8px 12px;border-radius:8px;background:var(--sub);border:1px solid var(--line)}
+.admin-public-link:hover{color:var(--ink);border-color:var(--muted)}
+
 
 
