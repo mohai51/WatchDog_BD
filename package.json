@@ -1,0 +1,26 @@
+{
+  "name": "bangladesh-safemap",
+  "version": "1.0.0",
+  "description": "Bangladesh SafeMap - 64 District Crowdsourced Crime Reporting & Geographic Analytics Platform",
+  "main": "server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "bangladesh",
+    "safemap",
+    "crime-reporting",
+    "geospatial",
+    "leaflet",
+    "mongodb"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "mongodb": "^6.14.0"
+  }
+}
