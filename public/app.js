@@ -1,32 +1,900 @@
-const $=id=>document.getElementById(id);
-const I={bn:{admin:'অ্যাডমিন',report:'+ রিপোর্ট করুন',headline:'নিরাপদ বাংলাদেশের জন্য তথ্যভিত্তিক উদ্যোগ',subline:'৬৪ জেলার বাস্তব সীমানা, কমিউনিটি রিপোর্ট ও যাচাইকৃত ঘটনার বিশ্লেষণ।',verified:'শুধু অনুমোদিত রিপোর্ট গণনা করা হয়',total:'মোট অনুমোদিত রিপোর্ট',totalNote:'সারা বাংলাদেশ',districts:'জেলা',districtNote:'বাস্তব GeoJSON সীমানা',areaCount:'নির্বাচিত জেলার রিপোর্ট',dataLabel:'ডেটার অবস্থা',dataNote:'অনুমোদিত জমা দেওয়া রিপোর্ট',mapHeading:'বাংলাদেশের জেলাভিত্তিক ম্যাপ',mapHelp:'যেকোনো জেলায় ক্লিক করে বিস্তারিত দেখুন',reset:'রিসেট',mapLegend:'অনুমোদিত রিপোর্ট সংখ্যা',low:'কম',high:'বেশি',noRoads:'বাস্তব জেলা সীমানা • রাস্তা বা নদীর লেয়ার নেই',areaInsights:'DISTRICT INSIGHTS',choose:'জেলা নির্বাচন করুন',reports:'অনুমোদিত রিপোর্ট',share:'সর্বমোটের অংশ',byType:'ঘটনার ধরন',monthly:'গত ৬ মাসের রিপোর্ট',interpretation:'ম্যাপের রঙ কী বোঝায়?',method:'রঙ অনুমোদিত রিপোর্টের সংখ্যার তুলনামূলক পার্থক্য দেখায়। এটি প্রকৃত অপরাধের হার বা কোনো জেলার নিরাপত্তার চূড়ান্ত মূল্যায়ন নয়।',warning:'জরুরি বিপদে বাংলাদেশে ৯৯৯-এ যোগাযোগ করুন। এই প্ল্যাটফর্ম পুলিশে অভিযোগ বা জরুরি সহায়তার বিকল্প নয়।',reportTitle:'ঘটনার রিপোর্ট জমা দিন',reportDesc:'আপনার রিপোর্ট পর্যালোচনার পর পরিসংখ্যানে যুক্ত হতে পারে।',name:'নাম (ঐচ্ছিক)',victim:'আপনি কি ভুক্তভোগী?',yes:'হ্যাঁ',no:'না',district:'জেলা',crimeType:'ঘটনার ধরন',date:'তারিখ',time:'সময়',location:'ঘটনাস্থলের বিবরণ (বাসার ঠিকানা নয়)',description:'ঘটনার বিস্তারিত',confirm:'আমি নিশ্চিত করছি এটি আমার জানা সত্য ঘটনা এবং জরুরি সেবা পাওয়ার মাধ্যম নয়।',cancel:'বাতিল',send:'পর্যালোচনার জন্য পাঠান',adminTitle:'Admin Moderation',adminDesc:'রিপোর্ট যাচাই করে অনুমোদন বা বাতিল করুন।',password:'Admin Password',login:'Login',refresh:'Refresh',logout:'Logout',search:'জেলা খুঁজুন...',all:'সব বিভাগ',pending:'রিপোর্ট জমা হয়েছে। অ্যাডমিন অনুমোদনের অপেক্ষায় আছে।',error:'অনুরোধ সম্পন্ন হয়নি',empty:'এখনো কোনো অনুমোদিত রিপোর্ট নেই',noQueue:'এই অবস্থায় কোনো রিপোর্ট নেই',approved:'অনুমোদন',rejected:'বাতিল',mapReady:'৬৪ জেলার ম্যাপ প্রস্তুত',mapFail:'ম্যাপ লোড হয়নি',snatching:'ছিনতাই',theft:'চুরি',robbery:'ডাকাতি',extortion:'চাঁদাবাজি',harassment:'হয়রানি',assault:'হামলা',fraud:'প্রতারণা',other:'অন্যান্য',incidentsHeading:'অনুমোদিত ঘটনার বিবরণ',noIncidents:'এই এলাকায় এখনো কোনো অনুমোদিত ঘটনার রেকর্ড নেই।',visits:'মোট সাইট ভিজিট',todayVisits:'আজকের ভিউ',tabReports:'📋 রিপোর্ট মডারেশন',tabAnalytics:'📊 সাইট অ্যানালিটিক্স',statVisitsTotal:'মোট সাইট ভিজিট',statVisitsToday:'আজকের ভিজিট',statReportsTotal:'মোট রিপোর্ট জমা',statPendingReports:'পেন্ডিং রিভিউ',weeklyVisitTrend:'গত ৭ দিনের ভিজিটর ট্রেন্ড'},en:{admin:'Admin',report:'+ Submit Report',headline:'A safer Bangladesh starts with better information',subline:'Authentic boundaries of 64 districts, community reports and moderated incident insights.',verified:'Only approved reports are counted',total:'Approved incident reports',totalNote:'Across Bangladesh',districts:'Districts',districtNote:'Authentic GeoJSON boundaries',areaCount:'Reports in selected district',dataLabel:'Data status',dataNote:'Approved community submissions',mapHeading:'Bangladesh District Map',mapHelp:'Click a district to explore its data',reset:'Reset',mapLegend:'Approved incident counts',low:'Lower',high:'Higher',noRoads:'Authentic district polygons • no roads or rivers',areaInsights:'DISTRICT INSIGHTS',choose:'Choose a district',reports:'Approved reports',share:'Share of all reports',byType:'Incident categories',monthly:'Reports over 6 months',interpretation:'What do the map colors mean?',method:'Colors compare approved report counts, not actual crime rates or a definitive measure of safety.',warning:'For emergencies in Bangladesh, call 999. This platform does not replace police reporting or emergency services.',reportTitle:'Submit an Incident Report',reportDesc:'Your submission may be included in statistics after moderation.',name:'Name (optional)',victim:'Were you the victim?',yes:'Yes',no:'No',district:'District',crimeType:'Incident type',date:'Date',time:'Time',location:'Location description (not a home address)',description:'Incident details',confirm:'I confirm this is a truthful account to the best of my knowledge and not an emergency request.',cancel:'Cancel',send:'Submit for review',adminTitle:'Admin Moderation & Analytics',adminDesc:'Review reports and explore live site traffic analytics.',password:'Admin password',login:'Login',refresh:'Refresh',logout:'Logout',search:'Search district...',all:'All divisions',pending:'Report submitted and awaiting admin review.',error:'Request failed',empty:'No approved reports yet',noQueue:'No reports with this status',approved:'Approve',rejected:'Reject',mapReady:'64-district map ready',mapFail:'Could not load map',snatching:'Snatching',theft:'Theft',robbery:'Robbery',extortion:'Extortion',harassment:'Harassment',assault:'Assault',fraud:'Fraud',other:'Other',incidentsHeading:'Verified Incident Details',noIncidents:'No verified incidents recorded for this area.',visits:'Total Site Visits',todayVisits:'Today Visits',tabReports:'📋 Moderation',tabAnalytics:'📊 Site Analytics',statVisitsTotal:'Total Site Visits',statVisitsToday:'Today Visits',statReportsTotal:'Total Reports Submitted',statPendingReports:'Pending Review',weeklyVisitTrend:'Last 7 Days Visitor Trend'}};
-const BN={'Dhaka':'ঢাকা','Gazipur':'গাজীপুর','Narayanganj':'নারায়ণগঞ্জ','Chattogram':'চট্টগ্রাম','Chittagong':'চট্টগ্রাম','Cumilla':'কুমিল্লা','Comilla':'কুমিল্লা','Sylhet':'সিলেট','Rajshahi':'রাজশাহী','Khulna':'খুলনা','Barishal':'বরিশাল','Barisal':'বরিশাল','Rangpur':'রংপুর','Mymensingh':'ময়মনসিংহ','Jhalokati':'ঝালকাঠি','Jhalokathi':'ঝালকাঠি','Coxs Bazar':'কক্সবাজার',"Cox's Bazar":'কক্সবাজার','Noakhali':'নোয়াখালী','Feni':'ফেনী','Bogra':'বগুড়া','Bogura':'বগুড়া','Tangail':'টাঙ্গাইল','Faridpur':'ফরিদপুর','Pabna':'পাবনা','Kushtia':'কুষ্টিয়া','Jessore':'যশোর','Jashore':'যশোর','Satkhira':'সাতক্ষীরা','Bagerhat':'বাগেরহাট','Pirojpur':'পিরোজপুর','Patuakhali':'পটুয়াখালী','Bhola':'ভোলা','Barguna':'বরগুনা','Narsingdi':'নরসিংদী','Manikganj':'মানিকগঞ্জ','Munshiganj':'মুন্সিগঞ্জ','Madaripur':'মাদারীপুর','Shariatpur':'শরীয়তপুর','Gopalganj':'গোপালগঞ্জ','Kishoreganj':'কিশোরগঞ্জ','Jamalpur':'জামালপুর','Sherpur':'শেরপুর','Netrokona':'নেত্রকোনা','Sunamganj':'সুনামগঞ্জ','Habiganj':'হবিগঞ্জ','Moulvibazar':'মৌলভীবাজার','Brahmanbaria':'ব্রাহ্মণবাড়িয়া','Chandpur':'চাঁদপুর','Lakshmipur':'লক্ষ্মীপুর','Laxmipur':'লক্ষ্মীপুর','Bandarban':'বান্দরবান','Rangamati':'রাঙামাটি','Khagrachhari':'খাগড়াছড়ি','Natore':'নাটোর','Naogaon':'নওগাঁ','Chapainawabganj':'চাঁপাইনবাবগঞ্জ','Nawabganj':'চাঁপাইনবাবগঞ্জ','Joypurhat':'জয়পুরহাট','Sirajganj':'সিরাজগঞ্জ','Dinajpur':'দিনাজপুর','Thakurgaon':'ঠাকুরগাঁও','Panchagarh':'পঞ্চগড়','Nilphamari':'নীলফামারী','Lalmonirhat':'লালমনিরহাট','Kurigram':'কুড়িগ্রাম','Gaibandha':'গাইবান্ধা','Chuadanga':'চুয়াডাঙ্গা','Meherpur':'মেহেরপুর','Magura':'মাগুরা','Narail':'নড়াইল','Jhenaidah':'ঝিনাইদহ'};
-let lang=localStorage.getItem('safemap-lang')||'bn';let selected='',features=[],layer,stats=null,typeChart,monthChart,adminToken=null,searchTerm='';
-const map=L.map('map',{zoomControl:true,attributionControl:false,preferCanvas:true,minZoom:5,maxZoom:12}).setView([23.7,90.3],7);
-const types=['snatching','theft','robbery','extortion','harassment','assault','fraud','other'];
-const $text=(id,value)=>$(id).textContent=value;const name=f=>lang==='bn'?(BN[f.properties.name]||f.properties.name):f.properties.name;const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-async function api(url,opts={}){let r=await fetch(url,{...opts,headers:{...(opts.body?{'Content-Type':'application/json'}:{}),...(opts.headers||{})}});let v=await r.json();if(!r.ok)throw Error(v.error||'HTTP '+r.status);return v}
-function paint(){if(!layer)return;const counts=stats?.district_counts||{};let max=Math.max(0,...Object.values(counts));layer.eachLayer(l=>{let n=counts[l.feature.properties.code]||0;let idx=max===0?0:n===0?0:Math.min(4,Math.max(1,Math.ceil(n/max*4)));let colors=['#39ad86','#8fc76b','#e4bc53','#ed9155','#df5a65'];l.setStyle({fillColor:colors[idx],fillOpacity:1,color:l.feature.properties.code===selected?'#26344d':getComputedStyle(document.body).getPropertyValue('--outline').trim(),weight:l.feature.properties.code===selected?3:1.4})})}
-function pick(code,fit=true){selected=code;let f=features.find(x=>x.properties.code===code);$text('districtName',f?name(f):(lang==='bn'?'বাংলাদেশ':'Bangladesh'));$text('selectedCaption',f?name(f):(lang==='bn'?'বাংলাদেশ':'Bangladesh'));$text('districtDivision',f?f.properties.division:I[lang].choose);$text('districtTag',f?f.properties.code:'ALL');if(f&&fit){let l=layer.getLayers().find(x=>x.feature.properties.code===code);if(l)map.fitBounds(l.getBounds(),{padding:[30,30],maxZoom:9})}paint();refreshStats()}
-async function refreshStats(){try{let s=await api('/api/stats'+(selected?'?district='+encodeURIComponent(selected):''));stats=s;$text('totalReports',s.total);$text('selectedCount',s.selected_count);$text('detailCount',s.selected_count);$text('detailShare',s.total?(100*s.selected_count/s.total).toFixed(1)+'%':'0%');if($('totalVisits'))$text('totalVisits',(s.total_visits||0).toLocaleString());if($('todayVisitsNote'))$text('todayVisitsNote',(lang==='bn'?'আজকের ভিউ: ':'Today: ')+(s.today_visits||0).toLocaleString());$text('dataStatus','LIVE');paint();drawCharts(s);renderIncidents(s.incidents||[])}catch(e){$text('dataStatus','ERROR');$text('mapStatus',e.message)}}
-function renderIncidents(list){const feed=$('districtIncidents');if(!feed)return;if($('incidentFeedCount'))$('incidentFeedCount').textContent=list.length;feed.replaceChildren();if(!list.length){let empty=document.createElement('div');empty.className='no-incidents-msg';empty.textContent=I[lang].noIncidents;feed.append(empty);return}for(let item of list){let card=document.createElement('div');card.className='incident-card';let top=document.createElement('div');top.className='incident-card-top';let badge=document.createElement('span');badge.className='incident-badge badge-'+item.type;badge.textContent=I[lang][item.type]||item.type;let timeSpan=document.createElement('span');timeSpan.className='incident-time';timeSpan.textContent=`📅 ${item.incident_date} · 🕒 ${item.incident_time}`;top.append(badge,timeSpan);let loc=document.createElement('div');loc.className='incident-loc';loc.textContent=`📍 ${item.location}`;let desc=document.createElement('p');desc.className='incident-desc';desc.textContent=item.description;let meta=document.createElement('div');meta.className='incident-meta';let repName=item.reporter_name||(lang==='bn'?'নাম প্রকাশে অনিচ্ছুক':'Anonymous');meta.textContent=`👤 ${repName}`;card.append(top,loc,desc,meta);feed.append(card)}}
-function drawCharts(s){let labels=types.map(x=>I[lang][x]);let ink=getComputedStyle(document.body).getPropertyValue('--muted').trim();let base={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:ink},grid:{display:false}},y:{beginAtZero:true,ticks:{precision:0,color:ink},grid:{color:'#88888820'}}}};if(typeChart)typeChart.destroy();if(monthChart)monthChart.destroy();typeChart=new Chart($('typeChart'),{type:'bar',data:{labels,datasets:[{data:types.map(x=>s.types[x]||0),backgroundColor:['#e15b66','#e9a45c','#d47844','#8d9fe3','#5db6a1','#9b87ce','#d6bb60','#92a1b4'],borderRadius:5}]},options:base});monthChart=new Chart($('monthChart'),{type:'line',data:{labels:s.months.map(x=>x.month),datasets:[{data:s.months.map(x=>x.count),borderColor:'#6c83e5',backgroundColor:'#6c83e525',fill:true,tension:.35,pointRadius:4}]},options:base})}
-function renderLanguage(){document.documentElement.lang=lang;document.querySelectorAll('[data-i]').forEach(el=>{if(I[lang][el.dataset.i])el.textContent=I[lang][el.dataset.i]});document.querySelectorAll('[data-placeholder]').forEach(el=>el.placeholder=I[lang][el.dataset.placeholder]);$text('langBtn',lang==='bn'?'EN':'বাং');let div=$('divisionFilter').value;let divisions=[...new Set(features.map(f=>f.properties.division))].sort();$('divisionFilter').innerHTML=`<option value="">${I[lang].all}</option>`+divisions.map(x=>`<option value="${esc(x)}">${esc(BN[x]&&lang==='bn'?BN[x]:x)}</option>`).join('');$('divisionFilter').value=div;let old=$('formDistrict').value;$('formDistrict').innerHTML=features.slice().sort((a,b)=>a.properties.name.localeCompare(b.properties.name)).map(f=>`<option value="${esc(f.properties.code)}">${esc(name(f))}</option>`).join('');$('formDistrict').value=selected||old||features[0]?.properties.code||'';$('formType').innerHTML=types.map(x=>`<option value="${x}">${I[lang][x]}</option>`).join('');if(layer)layer.eachLayer(l=>l.setTooltipContent(name(l.feature)));pick(selected,false)}
-async function recordPageVisit(){try{if(!sessionStorage.getItem('safemap_v')){sessionStorage.setItem('safemap_v','1');await api('/api/analytics/visit',{method:'POST'})}}catch(e){}}
-async function init(){try{let d=await api('/districts.geojson');features=d.features;if(features.length!==64)throw Error('Expected 64 districts, found '+features.length);layer=L.geoJSON(d,{style:{color:'#fff',weight:1,fillOpacity:1},onEachFeature:(f,l)=>{l.bindTooltip(()=>name(f),{sticky:true});l.on('click',()=>pick(f.properties.code));l.on('mouseover',()=>{if(f.properties.code!==selected)l.setStyle({weight:2.5,color:'#455674'})});l.on('mouseout',paint)}}).addTo(map);map.fitBounds(layer.getBounds(),{padding:[20,20]});$text('districtTotal',features.length);$text('mapStatus',I[lang].mapReady);renderLanguage();await recordPageVisit();await refreshStats()}catch(e){$text('mapStatus',I[lang].mapFail+': '+e.message)}}
-function open(id){$(id).classList.add('open')}function close(id){$(id).classList.remove('open')}
-$('langBtn').onclick=()=>{lang=lang==='bn'?'en':'bn';localStorage.setItem('safemap-lang',lang);renderLanguage()};
-$('themeBtn').onclick=()=>{document.body.classList.toggle('dark');$('themeBtn').textContent=document.body.classList.contains('dark')?'☀':'☾';paint();if(stats)drawCharts(stats)};
-$('resetBtn').onclick=()=>{if(layer)map.fitBounds(layer.getBounds(),{padding:[20,20]});pick('',false);$('divisionFilter').value='';$('search').value='';searchTerm='';filterMap()};
-$('reportBtn').onclick=()=>{if(selected)$('formDistrict').value=selected;open('reportModal')};
-document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>close(b.dataset.close));
-document.querySelectorAll('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)close(m.id)}));
-document.addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.modal-backdrop').forEach(m=>close(m.id))});
-$('divisionFilter').onchange=()=>filterMap();
-$('search').oninput=e=>{searchTerm=e.target.value.trim().toLowerCase();filterMap()};
-function filterMap(){if(!layer)return;let div=$('divisionFilter').value;layer.eachLayer(l=>{let f=l.feature,visible=(!div||f.properties.division===div)&&(!searchTerm||f.properties.name.toLowerCase().includes(searchTerm)||(BN[f.properties.name]||'').includes(searchTerm));l.setStyle({fillOpacity:visible?1:.12})})}
-$('reportForm').elements.incident_date.max=new Date().toISOString().slice(0,10);
-$('reportForm').elements.incident_date.value=new Date().toISOString().slice(0,10);
-$('reportForm').onsubmit=async e=>{e.preventDefault();let f=new FormData(e.target);let payload=Object.fromEntries(f.entries());payload.is_victim=payload.is_victim==='true';let msg=$('reportMessage');msg.textContent='…';try{await api('/api/reports',{method:'POST',body:JSON.stringify(payload)});msg.textContent=I[lang].pending;e.target.reset();e.target.elements.incident_date.value=new Date().toISOString().slice(0,10);setTimeout(()=>{close('reportModal');msg.textContent=''},2400)}catch(err){msg.textContent=I[lang].error+': '+err.message}};
-init();
+/**
+ * WatchDog BD — Community-Powered Crime Reporting & Public Safety Intelligence
+ * Modern Map-First Frontend Application (Leaflet.js + Chart.js)
+ */
 
+const $ = id => document.getElementById(id);
+const $text = (id, val) => { const el = $(id); if (el) el.textContent = val; };
+
+// 1. Translations & Lexicon (Bilingual BN & EN)
+const I18N = {
+  bn: {
+    brandTag: 'কমিউনিটি পাবলিক সেফটি ইন্টেলিজেন্স',
+    navMap: 'ম্যাপ দেখুন',
+    navHow: 'কীভাবে কাজ করে',
+    navSafety: 'জরুরি সেবা',
+    navTrack: 'রিপোর্ট ট্র্যাক করুন',
+    navCompare: 'জেলার তুলনা',
+    ctaReport: '+ রিপোর্ট করুন',
+    heroEyebrow: 'নাগরিক অংশগ্রহণমূলক অপরাধ পর্যবেক্ষণ ও নিরাপত্তা তথ্য',
+    heroHeading: 'আপনার এলাকার অপরাধ পরিস্থিতি সম্পর্কে জানুন',
+    heroSub: 'বাংলাদেশের ৬৪ জেলার অপরাধসংক্রান্ত রিপোর্ট, নিরাপত্তা তথ্য ও বিশ্লেষণ এক প্ল্যাটফর্মে। নাগরিক সতর্কতা ও সঠিক তথ্যের জন্য উন্মুক্ত উদ্যোগ।',
+    ctaExplore: '🗺️ ম্যাপ অনুসন্ধান করুন',
+    ctaReportSecondary: '📝 একটি ঘটনা রিপোর্ট করুন',
+    trustNotice: '🛡️ রিপোর্টগুলো যাচাইকৃত • কোনো মনগড়া পরিসংখ্যান নয়',
+    statTotalReports: 'প্রকাশিত মোট রিপোর্ট',
+    statTotalNote: 'সারাদেশের যাচাইকৃত রেকর্ড',
+    statDistricts: 'আওতাভুক্ত জেলা',
+    statDistrictsNote: 'খাঁটি বাস্তব GeoJSON সীমানা',
+    statDrugReports: 'মাদকসংক্রান্ত রেকর্ড',
+    statDrugNote: 'প্রকাশিত ও পর্যালোচিত',
+    statLastUpdate: 'সর্বশেষ আপডেট',
+    statUpdateNote: 'লাইভ ডাটাবেস সিঙ্ক',
+    searchPlaceholder: 'জেলা খুঁজুন... (e.g. Dhaka, Bogra, সিলেট)',
+    allCategories: 'সব ধরনের অপরাধ (All Categories)',
+    catExtortion: 'চাঁদাবাজি (Extortion)',
+    catTheft: 'চুরি (Theft)',
+    catRobbery: 'ডাকাতি (Robbery)',
+    catSnatching: 'ছিনতাই (Snatching)',
+    catDrug: 'মাদকসংক্রান্ত (Drug-related)',
+    catHarassment: 'হয়রানি (Harassment)',
+    catAssault: 'হামলা (Assault)',
+    catFraud: 'প্রতারণা (Fraud)',
+    catOther: 'অন্যান্য (Other)',
+    rangeAll: 'সব সময় (All Time)',
+    range7d: 'গত ৭ দিন (Last 7 Days)',
+    range30d: 'গত ৩০ দিন (Last 30 Days)',
+    range6m: 'গত ৬ মাস (Last 6 Months)',
+    btnReset: '🔄 রিসেট',
+    divAll: 'সব বিভাগ',
+    legendTitle: 'অনুমোদিত রিপোর্ট সংখ্যা',
+    legendLow: '০-১ (কম)',
+    legendMid: '৩-৫',
+    legendHigh: '১০+ (বেশি)',
+    drawerTotalReports: 'মোট অনুমোদিত রিপোর্ট',
+    drawerNationalShare: 'জাতীয় অনুপাত',
+    btnReportHere: '+ এই জেলায় রিপোর্ট করুন',
+    btnShare: '🔗 শেয়ার',
+    headingCategories: 'ঘটনার ধরন অনুযায়ী বিন্যাস',
+    headingMonthly: 'গত ৬ মাসের ট্রেন্ড',
+    headingVerifiedIncidents: 'যাচাইকৃত ঘটনার বিবরণ',
+    methodologyDisclaimer: 'এই তথ্য নাগরিক রিপোর্ট এবং গণমাধ্যমে প্রকাশিত সত্য ঘটনার ওপর ভিত্তি করে তৈরি। এটি অপরাধের হার বা কোনো জেলার সামগ্রিক নিরাপত্তার চূড়ান্ত মাপকাঠি নয়।',
+    mapFooterVector: '🇧🇩 খাঁটি ৬৪ জেলার সীমানা • কোনো বাহ্যিক ট্র্যাকিং বা রাস্তার লেয়ার নেই',
+    mapReady: '🟢 ম্যাপ প্রস্তুত',
+    modalReportTitle: 'ঘটনার রিপোর্ট জমা দিন',
+    modalReportSubtitle: 'সচেতন নাগরিক হিসেবে সত্য তথ্য দিয়ে জননিরাপত্তায় ভূমিকা রাখুন।',
+    step1Title: 'ধাপ ১: ঘটনার প্রাথমিক তথ্য',
+    fieldCategory: 'অপরাধের ধরন',
+    fieldDistrict: 'জেলা',
+    fieldDate: 'ঘটনার তারিখ',
+    fieldTime: 'আনুমানিক সময়',
+    fieldLocation: 'আনুমানিক এলাকা / স্থান (বাসা বা ব্যক্তিগত ঠিকানা দেবেন না)',
+    btnNext: 'পরবর্তী ধাপ ➜',
+    step2Title: 'ধাপ ২: ঘটনার বিস্তারিত ও সত্যতা',
+    fieldWitness: 'ঘটনায় আপনার সংশ্লিষ্টতা',
+    optVictim: 'আমি নিজেই ঘটনার ভুক্তভোগী',
+    optWitness: 'আমি সরাসরি ঘটনার প্রত্যক্ষদর্শী',
+    optInformed: 'আমি বিশ্বস্ত স্থানীয় সূত্র বা সংবাদ থেকে অবহিত',
+    fieldDesc: 'ঘটনার বস্তুনিষ্ঠ বিবরণ (কমপক্ষে ১৫ অক্ষর)',
+    fieldReference: 'তথ্যসূত্র বা সংবাদের লিংক (যদি থাকে)',
+    fieldName: 'আপনার নাম (ঐচ্ছিক - জনসম্মুখে গোপন রাখা হবে)',
+    fieldContact: 'যোগাযোগের নম্বর/ইমেইল (ঐচ্ছিক - সম্পূর্ণ গোপন)',
+    btnBack: '⬅ পূর্ববর্তী ধাপ',
+    step3Title: 'ধাপ ৩: চূড়ান্ত পর্যালোচনা ও জমা',
+    confirmDeclaration: 'আমি ঘোষণা করছি যে এই তথ্য আমার জানা মতে সম্পূর্ণ সত্য এবং কোনো ব্যক্তিকে হয়রানি করার উদ্দেশ্যে উদ্দেশ্যপ্রণোদিতভাবে মিথ্যা তথ্য দেওয়া হচ্ছে না।',
+    btnSubmit: 'জমা দিন (Submit Report)',
+    successTitle: 'রিপোর্টটি সফলভাবে জমা হয়েছে!',
+    successSub: 'আমাদের মডারেশন টিম তথ্য যাচাইয়ের পর এটি প্ল্যাটফর্মে প্রকাশ করবে। আপনার রিপোর্টের অবস্থা ট্র্যাক করতে নিচের গোপন রেফারেন্স কোডটি সংরক্ষণ করুন:',
+    btnClose: 'ঠিক আছে (সম্পন্ন)',
+    trackModalTitle: 'রিপোর্টের অবস্থা জানুন',
+    trackModalSub: 'আপনার সাবমিশন কোড দিয়ে মডারেশন ও অনুমোদনের লাইভ স্ট্যাটাস দেখুন।',
+    trackLabel: 'গোপন ট্র্যাকিং রেফারেন্স (e.g. WD-8F3K9A)',
+    btnSearchStatus: 'অনুসন্ধান করুন',
+    compareTitle: 'দুই জেলার তথ্যভিত্তিক তুলনা',
+    compareSub: 'দুটি জেলার যাচাইকৃত রিপোর্টের সংখ্যা ও অপরাধের ধরনের তুলনামূলক বিশ্লেষণ।',
+    compareD1: 'প্রথম জেলা:',
+    compareD2: 'দ্বিতীয় জেলা:',
+    btnCompareRun: 'তুলনা দেখুন',
+    safetyTitle: 'জরুরি যোগাযোগ ও নিরাপত্তা নির্দেশিকা',
+    safetySub: 'বাংলাদেশে তাত্ক্ষণিক বিপদ বা অপরাধের শিকার হলে করণীয় ও অফিসিয়াল হেল্পলাইন।',
+    methodTitle: 'তথ্য সংগ্রহের পদ্ধতি ও সীমাবদ্ধতা',
+    methodSub: 'WatchDog BD কীভাবে তথ্য সংগ্রহ, যাচাই ও প্রদর্শন করে।',
+    navMethodology: 'তথ্যের সীমাবদ্ধতা',
+    noIncidentsFound: 'এই ফিল্টারে কোনো প্রকাশিত ঘটনা পাওয়া যায়নি।'
+  },
+  en: {
+    brandTag: 'Community Public Safety Intelligence',
+    navMap: 'Explore Map',
+    navHow: 'How It Works',
+    navSafety: 'Safety Resources',
+    navTrack: 'Track Report',
+    navCompare: 'Compare Districts',
+    ctaReport: '+ Report Incident',
+    heroEyebrow: 'COMMUNITY-POWERED CRIME REPORTING & PUBLIC SAFETY INTELLIGENCE',
+    heroHeading: 'Understand Crime & Safety In Your District',
+    heroSub: 'Nationwide crowd-sourced incident reporting, moderated records, and civic intelligence across all 64 districts of Bangladesh.',
+    ctaExplore: '🗺️ Explore Safety Map',
+    ctaReportSecondary: '📝 Report an Incident',
+    trustNotice: '🛡️ Moderated community data • Not official police crime stats',
+    statTotalReports: 'Published Reports',
+    statTotalNote: 'Nationwide verified records',
+    statDistricts: 'Districts Covered',
+    statDistrictsNote: 'Authentic 64 GeoJSON boundaries',
+    statDrugReports: 'Drug-related Records',
+    statDrugNote: 'Published and reviewed',
+    statLastUpdate: 'Last Update',
+    statUpdateNote: 'Live database sync',
+    searchPlaceholder: 'Search district... (e.g. Dhaka, Bogra, Sylhet)',
+    allCategories: 'All Categories',
+    catExtortion: 'Extortion',
+    catTheft: 'Theft',
+    catRobbery: 'Robbery',
+    catSnatching: 'Snatching',
+    catDrug: 'Drug-related',
+    catHarassment: 'Harassment',
+    catAssault: 'Assault',
+    catFraud: 'Fraud',
+    catOther: 'Other',
+    rangeAll: 'All Time',
+    range7d: 'Last 7 Days',
+    range30d: 'Last 30 Days',
+    range6m: 'Last 6 Months',
+    btnReset: '🔄 Reset',
+    divAll: 'All Divisions',
+    legendTitle: 'Approved Incident Reports',
+    legendLow: '0-1 (Low)',
+    legendMid: '3-5',
+    legendHigh: '10+ (High)',
+    drawerTotalReports: 'Approved Reports',
+    drawerNationalShare: 'National Share',
+    btnReportHere: '+ Report in this District',
+    btnShare: '🔗 Share',
+    headingCategories: 'Category Breakdown',
+    headingMonthly: '6-Month Trend',
+    headingVerifiedIncidents: 'Verified Incident Records',
+    methodologyDisclaimer: 'This data reflects citizen submissions and verified media reports. It is not equivalent to official police crime statistics or definitive safety ratings.',
+    mapFooterVector: '🇧🇩 Authentic 64 district polygons • Zero external tile trackers',
+    mapReady: '🟢 Map Ready',
+    modalReportTitle: 'Submit an Incident Report',
+    modalReportSubtitle: 'Contribute to public safety intelligence with truthful information.',
+    step1Title: 'Step 1: Incident Overview',
+    fieldCategory: 'Crime Category',
+    fieldDistrict: 'District',
+    fieldDate: 'Incident Date',
+    fieldTime: 'Approximate Time',
+    fieldLocation: 'Approximate Locality / Area (Never provide home addresses)',
+    btnNext: 'Next Step ➜',
+    step2Title: 'Step 2: Details & Evidence',
+    fieldWitness: 'Your Connection to Incident',
+    optVictim: 'I am the direct victim',
+    optWitness: 'I was a direct eyewitness',
+    optInformed: 'I am informed via verified local knowledge or news',
+    fieldDesc: 'Objective Description (minimum 15 characters)',
+    fieldReference: 'Source Reference or News URL (optional)',
+    fieldName: 'Your Name (optional - strictly confidential)',
+    fieldContact: 'Contact Info (optional - strictly confidential)',
+    btnBack: '⬅ Previous Step',
+    step3Title: 'Step 3: Review & Submit',
+    confirmDeclaration: 'I declare that this information is truthful to the best of my knowledge and is not intended to harass or defame any individual.',
+    btnSubmit: 'Submit Report',
+    successTitle: 'Report Successfully Submitted!',
+    successSub: 'Our moderation team will review this report before publication. Save your secret tracking reference code below:',
+    btnClose: 'Done',
+    trackModalTitle: 'Track Report Status',
+    trackModalSub: 'Check live moderation and verification status with your tracking reference.',
+    trackLabel: 'Secret Tracking Reference (e.g. WD-8F3K9A)',
+    btnSearchStatus: 'Search Status',
+    compareTitle: 'Compare Two Districts',
+    compareSub: 'Comparative breakdown of incident counts and categories between two districts.',
+    compareD1: 'First District:',
+    compareD2: 'Second District:',
+    btnCompareRun: 'Run Comparison',
+    safetyTitle: 'Emergency Contacts & Guidelines',
+    safetySub: 'Official hotlines and immediate safety guidance in Bangladesh.',
+    methodTitle: 'Methodology & Data Limitations',
+    methodSub: 'How WatchDog BD collects, verifies, and maps public safety reports.',
+    navMethodology: 'Data Limitations',
+    noIncidentsFound: 'No published incidents found matching this filter.'
+  }
+};
+
+const BN_DISTRICTS = {
+  'Dhaka':'ঢাকা','Gazipur':'গাজীপুর','Narayanganj':'নারায়ণগঞ্জ','Chattogram':'চট্টগ্রাম','Chittagong':'চট্টগ্রাম',
+  'Cumilla':'কুমিল্লা','Comilla':'কুমিল্লা','Sylhet':'সিলেট','Rajshahi':'রাজশাহী','Khulna':'খুলনা',
+  'Barishal':'বরিশাল','Barisal':'বরিশাল','Rangpur':'রংপুর','Mymensingh':'ময়মনসিংহ','Jhalokati':'ঝালকাঠি',
+  'Jhalokathi':'ঝালকাঠি','Coxs Bazar':'কক্সবাজার',"Cox's Bazar":'কক্সবাজার','Noakhali':'নোয়াখালী','Feni':'ফেনী',
+  'Bogra':'বগুড়া','Bogura':'বগুড়া','Tangail':'টাঙ্গাইল','Faridpur':'ফরিদপুর','Pabna':'পাবনা',
+  'Kushtia':'কুষ্টিয়া','Jessore':'যশোর','Jashore':'যশোর','Satkhira':'সাতক্ষীরা','Bagerhat':'বাগেরহাট',
+  'Pirojpur':'পিরোজপুর','Patuakhali':'পটুয়াখালী','Bhola':'ভোলা','Barguna':'বরগুনা','Narsingdi':'নরসিংদী',
+  'Manikganj':'মানিকগঞ্জ','Munshiganj':'মুন্সিগঞ্জ','Madaripur':'মাদারীপুর','Shariatpur':'শরীয়তপুর',
+  'Gopalganj':'গোপালগঞ্জ','Kishoreganj':'কিশোরগঞ্জ','Jamalpur':'জামালপুর','Sherpur':'শেরপুর',
+  'Netrokona':'নেত্রকোনা','Sunamganj':'সুনামগঞ্জ','Habiganj':'হবিগঞ্জ','Moulvibazar':'মৌলভীবাজার',
+  'Brahmanbaria':'ব্রাহ্মণবাড়িয়া','Chandpur':'চাঁদপুর','Lakshmipur':'লক্ষ্মীপুর','Laxmipur':'লক্ষ্মীপুর',
+  'Bandarban':'বান্দরবান','Rangamati':'রাঙামাটি','Khagrachhari':'খাগড়াছড়ি','Natore':'নাটোর',
+  'Naogaon':'নওগাঁ','Chapainawabganj':'চাঁপাইনবাবগঞ্জ','Joypurhat':'জয়পুরহাট','Sirajganj':'সিরাজগঞ্জ',
+  'Dinajpur':'দিনাজপুর','Thakurgaon':'ঠাকুরগাঁও','Panchagarh':'পঞ্চগড়','Nilphamari':'নীলফামারী',
+  'Lalmonirhat':'লালমনিরহাট','Kurigram':'কুড়িগ্রাম','Gaibandha':'গাইবান্ধা','Chuadanga':'চুয়াডাঙ্গা',
+  'Meherpur':'মেহেরপুর','Magura':'মাগুরা','Narail':'নড়াইল','Jhenaidah':'ঝিনাইদহ'
+};
+
+const CATEGORIES = ['extortion', 'theft', 'robbery', 'snatching', 'drug_related', 'harassment', 'assault', 'fraud', 'other'];
+
+let lang = localStorage.getItem('watchdog_lang') || 'bn';
+let selectedDistrictCode = '';
+let geoFeatures = [];
+let geoLayer = null;
+let statsData = null;
+let typeChart = null;
+let monthChart = null;
+
+// Multi-filters
+let activeDivision = '';
+let activeCategory = '';
+let activeDateRange = 'all';
+let searchKeyword = '';
+
+// 2. Leaflet Map Setup
+const map = L.map('map', {
+  zoomControl: true,
+  attributionControl: false,
+  preferCanvas: true,
+  minZoom: 6,
+  maxZoom: 12
+}).setView([23.75, 90.35], 7);
+
+const districtName = f => lang === 'bn' ? (BN_DISTRICTS[f.properties.name] || f.properties.name) : f.properties.name;
+
+// 3. API Client
+async function api(url, opts = {}) {
+  const headers = {
+    ...(opts.body ? { 'Content-Type': 'application/json' } : {}),
+    ...(opts.headers || {})
+  };
+  const res = await fetch(url, { ...opts, headers });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
+  return data;
+}
+
+// 4. Map Choropleth Painting
+function paintMap() {
+  if (!geoLayer) return;
+  const counts = statsData?.district_counts || {};
+  const isDark = document.body.classList.contains('dark');
+  const outlineColor = isDark ? '#0E1B31' : '#FFFFFF';
+
+  geoLayer.eachLayer(l => {
+    const code = l.feature.properties.code;
+    const n = counts[code] || 0;
+    
+    // Explicit 5-step color scale
+    let fillColor = '#2aa579';
+    if (n >= 10) fillColor = '#df5a65';
+    else if (n >= 6) fillColor = '#ed9155';
+    else if (n >= 3) fillColor = '#e4bc53';
+    else if (n >= 1) fillColor = '#8fc76b';
+
+    const isSelected = (code === selectedDistrictCode);
+
+    l.setStyle({
+      fillColor,
+      fillOpacity: isSelected ? 0.95 : 0.85,
+      color: isSelected ? '#00BFA6' : outlineColor,
+      weight: isSelected ? 3 : 1.2
+    });
+  });
+}
+
+// 5. Select District & Slide Out Drawer (Unseen Bangladesh UX)
+function selectDistrict(code, fitBounds = true) {
+  selectedDistrictCode = code;
+  const f = geoFeatures.find(x => x.properties.code === code);
+
+  if (!code || !f) {
+    closeDrawer();
+    window.location.hash = '';
+    paintMap();
+    return;
+  }
+
+  // Update URL deep link hash e.g. #district=BD3026
+  window.location.hash = 'district=' + encodeURIComponent(code);
+
+  $text('drawerDistrictName', districtName(f));
+  $text('drawerDistrictDivision', f.properties.division + ' Division');
+
+  const count = statsData?.district_counts?.[code] || 0;
+  $text('drawerReportCount', count);
+  const total = statsData?.total || 0;
+  $text('drawerNationalShare', total ? (100 * count / total).toFixed(1) + '%' : '0%');
+
+  // Filter incidents for this district
+  const districtIncidents = (statsData?.incidents || []).filter(inc => inc.district_code === code);
+  renderDistrictIncidents(districtIncidents);
+
+  // Zoom to polygon
+  if (fitBounds && geoLayer) {
+    const layerObj = geoLayer.getLayers().find(x => x.feature.properties.code === code);
+    if (layerObj) {
+      map.fitBounds(layerObj.getBounds(), { padding: [40, 40], maxZoom: 9 });
+    }
+  }
+
+  paintMap();
+  openDrawer();
+}
+
+function openDrawer() {
+  $('districtDrawer').classList.add('open');
+}
+
+function closeDrawer() {
+  $('districtDrawer').classList.remove('open');
+  selectedDistrictCode = '';
+  paintMap();
+}
+
+$('closeDrawerBtn').onclick = closeDrawer;
+
+// 6. Render Incidents Feed in Drawer
+function renderDistrictIncidents(list) {
+  const container = $('districtIncidentsList');
+  $text('drawerIncidentCountBadge', list.length);
+  container.replaceChildren();
+
+  if (!list.length) {
+    const empty = document.createElement('div');
+    empty.style.padding = '20px';
+    empty.style.textAlign = 'center';
+    empty.style.color = 'var(--muted)';
+    empty.style.fontSize = '12px';
+    empty.textContent = I18N[lang].noIncidentsFound;
+    container.append(empty);
+    return;
+  }
+
+  for (const item of list) {
+    const card = document.createElement('div');
+    card.className = 'incident-card';
+
+    const top = document.createElement('div');
+    top.className = 'incident-top-row';
+
+    const catBadge = document.createElement('span');
+    catBadge.className = 'badge-tag badge-' + item.type;
+    catBadge.textContent = I18N[lang]['cat' + item.type.charAt(0).toUpperCase() + item.type.slice(1)] || item.type;
+
+    const timeSpan = document.createElement('span');
+    timeSpan.style.fontSize = '11px';
+    timeSpan.style.color = 'var(--muted)';
+    timeSpan.textContent = `📅 ${item.incident_date} · 🕒 ${item.incident_time}`;
+
+    top.append(catBadge, timeSpan);
+
+    const loc = document.createElement('div');
+    loc.className = 'incident-loc';
+    loc.textContent = `📍 ${item.location}`;
+
+    const narrative = document.createElement('p');
+    narrative.className = 'incident-narrative';
+    narrative.textContent = item.description;
+
+    // Verification Badge
+    const verif = document.createElement('div');
+    verif.className = 'verification-badge verif-' + (item.verification_status || 'moderated');
+    let verifLabel = '⚖️ Moderated';
+    if (item.verification_status === 'published_news_report') verifLabel = '📰 Published News Report';
+    else if (item.verification_status === 'independently_verified') verifLabel = '✅ Independently Verified';
+    verif.textContent = verifLabel;
+
+    card.append(top, loc, narrative, verif);
+
+    if (item.news_source && item.news_source.url) {
+      const newsBox = document.createElement('div');
+      newsBox.className = 'news-attribution-box';
+      newsBox.innerHTML = `<strong>উৎস:</strong> <a href="${item.news_source.url}" target="_blank" rel="noopener noreferrer">${item.news_source.source_name || 'সংবাদ লিংক'} ↗</a>`;
+      card.append(newsBox);
+    }
+
+    container.append(card);
+  }
+}
+
+// 7. Refresh Stats & Visualizations
+async function refreshStats() {
+  try {
+    let url = `/api/stats?date_range=${activeDateRange}`;
+    if (activeCategory) url += `&type=${encodeURIComponent(activeCategory)}`;
+
+    const data = await api(url);
+    statsData = data;
+
+    $text('totalReports', (data.total || 0).toLocaleString());
+    $text('drugReportsCount', (data.drug_related_total || 0).toLocaleString());
+    if (data.last_updated) {
+      $text('lastDataUpdate', data.last_updated);
+    }
+
+    paintMap();
+    drawCharts(data);
+
+    // Deep link check from URL hash on first load
+    handleDeepLinkHash();
+  } catch (err) {
+    console.error('Stats fetch error:', err);
+  }
+}
+
+function drawCharts(data) {
+  const ink = getComputedStyle(document.body).getPropertyValue('--muted').trim() || '#64748B';
+  const isDark = document.body.classList.contains('dark');
+
+  // 1. Category Bar Chart
+  if (typeChart) typeChart.destroy();
+  const catLabels = CATEGORIES.map(c => I18N[lang]['cat' + c.charAt(0).toUpperCase() + c.slice(1)] || c);
+  const catCounts = CATEGORIES.map(c => data.types[c] || 0);
+
+  typeChart = new Chart($('typeChart'), {
+    type: 'bar',
+    data: {
+      labels: catLabels,
+      datasets: [{
+        data: catCounts,
+        backgroundColor: '#00BFA6',
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: ink, font: { size: 10 } }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { precision: 0, color: ink }, grid: { color: isDark ? '#1E2E4A' : '#E5EAF0' } }
+      }
+    }
+  });
+
+  // 2. Monthly Line Chart
+  if (monthChart) monthChart.destroy();
+  const mLabels = (data.months || []).map(m => m.month.slice(5));
+  const mCounts = (data.months || []).map(m => m.count);
+
+  monthChart = new Chart($('monthChart'), {
+    type: 'line',
+    data: {
+      labels: mLabels,
+      datasets: [{
+        data: mCounts,
+        borderColor: '#00BFA6',
+        backgroundColor: 'rgba(0, 191, 166, 0.15)',
+        fill: true,
+        tension: 0.35,
+        pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { color: ink, font: { size: 10 } }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { precision: 0, color: ink }, grid: { color: isDark ? '#1E2E4A' : '#E5EAF0' } }
+      }
+    }
+  });
+}
+
+// 8. Multi-Filter & Search Handling
+function applyMapFilters() {
+  if (!geoLayer) return;
+  const kw = searchKeyword.toLowerCase();
+
+  geoLayer.eachLayer(l => {
+    const f = l.feature;
+    const nameEn = f.properties.name.toLowerCase();
+    const nameBn = (BN_DISTRICTS[f.properties.name] || '').toLowerCase();
+
+    const matchesSearch = (!kw || nameEn.includes(kw) || nameBn.includes(kw));
+    const matchesDivision = (!activeDivision || f.properties.division === activeDivision);
+
+    const isVisible = matchesSearch && matchesDivision;
+    l.setStyle({ fillOpacity: isVisible ? 0.85 : 0.12 });
+  });
+}
+
+$('districtSearch').oninput = e => {
+  searchKeyword = e.target.value.trim();
+  applyMapFilters();
+};
+
+$('categoryFilter').onchange = e => {
+  activeCategory = e.target.value;
+  refreshStats();
+};
+
+$('dateRangeFilter').onchange = e => {
+  activeDateRange = e.target.value;
+  refreshStats();
+};
+
+// Division Selector Pills
+document.querySelectorAll('#divisionPills button').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('#divisionPills button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    activeDivision = btn.dataset.div || '';
+    applyMapFilters();
+  };
+});
+
+$('resetMapBtn').onclick = () => {
+  searchKeyword = '';
+  $('districtSearch').value = '';
+  activeDivision = '';
+  document.querySelectorAll('#divisionPills button').forEach(b => b.classList.toggle('active', !b.dataset.div));
+  activeCategory = '';
+  $('categoryFilter').value = '';
+  activeDateRange = 'all';
+  $('dateRangeFilter').value = 'all';
+  closeDrawer();
+  if (geoLayer) map.fitBounds(geoLayer.getBounds(), { padding: [20, 20] });
+  applyMapFilters();
+  refreshStats();
+};
+
+// 9. Deep Linking (#district=BD3026)
+function handleDeepLinkHash() {
+  const hash = window.location.hash.slice(1);
+  if (hash.startsWith('district=')) {
+    const code = decodeURIComponent(hash.split('=')[1] || '').toUpperCase();
+    if (code && code !== selectedDistrictCode) {
+      selectDistrict(code, true);
+    }
+  }
+}
+window.addEventListener('hashchange', handleDeepLinkHash);
+
+// Share Drawer Link
+$('drawerShareBtn').onclick = () => {
+  const url = window.location.href;
+  navigator.clipboard.writeText(url).then(() => {
+    alert(lang === 'bn' ? 'জেলা লিংক কপি হয়েছে!' : 'District link copied to clipboard!');
+  }).catch(() => {
+    prompt(lang === 'bn' ? 'লিংকটি কপি করুন:' : 'Copy this link:', url);
+  });
+};
+
+// 10. Guided 3-Step Reporting Experience
+let currentStep = 1;
+
+function showStep(s) {
+  currentStep = s;
+  ['step1', 'step2', 'step3', 'stepSuccess'].forEach(id => {
+    if ($(id)) $(id).classList.remove('active');
+  });
+  ['bubble1', 'bubble2', 'bubble3'].forEach((id, idx) => {
+    const el = $(id);
+    if (!el) return;
+    el.classList.remove('active', 'completed');
+    if (idx + 1 === s) el.classList.add('active');
+    else if (idx + 1 < s) el.classList.add('completed');
+  });
+
+  const pane = $('step' + s);
+  if (pane) pane.classList.add('active');
+}
+
+$('nextToStep2Btn').onclick = () => {
+  const form = $('multiStepReportForm');
+  if (!form.type.value || !form.district_code.value || !form.incident_date.value || !form.location.value.trim()) {
+    alert(lang === 'bn' ? 'অনুগ্রহ করে ১ম ধাপের সব আবশ্যক তথ্য পূরণ করুন।' : 'Please complete all required fields in Step 1.');
+    return;
+  }
+  showStep(2);
+};
+
+$('backToStep1Btn').onclick = () => showStep(1);
+
+$('nextToStep3Btn').onclick = () => {
+  const form = $('multiStepReportForm');
+  const desc = form.description.value.trim();
+  if (desc.length < 15) {
+    alert(lang === 'bn' ? 'ঘটনার বিবরণ কমপক্ষে ১৫ অক্ষরের হতে হবে।' : 'Narrative must be at least 15 characters.');
+    return;
+  }
+
+  // Populate Step 3 Review Card
+  const rev = $('step3ReviewCard');
+  const dObj = geoFeatures.find(f => f.properties.code === form.district_code.value);
+  const dNameStr = dObj ? districtName(dObj) : form.district_code.value;
+
+  rev.innerHTML = `
+    <div><strong>জেলা:</strong> ${dNameStr}</div>
+    <div><strong>অপরাধের ধরন:</strong> ${I18N[lang]['cat' + form.type.value.charAt(0).toUpperCase() + form.type.value.slice(1)] || form.type.value}</div>
+    <div><strong>তারিখ ও সময়:</strong> ${form.incident_date.value} (${form.incident_time.value})</div>
+    <div><strong>স্থান:</strong> ${form.location.value}</div>
+    <div style="margin-top:6px;border-top:1px solid var(--line);padding-top:6px"><strong>বিবরণ:</strong> ${form.description.value}</div>
+  `;
+
+  showStep(3);
+};
+
+$('backToStep2Btn').onclick = () => showStep(2);
+
+// Form Submission
+$('multiStepReportForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const submitBtn = $('submitReportFinalBtn');
+  const errBox = $('submissionError');
+  errBox.textContent = '';
+  submitBtn.disabled = true;
+
+  const payload = {
+    district_code: form.district_code.value,
+    type: form.type.value,
+    incident_date: form.incident_date.value,
+    incident_time: form.incident_time.value,
+    location: form.location.value.trim(),
+    description: form.description.value.trim(),
+    witness_status: form.witness_status.value,
+    reference_url: form.reference_url.value.trim(),
+    reporter_name: form.reporter_name.value.trim(),
+    reporter_contact: form.reporter_contact.value.trim()
+  };
+
+  try {
+    const res = await api('/api/reports', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    // Show success view with private tracking code
+    $text('generatedTrackingCode', res.tracking_code);
+    $('step3').classList.remove('active');
+    $('stepSuccess').classList.add('active');
+    form.reset();
+  } catch (err) {
+    errBox.textContent = err.message;
+  } finally {
+    submitBtn.disabled = false;
+  }
+};
+
+$('copyTrackingCodeBtn').onclick = () => {
+  const code = $('generatedTrackingCode').textContent;
+  navigator.clipboard.writeText(code).then(() => {
+    alert(lang === 'bn' ? 'ট্র্যাকিং কোড কপি করা হয়েছে!' : 'Tracking code copied!');
+  });
+};
+
+// 11. Report Status Tracking Modal
+$('trackForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const code = $('trackInputCode').value.trim();
+  const box = $('trackResultBox');
+  box.hidden = false;
+  box.innerHTML = '<span style="color:var(--muted)">অনুসন্ধান চলছে...</span>';
+
+  try {
+    const res = await api('/api/reports/track/' + encodeURIComponent(code));
+    let statusColor = '#ed9155';
+    let statusText = 'Pending Moderation (পর্যালোচনাধীন)';
+    if (res.status === 'approved') {
+      statusColor = '#2aa579';
+      statusText = 'Approved & Published (অনুমোদিত)';
+    } else if (res.status === 'rejected') {
+      statusColor = '#df5a65';
+      statusText = 'Rejected / Not Verified (বাতিল)';
+    }
+
+    const dObj = geoFeatures.find(f => f.properties.code === res.district_code);
+    const dNameStr = dObj ? districtName(dObj) : res.district_code;
+
+    box.innerHTML = `
+      <div style="background:var(--sub);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13px;line-height:1.7">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <strong>রেফারেন্স: ${res.tracking_code}</strong>
+          <span style="font-size:11px;padding:3px 8px;border-radius:6px;background:${statusColor}22;color:${statusColor};font-weight:700">${statusText}</span>
+        </div>
+        <div><strong>জেলা:</strong> ${dNameStr}</div>
+        <div><strong>অপরাধের ধরন:</strong> ${res.type}</div>
+        <div><strong>জমা দেওয়ার তারিখ:</strong> ${new Date(res.submitted_at).toLocaleDateString()}</div>
+        ${res.reviewed_at ? `<div><strong>পর্যালোচনার তারিখ:</strong> ${new Date(res.reviewed_at).toLocaleDateString()}</div>` : ''}
+      </div>
+    `;
+  } catch (err) {
+    box.innerHTML = `<div style="color:var(--red);font-size:13px;padding:10px;background:var(--red-subtle);border-radius:8px">❌ ${err.message}</div>`;
+  }
+};
+
+// 12. District Comparison Modal Logic
+async function populateCompareSelects() {
+  const sorted = [...geoFeatures].sort((a, b) => a.properties.name.localeCompare(b.properties.name));
+  const optionsHtml = sorted.map(f => `<option value="${f.properties.code}">${districtName(f)} (${f.properties.division})</option>`).join('');
+  $('compareSelect1').innerHTML = optionsHtml;
+  $('compareSelect2').innerHTML = optionsHtml;
+  if (sorted.length > 1) {
+    $('compareSelect2').selectedIndex = 1;
+  }
+}
+
+$('runCompareBtn').onclick = async () => {
+  const d1 = $('compareSelect1').value;
+  const d2 = $('compareSelect2').value;
+  const container = $('compareResultContainer');
+  container.innerHTML = '<span style="color:var(--muted)">তুলনা লোড হচ্ছে...</span>';
+
+  try {
+    const res = await api(`/api/districts/compare?d1=${encodeURIComponent(d1)}&d2=${encodeURIComponent(d2)}`);
+    container.innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+        <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
+          <h4 style="margin:0 0 6px;font-size:16px">${res.district1.name} (${res.district1.division})</h4>
+          <div style="font-size:22px;font-weight:800;color:var(--teal)">${res.district1.total_reports} <small style="font-size:11px;font-weight:500;color:var(--muted)">মোট রিপোর্ট</small></div>
+        </div>
+        <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
+          <h4 style="margin:0 0 6px;font-size:16px">${res.district2.name} (${res.district2.division})</h4>
+          <div style="font-size:22px;font-weight:800;color:var(--teal)">${res.district2.total_reports} <small style="font-size:11px;font-weight:500;color:var(--muted)">মোট রিপোর্ট</small></div>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:8px 12px;border-radius:8px">
+        ℹ️ ${res.caveat}
+      </div>
+    `;
+  } catch (err) {
+    container.innerHTML = `<div style="color:var(--red)">${err.message}</div>`;
+  }
+};
+
+// 13. Modal Open/Close Controls
+function openModal(id) { $(id).classList.add('open'); }
+function closeModal(id) { $(id).classList.remove('open'); }
+
+document.querySelectorAll('[data-close]').forEach(b => {
+  b.onclick = () => closeModal(b.dataset.close);
+});
+document.querySelectorAll('.modal-backdrop').forEach(m => {
+  m.addEventListener('click', e => { if (e.target === m) closeModal(m.id); });
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop').forEach(m => closeModal(m.id));
+});
+
+// Triggers
+$('openReportBtn').onclick = () => { showStep(1); openModal('reportModal'); };
+$('mOpenReportBtn').onclick = () => { $('mobileNavDrawer').classList.remove('open'); showStep(1); openModal('reportModal'); };
+$('heroReportBtn').onclick = () => { showStep(1); openModal('reportModal'); };
+$('drawerSubmitBtn').onclick = () => {
+  showStep(1);
+  if (selectedDistrictCode) $('formDistrict').value = selectedDistrictCode;
+  openModal('reportModal');
+};
+
+$('navTrackBtn').onclick = e => { e.preventDefault(); openModal('trackModal'); };
+$('mNavTrack').onclick = e => { e.preventDefault(); $('mobileNavDrawer').classList.remove('open'); openModal('trackModal'); };
+
+$('navCompareBtn').onclick = e => { e.preventDefault(); populateCompareSelects(); openModal('compareModal'); };
+$('mNavCompare').onclick = e => { e.preventDefault(); $('mobileNavDrawer').classList.remove('open'); populateCompareSelects(); openModal('compareModal'); };
+
+$('navSafetyBtn').onclick = e => { e.preventDefault(); openModal('safetyModal'); };
+$('mNavSafety').onclick = e => { e.preventDefault(); $('mobileNavDrawer').classList.remove('open'); openModal('safetyModal'); };
+$('fSafetyBtn').onclick = e => { e.preventDefault(); openModal('safetyModal'); };
+
+$('navHowBtn').onclick = e => { e.preventDefault(); openModal('methodologyModal'); };
+$('mNavHow').onclick = e => { e.preventDefault(); $('mobileNavDrawer').classList.remove('open'); openModal('methodologyModal'); };
+$('fHowBtn').onclick = e => { e.preventDefault(); openModal('methodologyModal'); };
+$('fMethodBtn').onclick = e => { e.preventDefault(); openModal('methodologyModal'); };
+
+$('mobileMenuBtn').onclick = () => {
+  $('mobileNavDrawer').classList.toggle('open');
+};
+
+// 14. Theme & Language Toggles
+$('themeBtn').onclick = () => {
+  document.body.classList.toggle('dark');
+  const isDark = document.body.classList.contains('dark');
+  $('themeBtn').textContent = isDark ? '☀' : '☾';
+  localStorage.setItem('watchdog_theme', isDark ? 'dark' : 'light');
+  paintMap();
+  if (statsData) drawCharts(statsData);
+};
+
+if (localStorage.getItem('watchdog_theme') === 'dark') {
+  document.body.classList.add('dark');
+  $('themeBtn').textContent = '☀';
+}
+
+$('langBtn').onclick = () => {
+  lang = lang === 'bn' ? 'en' : 'bn';
+  localStorage.setItem('watchdog_lang', lang);
+  renderLanguage();
+};
+
+function renderLanguage() {
+  document.documentElement.lang = lang;
+  $text('langBtn', lang === 'bn' ? 'EN' : 'বাং');
+
+  document.querySelectorAll('[data-i]').forEach(el => {
+    const key = el.dataset.i;
+    if (I18N[lang][key]) el.textContent = I18N[lang][key];
+  });
+  document.querySelectorAll('[data-placeholder]').forEach(el => {
+    const key = el.dataset.placeholder;
+    if (I18N[lang][key]) el.placeholder = I18N[lang][key];
+  });
+
+  // Populate form selects in active language
+  if (geoFeatures.length) {
+    const sorted = [...geoFeatures].sort((a, b) => a.properties.name.localeCompare(b.properties.name));
+    $('formDistrict').innerHTML = sorted.map(f => `<option value="${f.properties.code}">${districtName(f)}</option>`).join('');
+  }
+
+  $('formType').innerHTML = CATEGORIES.map(c => `<option value="${c}">${I18N[lang]['cat' + c.charAt(0).toUpperCase() + c.slice(1)] || c}</option>`).join('');
+
+  if (geoLayer) {
+    geoLayer.eachLayer(l => l.setTooltipContent(districtName(l.feature)));
+  }
+
+  if (selectedDistrictCode) {
+    selectDistrict(selectedDistrictCode, false);
+  }
+}
+
+// 15. Privacy-Preserving Visit Recording
+async function recordPageHit() {
+  try {
+    if (!sessionStorage.getItem('watchdog_visited')) {
+      sessionStorage.setItem('watchdog_visited', '1');
+      await api('/api/analytics/visit', { method: 'POST' });
+    }
+  } catch {}
+}
+
+// 16. App Bootstrap
+async function init() {
+  try {
+    // Set max report date to today
+    $('formDate').max = new Date().toISOString().slice(0, 10);
+    $('formDate').value = new Date().toISOString().slice(0, 10);
+
+    const geoData = await api('/districts.geojson');
+    geoFeatures = geoData.features;
+    if (geoFeatures.length !== 64) {
+      throw new Error(`Expected 64 districts in GeoJSON, found ${geoFeatures.length}`);
+    }
+
+    // Build vector layer
+    geoLayer = L.geoJSON(geoData, {
+      style: {
+        color: '#FFFFFF',
+        weight: 1.2,
+        fillOpacity: 0.85
+      },
+      onEachFeature: (f, l) => {
+        l.bindTooltip(() => districtName(f), { sticky: true });
+        l.on('click', () => selectDistrict(f.properties.code));
+        l.on('mouseover', () => {
+          if (f.properties.code !== selectedDistrictCode) {
+            l.setStyle({ weight: 2.2, color: '#00BFA6' });
+          }
+        });
+        l.on('mouseout', paintMap);
+      }
+    }).addTo(map);
+
+    map.fitBounds(geoLayer.getBounds(), { padding: [20, 20] });
+    $text('districtTotal', geoFeatures.length);
+    $text('mapStatusIndicator', I18N[lang].mapReady);
+
+    renderLanguage();
+    await recordPageHit();
+    await refreshStats();
+  } catch (err) {
+    console.error('App init error:', err);
+    $text('mapStatusIndicator', '❌ Error: ' + err.message);
+  }
+}
+
+init();

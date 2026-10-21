@@ -1,8 +1,532 @@
-<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#121e35"><title>Bangladesh SafeMap | Community Safety</title><link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><link rel="stylesheet" href="/style.css"></head><body><header><div class="brand"><span class="brand-icon">⬡</span><div>Bangladesh <em>SafeMap</em><small>COMMUNITY SAFETY INTELLIGENCE</small></div></div><div class="header-actions"><button class="button ghost" id="langBtn">EN</button><button class="button ghost" id="themeBtn" aria-label="Theme">☾</button><button class="button primary" id="reportBtn" data-i="report">+ রিপোর্ট করুন</button></div></header>
-<main class="container"><div class="intro"><div><div class="eyebrow">NATIONWIDE SAFETY MAPPING PLATFORM</div><h1 data-i="headline">নিরাপদ বাংলাদেশের জন্য তথ্যভিত্তিক উদ্যোগ</h1><p data-i="subline">৬৪ জেলার বাস্তব সীমানা, কমিউনিটি রিপোর্ট ও যাচাইকৃত ঘটনার বিশ্লেষণ।</p></div><span class="pill" data-i="verified">শুধু অনুমোদিত রিপোর্ট গণনা করা হয়</span></div>
-<div class="stats"><div class="stat"><small data-i="total">মোট অনুমোদিত রিপোর্ট</small><strong id="totalReports">0</strong><span data-i="totalNote">সারা বাংলাদেশ</span></div><div class="stat"><small data-i="districts">জেলা</small><strong id="districtTotal">64</strong><span data-i="districtNote">বাস্তব GeoJSON সীমানা</span></div><div class="stat"><small data-i="areaCount">নির্বাচিত জেলার রিপোর্ট</small><strong id="selectedCount">0</strong><span id="selectedCaption">Bangladesh</span></div><div class="stat"><small data-i="visits">মোট সাইট ভিজিট</small><strong id="totalVisits">0</strong><span id="todayVisitsNote">আজকের ভিউ: 0</span></div><div class="stat"><small data-i="dataLabel">ডেটার অবস্থা</small><strong class="stat-status" id="dataStatus">LIVE</strong><span data-i="dataNote">অনুমোদিত জমা দেওয়া রিপোর্ট</span></div></div>
-<div class="layout"><section class="map-card"><div class="map-header"><div><h2 data-i="mapHeading">বাংলাদেশের জেলা ভিত্তিক ম্যাপ</h2><p data-i="mapHelp">যেকোনো জেলায় ক্লিক করে বিস্তারিত দেখুন</p></div><div class="map-tools"><select id="divisionFilter" aria-label="Division"><option value="">All divisions</option></select><button class="button ghost" id="resetBtn" data-i="reset">Reset</button></div></div><div class="map-stage"><div id="map"></div><div class="map-overlay"><span class="map-overlay-title" data-i="mapLegend">অনুমোদিত রিপোর্ট সংখ্যা</span><div class="legend"><span style="background:#39ad86"></span><span style="background:#8fc76b"></span><span style="background:#e4bc53"></span><span style="background:#ed9155"></span><span style="background:#df5a65"></span></div><div class="legend-ends"><small data-i="low">কম</small><small data-i="high">বেশি</small></div></div></div><div class="map-footer"><span data-i="noRoads">বাস্তব জেলা সীমানা • রাস্তা বা নদীর লেয়ার নেই</span><span id="mapStatus">Loading…</span></div></section>
-<aside class="details"><div class="section-top"><div><span class="eyebrow" data-i="areaInsights">DISTRICT INSIGHTS</span><h2 id="districtName">বাংলাদেশ</h2><p id="districtDivision" data-i="choose">জেলা নির্বাচন করুন</p></div><span class="mini-tag" id="districtTag">ALL</span></div><input class="search" id="search" data-placeholder="search" placeholder="জেলা খুঁজুন"><div class="mini-stats"><div><small data-i="reports">অনুমোদিত রিপোর্ট</small><strong id="detailCount">0</strong></div><div><small data-i="share">সর্বমোটের অংশ</small><strong id="detailShare">0%</strong></div></div><div class="incident-section"><div class="incident-section-header"><h3 data-i="incidentsHeading">অনুমোদিত ঘটনার বিবরণ</h3><span class="incident-count-pill" id="incidentFeedCount">0</span></div><div id="districtIncidents" class="incidents-feed"></div></div><h3 data-i="byType">ঘটনার ধরন</h3><div class="chart-wrap"><canvas id="typeChart"></canvas></div><h3 data-i="monthly">গত ৬ মাসের রিপোর্ট</h3><div class="chart-wrap"><canvas id="monthChart"></canvas></div><div class="info"><b data-i="interpretation">ম্যাপের রঙ কী বোঝায়?</b><p data-i="method">রঙ অনুমোদিত রিপোর্টের সংখ্যার তুলনামূলক পার্থক্য দেখায়। এটি প্রকৃত অপরাধের হার বা কোনো জেলার নিরাপত্তার চূড়ান্ত মূল্যায়ন নয়।</p></div></aside></div>
-<div class="footnote" data-i="warning">জরুরি বিপদে বাংলাদেশে ৯৯৯-এ যোগাযোগ করুন। এই প্ল্যাটফর্ম পুলিশে অভিযোগ বা জরুরি সহায়তার বিকল্প নয়।</div></main>
-<div class="modal-backdrop" id="reportModal"><div class="modal" role="dialog" aria-modal="true" aria-labelledby="reportTitle"><div class="modal-head"><div><h2 id="reportTitle" data-i="reportTitle">ঘটনার রিপোর্ট জমা দিন</h2><p data-i="reportDesc">আপনার রিপোর্ট পর্যালোচনার পর পরিসংখ্যানে যুক্ত হতে পারে।</p></div><button class="close" data-close="reportModal">✕</button></div><form id="reportForm"><div class="form-grid"><label><span data-i="name">নাম (ঐচ্ছিক)</span><input name="reporter_name" maxlength="100" autocomplete="name"></label><label><span data-i="victim">আপনি কি ভুক্তভোগী?</span><select name="is_victim" required><option value="true" data-i="yes">হ্যাঁ</option><option value="false" data-i="no">না</option></select></label><label><span data-i="district">জেলা</span><select name="district_code" id="formDistrict" required></select></label><label><span data-i="crimeType">ঘটনার ধরন</span><select name="type" id="formType" required></select></label><label><span data-i="date">তারিখ</span><input name="incident_date" type="date" required></label><label><span data-i="time">সময়</span><input name="incident_time" type="time" required></label></div><label><span data-i="location">ঘটনাস্থলের বিবরণ (বাসার ঠিকানা নয়)</span><input name="location" minlength="3" maxlength="140" required></label><label><span data-i="description">ঘটনার বিস্তারিত</span><textarea name="description" minlength="15" maxlength="1500" rows="4" required></textarea></label><label class="check"><input type="checkbox" required><span data-i="confirm">আমি নিশ্চিত করছি এটি আমার জানা সত্য ঘটনা এবং জরুরি সেবা পাওয়ার মাধ্যম নয়।</span></label><div id="reportMessage" class="form-message"></div><div class="form-actions"><button type="button" class="button ghost" data-close="reportModal" data-i="cancel">বাতিল</button><button type="submit" class="button primary" data-i="send">পর্যালোচনার জন্য পাঠান</button></div></form></div></div>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script><script src="https://cdn.jsdelivr.net/npm/chart.js"></script><script src="/app.js"></script></body></html>
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#0B1930">
+  <title>WatchDog BD — Community-Powered Crime Reporting & Public Safety Intelligence</title>
+  <meta name="description" content="বাংলাদেশের ৬৪ জেলার অপরাধসংক্রান্ত রিপোর্ট, নিরাপত্তা তথ্য ও বিশ্লেষণ এক প্ল্যাটফর্মে। WatchDog BD community-powered public safety intelligence platform.">
+  
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://watch-dog-bd.vercel.app/">
+  <meta property="og:title" content="WatchDog BD — Community Safety Intelligence">
+  <meta property="og:description" content="Authentic 64-district public safety mapping, verified incident insights, and community crime reporting for Bangladesh.">
+
+  <!-- Typography: Inter & Hind Siliguri -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Leaflet Vector Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header>
+    <a href="/" class="brand" aria-label="WatchDog BD Home">
+      <div class="brand-radar">🛡️</div>
+      <div class="brand-text">
+        <strong>WatchDog <span>BD</span></strong>
+        <small data-i="brandTag">Public Safety Intelligence</small>
+      </div>
+    </a>
+
+    <!-- Desktop Navigation -->
+    <nav class="nav-links" aria-label="Main Navigation">
+      <a href="#mapWorkspace" class="nav-link active" data-i="navMap">Explore Map</a>
+      <a href="#howItWorks" class="nav-link" id="navHowBtn" data-i="navHow">How It Works</a>
+      <a href="#safetyResources" class="nav-link" id="navSafetyBtn" data-i="navSafety">Safety Resources</a>
+      <a href="#trackReport" class="nav-link" id="navTrackBtn" data-i="navTrack">Track Report</a>
+      <a href="#compare" class="nav-link" id="navCompareBtn" data-i="navCompare">Compare Districts</a>
+    </nav>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <button class="button ghost" id="langBtn" aria-label="Switch Language">EN</button>
+      <button class="button ghost" id="themeBtn" aria-label="Toggle Theme">☾</button>
+      <button class="button primary pill" id="openReportBtn" data-i="ctaReport">+ রিপোর্ট করুন</button>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Menu">☰</button>
+    </div>
+  </header>
+
+  <!-- Mobile Dropdown Navigation -->
+  <div class="mobile-nav-drawer" id="mobileNavDrawer">
+    <a href="#mapWorkspace" class="nav-link" data-i="navMap">Explore Map</a>
+    <a href="#howItWorks" class="nav-link" id="mNavHow" data-i="navHow">How It Works</a>
+    <a href="#safetyResources" class="nav-link" id="mNavSafety" data-i="navSafety">Safety Resources</a>
+    <a href="#trackReport" class="nav-link" id="mNavTrack" data-i="navTrack">Track Report</a>
+    <a href="#compare" class="nav-link" id="mNavCompare" data-i="navCompare">Compare Districts</a>
+    <button class="button primary" id="mOpenReportBtn" style="margin-top:10px" data-i="ctaReport">+ রিপোর্ট করুন</button>
+  </div>
+
+  <main class="container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-content">
+        <div class="hero-eyebrow" data-i="heroEyebrow">COMMUNITY-POWERED CRIME REPORTING & SAFETY INTELLIGENCE</div>
+        <h1 data-i="heroHeading">আপনার এলাকার অপরাধ পরিস্থিতি সম্পর্কে জানুন</h1>
+        <p data-i="heroSub">বাংলাদেশের ৬৪ জেলার অপরাধসংক্রান্ত রিপোর্ট, নিরাপত্তা তথ্য ও বিশ্লেষণ এক প্ল্যাটফর্মে। নাগরিক সতর্কতা ও সঠিক তথ্যের জন্য উন্মুক্ত উদ্যোগ।</p>
+        
+        <div class="hero-actions">
+          <a href="#mapWorkspace" class="button primary" id="heroExploreBtn" data-i="ctaExplore">🗺️ Explore Safety Map</a>
+          <button class="button ghost" id="heroReportBtn" data-i="ctaReportSecondary">📝 Report an Incident</button>
+          <span class="trust-badge" data-i="trustNotice">🛡️ রিপোর্টগুলো যাচাইকৃত • কোনো মনগড়া পরিসংখ্যান নয়</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Meaningful Statistics Bar -->
+    <section class="stats" aria-label="National Incident Statistics">
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <small data-i="statTotalReports">প্রকাশিত মোট রিপোর্ট</small>
+          <span class="stat-card-icon">📋</span>
+        </div>
+        <strong id="totalReports">0</strong>
+        <span data-i="statTotalNote">সারাদেশের যাচাইকৃত রেকর্ড</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <small data-i="statDistricts">আওতাভুক্ত জেলা</small>
+          <span class="stat-card-icon">🗺️</span>
+        </div>
+        <strong id="districtTotal">64</strong>
+        <span data-i="statDistrictsNote">খাঁটি বাস্তব GeoJSON সীমানা</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <small data-i="statDrugReports">মাদকসংক্রান্ত রেকর্ড</small>
+          <span class="stat-card-icon">⚠️</span>
+        </div>
+        <strong id="drugReportsCount" class="teal-val">0</strong>
+        <span data-i="statDrugNote">প্রকাশিত ও পর্যালোচিত</span>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <small data-i="statLastUpdate">সর্বশেষ আপডেট</small>
+          <span class="stat-card-icon">🕒</span>
+        </div>
+        <strong id="lastDataUpdate" style="font-size:18px;line-height:1.6">—</strong>
+        <span data-i="statUpdateNote">লাইভ ডাটাবেস সিঙ্ক</span>
+      </div>
+    </section>
+
+    <!-- Map-First Visual Centerpiece (Unseen Bangladesh Inspired) -->
+    <section class="map-workspace" id="mapWorkspace">
+      <!-- Multi-Filter Controls Bar -->
+      <div class="map-controls-bar">
+        <div class="map-filters">
+          <!-- Search Bar -->
+          <input type="text" id="districtSearch" data-placeholder="searchPlaceholder" placeholder="জেলা খুঁজুন... (e.g. Dhaka, Bogra)">
+          
+          <!-- Crime Category Filter -->
+          <select id="categoryFilter" aria-label="Filter by Category">
+            <option value="" data-i="allCategories">সব ধরনের অপরাধ (All Categories)</option>
+            <option value="extortion" data-i="catExtortion">চাঁদাবাজি (Extortion)</option>
+            <option value="theft" data-i="catTheft">চুরি (Theft)</option>
+            <option value="robbery" data-i="catRobbery">ডাকাতি (Robbery)</option>
+            <option value="snatching" data-i="catSnatching">ছিনতাই (Snatching)</option>
+            <option value="drug_related" data-i="catDrug">মাদকসংক্রান্ত (Drug-related)</option>
+            <option value="harassment" data-i="catHarassment">হয়রানি (Harassment)</option>
+            <option value="assault" data-i="catAssault">হামলা (Assault)</option>
+            <option value="fraud" data-i="catFraud">প্রতারণা (Fraud)</option>
+            <option value="other" data-i="catOther">অন্যান্য (Other)</option>
+          </select>
+
+          <!-- Date Range Filter -->
+          <select id="dateRangeFilter" aria-label="Filter by Date Range">
+            <option value="all" data-i="rangeAll">সব সময় (All Time)</option>
+            <option value="7d" data-i="range7d">গত ৭ দিন (Last 7 Days)</option>
+            <option value="30d" data-i="range30d">গত ৩০ দিন (Last 30 Days)</option>
+            <option value="6m" data-i="range6m">গত ৬ মাস (Last 6 Months)</option>
+          </select>
+
+          <!-- Reset Filter Button -->
+          <button class="button ghost" id="resetMapBtn" data-i="btnReset">🔄 রিসেট</button>
+        </div>
+
+        <!-- Division Selector Pills -->
+        <div class="division-pills" id="divisionPills">
+          <button class="active" data-div="" data-i="divAll">সব বিভাগ</button>
+          <button data-div="Dhaka">ঢাকা</button>
+          <button data-div="Chittagong">চট্টগ্রাম</button>
+          <button data-div="Rajshahi">রাজশাহী</button>
+          <button data-div="Khulna">খুলনা</button>
+          <button data-div="Barisal">বরিশাল</button>
+          <button data-div="Sylhet">সিলেট</button>
+          <button data-div="Rangpur">রংপুর</button>
+          <button data-div="Mymensingh">ময়মনসিংহ</button>
+        </div>
+      </div>
+
+      <!-- Map Canvas Container -->
+      <div class="map-canvas-container">
+        <div id="map"></div>
+
+        <!-- Accessible Non-Color Numerical Legend -->
+        <div class="map-legend-box" aria-label="Incident Count Legend">
+          <span class="map-legend-title" data-i="legendTitle">অনুমোদিত রিপোর্ট সংখ্যা</span>
+          <div class="legend-bars">
+            <span style="background:#2aa579" title="0 reports"></span>
+            <span style="background:#8fc76b" title="1-2 reports"></span>
+            <span style="background:#e4bc53" title="3-5 reports"></span>
+            <span style="background:#ed9155" title="6-9 reports"></span>
+            <span style="background:#df5a65" title="10+ reports"></span>
+          </div>
+          <div class="legend-labels">
+            <small data-i="legendLow">০-১ (কম)</small>
+            <small data-i="legendMid">৩-৫</small>
+            <small data-i="legendHigh">১০+ (বেশি)</small>
+          </div>
+        </div>
+
+        <!-- District Slide-out Drawer (Desktop Right Drawer / Mobile Bottom Sheet) -->
+        <aside class="district-drawer" id="districtDrawer" aria-label="District Details Drawer">
+          <div class="drawer-header">
+            <div>
+              <h2 id="drawerDistrictName">বাংলাদেশ</h2>
+              <p id="drawerDistrictDivision">জেলা নির্বাচন করুন</p>
+            </div>
+            <button class="drawer-close" id="closeDrawerBtn" aria-label="Close Drawer">✕</button>
+          </div>
+
+          <div class="drawer-body">
+            <!-- District KPIs -->
+            <div class="drawer-kpis">
+              <div class="drawer-kpi">
+                <small data-i="drawerTotalReports">মোট অনুমোদিত রিপোর্ট</small>
+                <strong id="drawerReportCount">0</strong>
+              </div>
+              <div class="drawer-kpi">
+                <small data-i="drawerNationalShare">জাতীয় অনুপাত</small>
+                <strong id="drawerNationalShare">0%</strong>
+              </div>
+            </div>
+
+            <!-- Drawer Quick Actions -->
+            <div class="drawer-actions">
+              <button class="button primary" id="drawerSubmitBtn" style="flex:1" data-i="btnReportHere">+ এই জেলায় রিপোর্ট করুন</button>
+              <button class="button ghost" id="drawerShareBtn" title="Share District URL" data-i="btnShare">🔗 শেয়ার</button>
+            </div>
+
+            <!-- Category Chart -->
+            <div>
+              <h3 style="font-size:13px;margin:12px 0 6px" data-i="headingCategories">ঘটনার ধরন অনুযায়ী বিন্যাস</h3>
+              <div style="height:140px;position:relative">
+                <canvas id="typeChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Monthly Trends Chart -->
+            <div>
+              <h3 style="font-size:13px;margin:12px 0 6px" data-i="headingMonthly">গত ৬ মাসের ট্রেন্ড</h3>
+              <div style="height:120px;position:relative">
+                <canvas id="monthChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Incidents Feed -->
+            <div class="incident-feed-header">
+              <h3 data-i="headingVerifiedIncidents">যাচাইকৃত ঘটনার বিবরণ</h3>
+              <span class="badge-tag" id="drawerIncidentCountBadge" style="background:var(--teal-subtle);color:var(--teal)">0</span>
+            </div>
+            
+            <div class="incidents-list" id="districtIncidentsList">
+              <!-- Rendered dynamically -->
+            </div>
+
+            <!-- Caveat -->
+            <div style="background:var(--sub);padding:10px 12px;border-radius:8px;font-size:11px;color:var(--muted);line-height:1.5">
+              ⚠️ <span data-i="methodologyDisclaimer">এই তথ্য নাগরিক রিপোর্ট এবং গণমাধ্যমে প্রকাশিত সত্য ঘটনার ওপর ভিত্তি করে তৈরি। এটি অপরাধের হার বা কোনো জেলার সামগ্রিক নিরাপত্তার চূড়ান্ত মাপকাঠি নয়।</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- Map Footer Bar -->
+      <div class="map-footer-bar">
+        <span data-i="mapFooterVector">🇧🇩 খাঁটি ৬৪ জেলার সীমানা • কোনো বাহ্যিক ট্র্যাকিং বা রাস্তার লেয়ার নেই</span>
+        <span id="mapStatusIndicator">🟢 ম্যাপ প্রস্তুত</span>
+      </div>
+    </section>
+  </main>
+
+  <!-- 3-STEP INCIDENT REPORTING MODAL -->
+  <div class="modal-backdrop" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
+    <div class="modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="reportModalTitle" data-i="modalReportTitle">ঘটনার রিপোর্ট জমা দিন</h2>
+          <p data-i="modalReportSubtitle">সচেতন নাগরিক হিসেবে সত্য তথ্য দিয়ে জননিরাপত্তায় ভূমিকা রাখুন।</p>
+        </div>
+        <button class="drawer-close" data-close="reportModal" aria-label="Close">✕</button>
+      </div>
+
+      <!-- Progress Step Indicator -->
+      <div class="step-progress-bar">
+        <div class="step-bubble active" id="bubble1">১</div>
+        <div class="step-bubble" id="bubble2">২</div>
+        <div class="step-bubble" id="bubble3">৩</div>
+      </div>
+
+      <form id="multiStepReportForm">
+        <!-- STEP 1: Basic Incident Information -->
+        <div class="step-pane active" id="step1">
+          <h3 style="font-size:14px;margin:0 0 12px" data-i="step1Title">ধাপ ১: ঘটনার প্রাথমিক তথ্য</h3>
+          <div class="form-grid">
+            <label>
+              <span data-i="fieldCategory">অপরাধের ধরন</span>
+              <select name="type" id="formType" required></select>
+            </label>
+            <label>
+              <span data-i="fieldDistrict">জেলা</span>
+              <select name="district_code" id="formDistrict" required></select>
+            </label>
+            <label>
+              <span data-i="fieldDate">ঘটনার তারিখ</span>
+              <input type="date" name="incident_date" id="formDate" required>
+            </label>
+            <label>
+              <span data-i="fieldTime">আনুমানিক সময়</span>
+              <input type="time" name="incident_time" id="formTime" required value="12:00">
+            </label>
+          </div>
+
+          <label>
+            <span data-i="fieldLocation">আনুমানিক এলাকা / স্থান (বাসা বা ব্যক্তিগত ঠিকানা দেবেন না)</span>
+            <input type="text" name="location" id="formLocation" minlength="3" maxlength="140" required placeholder="যেমন: ধানমন্ডি ২৭ সংলগ্ন রোড / মিরপুর ১০ গোলচত্বর">
+          </label>
+
+          <div class="step-actions">
+            <span></span>
+            <button type="button" class="button primary" id="nextToStep2Btn" data-i="btnNext">পরবর্তী ধাপ ➜</button>
+          </div>
+        </div>
+
+        <!-- STEP 2: Incident Narrative & Source -->
+        <div class="step-pane" id="step2">
+          <h3 style="font-size:14px;margin:0 0 12px" data-i="step2Title">ধাপ ২: ঘটনার বিস্তারিত ও সত্যতা</h3>
+          
+          <label>
+            <span data-i="fieldWitness">ঘটনায় আপনার সংশ্লিষ্টতা</span>
+            <select name="witness_status" id="formWitness" required>
+              <option value="victim" data-i="optVictim">আমি নিজেই ঘটনার ভুক্তভোগী</option>
+              <option value="witness" data-i="optWitness">আমি সরাসরি ঘটনার প্রত্যক্ষদর্শী</option>
+              <option value="informed_citizen" data-i="optInformed">আমি বিশ্বস্ত স্থানীয় সূত্র বা সংবাদ থেকে অবহিত</option>
+            </select>
+          </label>
+
+          <label>
+            <span data-i="fieldDesc">ঘটনার বস্তুনিষ্ঠ বিবরণ (কমপক্ষে ১৫ অক্ষর)</span>
+            <textarea name="description" id="formDesc" rows="4" minlength="15" maxlength="2000" required placeholder="ঘটনার প্রেক্ষাপট, কী ঘটেছিল এবং বর্তমান পরিস্থিতি সম্পর্কে লিখুন..."></textarea>
+          </label>
+
+          <label>
+            <span data-i="fieldReference">তথ্যসূত্র বা সংবাদের লিংক (যদি থাকে)</span>
+            <input type="url" name="reference_url" id="formReference" placeholder="https://example.com/news-report">
+          </label>
+
+          <div class="form-grid">
+            <label>
+              <span data-i="fieldName">আপনার নাম (ঐচ্ছিক - জনসম্মুখে গোপন রাখা হবে)</span>
+              <input type="text" name="reporter_name" id="formReporterName" placeholder="নাম প্রকাশে অনিচ্ছুক">
+            </label>
+            <label>
+              <span data-i="fieldContact">যোগাযোগের নম্বর/ইমেইল (ঐচ্ছিক - সম্পূর্ণ গোপন)</span>
+              <input type="text" name="reporter_contact" id="formReporterContact" placeholder="জরুরি যাচাইয়ের প্রয়োজনে">
+            </label>
+          </div>
+
+          <div style="background:var(--sub);padding:10px 12px;border-radius:8px;font-size:11px;color:var(--muted);margin-bottom:14px">
+            🔒 <strong>গোপনীয়তার প্রতিশ্রুতি:</strong> আপনার নাম বা ব্যক্তিগত যোগাযোগের তথ্য কখনোই পাবলিক পেজে দেখানো হবে না।
+          </div>
+
+          <div class="step-actions">
+            <button type="button" class="button ghost" id="backToStep1Btn" data-i="btnBack">⬅ পূর্ববর্তী ধাপ</button>
+            <button type="button" class="button primary" id="nextToStep3Btn" data-i="btnNext">পর্যালোচনা ও ঘোষণা ➜</button>
+          </div>
+        </div>
+
+        <!-- STEP 3: Review, Declarations & Submission -->
+        <div class="step-pane" id="step3">
+          <h3 style="font-size:14px;margin:0 0 12px" data-i="step3Title">ধাপ ৩: চূড়ান্ত পর্যালোচনা ও জমা</h3>
+
+          <div id="step3ReviewCard" style="background:var(--sub);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px;font-size:12px;line-height:1.7">
+            <!-- Populated via JS -->
+          </div>
+
+          <label class="check">
+            <input type="checkbox" id="confirmAccuracy" required>
+            <span data-i="confirmDeclaration">আমি ঘোষণা করছি যে এই তথ্য আমার জানা মতে সম্পূর্ণ সত্য এবং কোনো ব্যক্তিকে হয়রানি করার উদ্দেশ্যে উদ্দেশ্যপ্রণোদিতভাবে মিথ্যা তথ্য দেওয়া হচ্ছে না।</span>
+          </label>
+
+          <div style="background:var(--red-subtle);color:var(--red);border:1px solid var(--red);border-radius:8px;padding:10px 12px;font-size:11px;margin:12px 0">
+            🚨 <strong>জরুরি সতর্কবার্তা:</strong> WatchDog BD পুলিশ বা জরুরি সেবার বিকল্প নয়। তাৎক্ষণিক বিপদে জাতীয় জরুরি সেবা <strong>৯৯৯</strong>-এ কল করুন।
+          </div>
+
+          <div id="submissionError" class="form-message" style="color:var(--red);margin:8px 0;font-weight:600"></div>
+
+          <div class="step-actions">
+            <button type="button" class="button ghost" id="backToStep2Btn" data-i="btnBack">⬅ পূর্ববর্তী ধাপ</button>
+            <button type="submit" class="button primary" id="submitReportFinalBtn" data-i="btnSubmit">জমা দিন (Submit Report)</button>
+          </div>
+        </div>
+
+        <!-- SUCCESS STATE WITH TRACKING CODE -->
+        <div class="step-pane" id="stepSuccess">
+          <div style="text-align:center;padding:20px 10px">
+            <div style="font-size:48px;margin-bottom:10px">✅</div>
+            <h3 style="font-size:20px;margin:0 0 6px" data-i="successTitle">রিপোর্টটি সফলভাবে জমা হয়েছে!</h3>
+            <p style="color:var(--muted);font-size:13px;max-width:480px;margin:0 auto 16px" data-i="successSub">আমাদের মডারেশন টিম তথ্য যাচাইয়ের পর এটি প্ল্যাটফর্মে প্রকাশ করবে। আপনার রিপোর্টের অবস্থা ট্র্যাক করতে নিচের গোপন রেফারেন্স কোডটি সংরক্ষণ করুন:</p>
+
+            <div class="tracking-box">
+              <small style="color:var(--muted);font-weight:700;display:block">আপনার গোপন ট্র্যাকিং কোড (Private Reference):</small>
+              <span class="tracking-code-val" id="generatedTrackingCode">WD-XXXXXXXX</span>
+              <div>
+                <button type="button" class="button ghost" id="copyTrackingCodeBtn" style="font-size:11px;padding:6px 12px">📋 কোড কপি করুন</button>
+              </div>
+            </div>
+
+            <button type="button" class="button primary" data-close="reportModal" data-i="btnClose">ঠিক আছে (সম্পন্ন)</button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- STATUS TRACKING MODAL -->
+  <div class="modal-backdrop" id="trackModal" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width:500px">
+      <div class="modal-head">
+        <div>
+          <h2 data-i="trackModalTitle">রিপোর্টের অবস্থা জানুন</h2>
+          <p data-i="trackModalSub">আপনার সাবমিশন কোড দিয়ে মডারেশন ও অনুমোদনের লাইভ স্ট্যাটাস দেখুন।</p>
+        </div>
+        <button class="drawer-close" data-close="trackModal">✕</button>
+      </div>
+
+      <form id="trackForm">
+        <label>
+          <span data-i="trackLabel">গোপন ট্র্যাকিং রেফারেন্স (e.g. WD-8F3K9A)</span>
+          <input type="text" id="trackInputCode" required placeholder="WD-XXXXXXXX" style="font-family:monospace;letter-spacing:1px;font-weight:700">
+        </label>
+        <button type="submit" class="button primary" style="width:100%" data-i="btnSearchStatus">অনুসন্ধান করুন</button>
+      </form>
+
+      <div id="trackResultBox" style="margin-top:16px" hidden></div>
+    </div>
+  </div>
+
+  <!-- DISTRICT COMPARISON MODAL -->
+  <div class="modal-backdrop" id="compareModal" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width:640px">
+      <div class="modal-head">
+        <div>
+          <h2 data-i="compareTitle">দুই জেলার তথ্যভিত্তিক তুলনা</h2>
+          <p data-i="compareSub">দুটি জেলার যাচাইকৃত রিপোর্টের সংখ্যা ও অপরাধের ধরনের তুলনামূলক বিশ্লেষণ।</p>
+        </div>
+        <button class="drawer-close" data-close="compareModal">✕</button>
+      </div>
+
+      <div class="form-grid" style="margin-bottom:14px">
+        <label>
+          <span data-i="compareD1">প্রথম জেলা:</span>
+          <select id="compareSelect1"></select>
+        </label>
+        <label>
+          <span data-i="compareD2">দ্বিতীয় জেলা:</span>
+          <select id="compareSelect2"></select>
+        </label>
+      </div>
+
+      <button type="button" class="button primary" id="runCompareBtn" style="width:100%;margin-bottom:16px" data-i="btnCompareRun">তুলনা দেখুন</button>
+
+      <div id="compareResultContainer"></div>
+    </div>
+  </div>
+
+  <!-- SAFETY RESOURCES & EMERGENCY CONTACTS MODAL -->
+  <div class="modal-backdrop" id="safetyModal" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width:620px">
+      <div class="modal-head">
+        <div>
+          <h2 data-i="safetyTitle">জরুরি যোগাযোগ ও নিরাপত্তা নির্দেশিকা</h2>
+          <p data-i="safetySub">বাংলাদেশে তাত্ক্ষণিক বিপদ বা অপরাধের শিকার হলে করণীয় ও অফিসিয়াল হেল্পলাইন।</p>
+        </div>
+        <button class="drawer-close" data-close="safetyModal">✕</button>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
+          <strong style="color:var(--red);font-size:16px">🚨 ৯৯৯ (999)</strong>
+          <small style="display:block;color:var(--muted)">জাতীয় জরুরি সেবা (পুলিশ, অ্যাম্বুলেন্স, ফায়ার)</small>
+        </div>
+        <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
+          <strong style="color:var(--teal);font-size:16px">📞 ১০৯ (109)</strong>
+          <small style="display:block;color:var(--muted)">নারী ও শিশু নির্যাতন প্রতিরোধ হেল্পলাইন</small>
+        </div>
+        <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
+          <strong style="color:#d97706;font-size:16px">⚖️ ১০৬ (106)</strong>
+          <small style="display:block;color:var(--muted)">দুদক অভিযোগ কেন্দ্র (দুর্নীতি ও চাঁদাবাজি)</small>
+        </div>
+        <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
+          <strong style="color:#2563eb;font-size:16px">💻 ০১৩২০০০১২৩৪</strong>
+          <small style="display:block;color:var(--muted)">পুলিশ সাইবার ক্রাইম তদন্ত হেল্পডেস্ক</small>
+        </div>
+      </div>
+
+      <div style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:12px;line-height:1.7">
+        <h4 style="margin:0 0 6px" data-i="gdTitle">থানায় সাধারণ ডায়েরি (GD) করার প্রাথমিক নিয়মাবলী:</h4>
+        <ul style="margin:0;padding-left:18px;color:var(--muted)">
+          <li>ঘটনার সঠিক তারিখ, সময় ও স্থান সুস্পষ্টভাবে উল্লেখ করুন।</li>
+          <li>চাঁদাবাজি, হুমকি বা মালামাল হারানোর ক্ষেত্রে প্রমাণাদি (মেসেজ, কল রেকর্ড, রসিদ) সংরক্ষণ করুন।</li>
+          <li>সরাসরি থানায় গিয়ে বা অনলাইন জিডি (Online GD) অ্যাপের মাধ্যমে আবেদন করা যায়।</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- METHODOLOGY & TRANSPARENCY MODAL -->
+  <div class="modal-backdrop" id="methodologyModal" role="dialog" aria-modal="true">
+    <div class="modal" style="max-width:620px">
+      <div class="modal-head">
+        <div>
+          <h2 data-i="methodTitle">তথ্য সংগ্রহের পদ্ধতি ও সীমাবদ্ধতা</h2>
+          <p data-i="methodSub">WatchDog BD কীভাবে তথ্য সংগ্রহ, যাচাই ও প্রদর্শন করে।</p>
+        </div>
+        <button class="drawer-close" data-close="methodologyModal">✕</button>
+      </div>
+
+      <div style="font-size:13px;line-height:1.7;color:var(--ink)">
+        <p><strong>১. তথ্যের উৎস:</strong> প্ল্যাটফর্মের ডেটা মূলত নাগরিকদের পাঠানো রিপোর্ট এবং জাতীয় প্রতিষ্ঠিত গণমাধ্যমে প্রকাশিত সংবাদ থেকে সংগৃহীত।</p>
+        <p><strong>২. মডারেশন নীতি:</strong> অপ্রমাণিত ব্যক্তিগত অভিযোগ, নির্দিষ্ট ব্যক্তির চরিত্রহনন বা অসম্পূর্ণ বিবরণ সরাসরি বাদ দেওয়া হয়।</p>
+        <p><strong>৩. ম্যাপের রঙের অর্থ:</strong> ম্যাপের কোরোপ্লেথ কালার শুধুমাত্র অনুমোদিত রিপোর্টের তুলনামূলক সংখ্যা বোঝায়। এটি কোনো জেলার অফিসিয়াল ক্রাইম রেট (Crime Rate per capita) নয়।</p>
+        <p><strong>৪. সংশোধন ও প্রত্যাহার:</strong> কোনো প্রকাশিত তথ্যে অসঙ্গতি থাকলে সংশ্লিষ্ট ব্যক্তি প্রমাণসহ সংশোধনের আবেদন করতে পারেন।</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <div>
+      <strong>WatchDog BD</strong> — Community-Powered Public Safety Intelligence
+      <div style="margin-top:4px;font-size:11px;color:var(--muted)">স্বেচ্ছাসেবী ও অলাভজনক নাগরিক সচেতনতা প্ল্যাটফর্ম • ২০২৬</div>
+    </div>
+    <div class="footer-nav">
+      <a href="#howItWorks" id="fHowBtn" data-i="navHow">পদ্ধতি ও নীতিমালা</a>
+      <a href="#safetyResources" id="fSafetyBtn" data-i="navSafety">জরুরি সেবা</a>
+      <a href="#methodology" id="fMethodBtn" data-i="navMethodology">তথ্যের সীমাবদ্ধতা</a>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

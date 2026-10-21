@@ -3,22 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="theme-color" content="#121e35">
-  <title>Bangladesh SafeMap — Admin Control Center</title>
+  <meta name="theme-color" content="#0B1930">
+  <title>WatchDog BD — Admin Control & Moderation Workspace</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header>
     <div class="brand">
-      <span class="brand-icon">🛡️</span>
-      <div>
-        SafeMap <em>Admin Portal</em>
-        <small>INTERNAL CONTROL & ANALYTICS</small>
+      <div class="brand-radar">🛡️</div>
+      <div class="brand-text">
+        <strong>WatchDog <span>BD</span> Admin</strong>
+        <small>INTERNAL MODERATION & ANALYTICS</small>
       </div>
     </div>
     <div class="header-actions">
-      <span class="admin-badge-live">Live MongoDB</span>
+      <span class="admin-badge-live" id="dbStatusBadge">MongoDB Connected</span>
       <button class="button ghost" id="langBtn">EN</button>
       <button class="button ghost" id="themeBtn" aria-label="Theme">☾</button>
       <a href="/" class="admin-public-link" target="_blank" rel="noopener">পাবলিক সাইট ↗</a>
@@ -26,18 +28,18 @@
   </header>
 
   <main class="admin-portal-wrap">
-    <!-- 1. Centered Login Screen -->
+    <!-- 1. Secure Centered Login Screen -->
     <div id="adminAuthSection" class="admin-login-card">
       <div class="admin-login-icon">🔒</div>
-      <h2 id="loginTitle">অ্যাডমিন প্রবেশদ্বার</h2>
-      <p id="loginSubtitle">রিপোর্ট যাচাই এবং লাইভ সাইট ট্রাফিকের বিস্তারিত দেখতে অ্যাডমিন পাসওয়ার্ড দিন।</p>
+      <h2 id="loginTitle">অ্যাডমিন কন্ট্রোল পোর্টাল</h2>
+      <p id="loginSubtitle">নাগরিক রিপোর্ট যাচাই, তথ্যসূত্র যাচাইকরণ ও ট্রাফিক অ্যানালিটিক্স অ্যাক্সেস করতে পাসওয়ার্ড দিন।</p>
       
       <form id="loginForm">
         <label>
-          <span style="font-weight:700;font-size:12px;display:block;margin-bottom:6px">Admin Password</span>
+          <span style="font-weight:700;font-size:12px;display:block;margin-bottom:6px">Administrator Password</span>
           <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••" style="padding:12px;font-size:14px">
         </label>
-        <div id="adminLoginError" class="form-message" style="color:#df5a65;margin:10px 0;text-align:left;font-weight:600"></div>
+        <div id="adminLoginError" class="form-message" style="color:var(--red);margin:10px 0;text-align:left;font-weight:600"></div>
         <button class="button primary" type="submit" id="loginBtnSubmit" style="margin-top:8px">লগইন করুন (Login)</button>
       </form>
     </div>
@@ -46,33 +48,48 @@
     <div id="adminDashboardSection" class="admin-dashboard-card" hidden>
       <div class="admin-header-title">
         <div>
-          <h1 id="dashboardHeading">অ্যাডমিন কন্ট্রোল সেন্টার</h1>
-          <p style="color:var(--muted);font-size:12px;margin:4px 0 0">সরাসরি নাগরিক রিপোর্ট যাচাই করুন এবং সাইটের লাইভ অ্যানালিটিক্স পর্যবেক্ষণ করুন।</p>
+          <h1 id="dashboardHeading">মডারেশন ও ইনটেলিজেন্স ওয়ার্কস্পেস</h1>
+          <p style="color:var(--muted);font-size:12px;margin:4px 0 0">নাগরিক রিপোর্ট যাচাই করুন, সত্যতা ও সংবাদের ভিত্তি নির্ধারণ করুন এবং প্ল্যাটফর্ম স্বাস্থ্য পর্যবেক্ষণ করুন।</p>
         </div>
-        <button class="button ghost" id="logoutBtn" style="color:#df5a65;border-color:#df5a6550">লগআউট (Logout)</button>
+        <button class="button ghost" id="logoutBtn" style="color:var(--red);border-color:var(--red-subtle)">লগআউট (Logout)</button>
       </div>
 
       <!-- Navigation Tabs -->
       <div class="admin-tabs">
-        <button class="button active" id="tabReportsBtn">📋 রিপোর্ট মডারেশন</button>
-        <button class="button ghost" id="tabAnalyticsBtn">📊 সাইট অ্যানালিটিক্স</button>
+        <button class="button active" id="tabReportsBtn">📋 রিপোর্ট মডারেশন কিউ</button>
+        <button class="button ghost" id="tabAnalyticsBtn">📊 সাইট ট্রাফিক ও অ্যানালিটিক্স</button>
       </div>
 
       <!-- Tab 1: Moderation Queue -->
       <div id="adminReportsView">
-        <div class="admin-toolbar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:12px;color:var(--muted);font-weight:700">ফিল্টার:</span>
-            <select id="moderationStatus" style="max-width:160px">
-              <option value="pending">Pending (পেন্ডিং)</option>
-              <option value="approved">Approved (অনুমোদিত)</option>
-              <option value="rejected">Rejected (বাতিল)</option>
-            </select>
+        <div class="admin-toolbar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;background:var(--sub);padding:12px;border-radius:10px;border:1px solid var(--line)">
+          <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+            <label style="margin:0;display:flex;align-items:center;gap:6px;font-size:12px">
+              <span>স্ট্যাটাস:</span>
+              <select id="moderationStatus" style="padding:6px 10px;font-size:12px">
+                <option value="pending">Pending (পেন্ডিং পর্যালোচনা)</option>
+                <option value="approved">Approved (অনুমোদিত ও প্রকাশিত)</option>
+                <option value="rejected">Rejected (বাতিলকৃত)</option>
+                <option value="all">All (সকল রিপোর্ট)</option>
+              </select>
+            </label>
+
+            <label style="margin:0;display:flex;align-items:center;gap:6px;font-size:12px">
+              <span>ভেরিফিকেশন ফিল্টার:</span>
+              <select id="filterVerification" style="padding:6px 10px;font-size:12px">
+                <option value="">সকল ধরন (All)</option>
+                <option value="published_news_report">সংবাদে প্রকাশিত (News Report)</option>
+                <option value="independently_verified">প্রমাণিত সত্য (Independently Verified)</option>
+                <option value="moderated">সাধারণ মডারেটেড (Moderated)</option>
+                <option value="community_submitted">নাগরিক দাখিলকৃত (Community Submitted)</option>
+              </select>
+            </label>
           </div>
-          <button class="button ghost" id="refreshAdminBtn">🔄 Refresh Queue</button>
+
+          <button class="button ghost" id="refreshAdminBtn" style="font-size:12px">🔄 Refresh Queue</button>
         </div>
         
-        <div id="reportQueue" style="margin-top:15px"></div>
+        <div id="reportQueue" style="margin-top:16px"></div>
       </div>
 
       <!-- Tab 2: Live Analytics & Traffic -->
@@ -81,39 +98,48 @@
           <div class="analytics-card">
             <small>মোট সাইট ভিজিট</small>
             <strong id="analyticsTotalVisits">0</strong>
-            <span>লাইভ ট্রাফিক</span>
+            <span>লাইভ পেজভিউ ট্রাফিক</span>
           </div>
           <div class="analytics-card">
             <small>আজকের ভিজিট</small>
-            <strong id="analyticsTodayVisits">0</strong>
-            <span>গত ২৪ ঘণ্টা</span>
+            <strong id="analyticsTodayVisits" style="color:var(--teal)">0</strong>
+            <span>গত ২৪ ঘণ্টায়</span>
           </div>
           <div class="analytics-card">
             <small>মোট রিপোর্ট জমা</small>
             <strong id="analyticsTotalReports">0</strong>
-            <span>সর্বমোট নাগরিক রিপোর্ট</span>
+            <span>সর্বমোট দাখিলকৃত</span>
           </div>
           <div class="analytics-card">
             <small>পেন্ডিং রিভিউ</small>
-            <strong id="analyticsPendingReports" style="color:#ed9155">0</strong>
-            <span>পর্যালোচনা প্রয়োজন</span>
+            <strong id="analyticsPendingReports" style="color:var(--amber)">0</strong>
+            <span>পর্যালোচনা অপেক্ষমাণ</span>
           </div>
         </div>
 
+        <!-- Verification Breakdown Mini Cards -->
         <div class="analytics-subgrid">
           <div class="analytics-card-mini">
-            <span>অনুমোদিত রিপোর্ট:</span>
-            <b id="analyticsApprovedReports" style="color:#2aa579">0</b>
+            <span>📰 জাতীয় গণমাধ্যমে প্রকাশিত রিপোর্ট:</span>
+            <b id="analyticsNewsReports" style="color:var(--teal)">0</b>
           </div>
           <div class="analytics-card-mini">
-            <span>প্রত্যাখ্যাত রিপোর্ট:</span>
-            <b id="analyticsRejectedReports" style="color:#df5a65">0</b>
+            <span>✅ নিরপেক্ষভাবে প্রমাণিত ঘটনা:</span>
+            <b id="analyticsIndVerified" style="color:var(--green)">0</b>
+          </div>
+          <div class="analytics-card-mini">
+            <span>⚖️ প্রাথমিক যাচাইকৃত রিপোর্ট:</span>
+            <b id="analyticsModerated" style="color:var(--ink)">0</b>
+          </div>
+          <div class="analytics-card-mini">
+            <span>❌ বাতিলকৃত / ভিত্তিহীন রিপোর্ট:</span>
+            <b id="analyticsRejectedReports" style="color:var(--red)">0</b>
           </div>
         </div>
 
         <div style="display:flex;align-items:center;justify-content:space-between;margin:24px 0 10px">
-          <h3 style="margin:0;font-size:14px">গত ৭ দিনের ভিজিটর ট্রেন্ড (Daily Traffic)</h3>
-          <button class="button ghost" id="refreshAnalyticsBtn" style="font-size:11px;padding:6px 10px">🔄 Refresh</button>
+          <h3 style="margin:0;font-size:14px">গত ৭ দিনের ভিজিটর ট্রাফিক ট্রেন্ড (7-Day Daily Visits)</h3>
+          <button class="button ghost" id="refreshAnalyticsBtn" style="font-size:11px;padding:6px 10px">🔄 Refresh Graph</button>
         </div>
         
         <div class="chart-wrap" style="height:220px;background:var(--sub);border-radius:12px;padding:12px;border:1px solid var(--line)">

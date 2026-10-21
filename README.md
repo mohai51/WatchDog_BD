@@ -1,95 +1,88 @@
-# Bangladesh SafeMap — 64 District MVP (100% Full-Stack JavaScript)
+# 🛡️ WatchDog BD — Community-Powered Crime Reporting & Public Safety Intelligence
 
-A working web application using the **uploaded `district.json`** as the sole geographic source. It shows Bangladesh's 64 district boundaries, with **no street, river or background map layers**.
+A modern, trustworthy, map-first public safety intelligence and crowdsourced incident reporting platform for Bangladesh.
 
-Built with **100% Full-Stack JavaScript** (Express.js + Vanilla JS + MongoDB Atlas).
+Built with **100% Full-Stack JavaScript** (Node.js + Express.js + Vanilla JS + Leaflet.js + Chart.js + MongoDB Atlas Cloud).
 
-## Run (Node.js 18+)
+- **Repository**: [https://github.com/mohai51/WatchDog_BD](https://github.com/mohai51/WatchDog_BD)
+- **Live Deployment**: [https://watch-dog-bd.vercel.app/](https://watch-dog-bd.vercel.app/)
+- **Design Inspiration**: Unseen Bangladesh (minimalist vector map, guided experience, side drawer)
 
-From the `bangladesh_safemap` directory:
+---
+
+## 🌟 Key Features
+
+### 1. Map-First Geospatial Experience
+- **Authentic 64-District Vector Map**: Pure GeoJSON vector boundaries with no external tile trackers, streets, or rivers.
+- **Deep Linking**: Dynamic URL hash support (e.g. `#district=BD3026`) for direct district bookmarking and sharing.
+- **Multi-Attribute Filtering**: Filter incidents by crime category (Extortion, Theft, Robbery, Snatching, Drug-related, Harassment, Fraud, Other), date range (7 days, 30 days, 6 months, all), division pills, and search in both Bengali and English.
+- **Desktop Side Drawer & Mobile Bottom Sheet**: Slide-out drawer with district KPIs, category distribution charts, 6-month trends, verified incident feeds, and sharing actions.
+
+### 2. Guided 3-Step Incident Reporting
+- **Step 1 (Incident Info)**: Category, district, approximate locality (no personal home addresses), date & time.
+- **Step 2 (Narrative & Privacy)**: Structured narrative, eyewitness/victim status, optional reference URL, and optional strictly confidential contact info.
+- **Step 3 (Review & Declaration)**: Summary review, accuracy declaration, emergency 999 notice, and one-click submission.
+- **Private Submitter Tracking Code**: Generates a cryptographically secure tracking reference (e.g. `WD-8F3K9A`) allowing reporters to check review status without exposing personal details.
+
+### 3. Trust & 5-Tier Verification Taxonomy
+- `community_submitted` — Awaiting moderation review.
+- `moderated` — Approved for publication based on community guidelines.
+- `independently_verified` — Corroborated by independent evidence or police GD records.
+- `published_news_report` — Attributed to recognized national news sources with original publisher links.
+- `rejected` / `withdrawn` — Removed from public view.
+
+### 4. Public Value Modules
+- **District Comparison**: Compare incident density and category breakdown between any two districts.
+- **Safety Resources & Emergency Center**: 999, 109, 106, cyber crime hotlines, and GD filing instructions.
+- **Transparency & Methodology**: Explains data collection limits and clarifies that map colors show report density, not definitive crime rates.
+- **Bilingual (BN/EN) & Theme Switching**: Seamless toggle between Bengali/English and Dark/Light modes.
+
+### 5. Isolated Admin Workspace (`/admin`)
+- Accessible only at `/admin` (zero public navbar links).
+- Secure password authentication with fail-safe production validation.
+- Moderation queue with verification tier assignment, moderator audit notes, and takedown management.
+- Live traffic analytics and 7-day visitor trend graph.
+
+---
+
+## 🔒 Security & Privacy Architecture
+
+- **PII Scrubbing**: Reporter names and victim status are strictly scrubbed from all public APIs.
+- **No Ephemeral Disk Fallback**: In production (`NODE_ENV=production` or `VERCEL=1`), local file writes are disabled to prevent silent data loss.
+- **Privacy-Preserving Analytics**: Visitor IP addresses are hashed with daily salt (SHA-256) rather than stored raw.
+- **Security Headers**: HSTS, X-Frame-Options: DENY, Content-Security-Policy, Referrer-Policy, and Permissions-Policy.
+
+---
+
+## 🚀 Local Development (Node.js 18+)
 
 ```bash
-# 1. Install dependencies (first time only)
+# 1. Clone repository
+git clone https://github.com/mohai51/WatchDog_BD.git
+cd WatchDog_BD
+
+# 2. Install dependencies
 npm install
 
-# 2. Start the server
-npm start
-```
+# 3. Setup environment variables
+cp .env.example .env
+# Edit .env with your MongoDB Atlas URI and desired admin password
 
-Or for automatic reload during development:
-```bash
+# 4. Start local development server
 npm run dev
 ```
 
-Open **http://localhost:8000** in your browser.
-
-- Default admin password is set in `.env` (`admin123`) or automatically generated in terminal.
-- Cloud Database: Set `MONGODB_URI` in `.env` to connect directly to MongoDB Atlas Free Tier.
-- Zero-config fallback: If no `MONGODB_URI` is provided, it automatically saves to local storage in `data/`.
-
-## Included
-
-- **100% JavaScript**: Single language across frontend and backend (Node.js + Express)
-- **MongoDB Atlas Support**: Free tier cloud database integration with zero maintenance
-- 64 authentic district polygons from the user-supplied GeoJSON, topology-preserving simplified for fast loading
-- English/Bangla toggle, dark/light theme, responsive map and dashboard
-- Clickable districts, division filter, search, reset, choropleth fill
-- District-level charts using **approved incident report counts only**
-- Incident submission (name optional, victim flag, type, district, date/time, location and description)
-- Admin login, pending/approved/rejected moderation, review workflow
-- Same-origin API, request validation, HTML-safe rendering, rate limiting
-- Public API returns only aggregate data, never names or incident narratives
-
-## 🚀 Deploy to Vercel (1-Click Deployment)
-
-This application is ready to deploy directly on [Vercel](https://vercel.com):
-
-1. **Push to GitHub**: Repository `https://github.com/mohai51/WatchDog_BD.git`
-2. **Import in Vercel**:
-   - Go to [vercel.com/new](https://vercel.com/new)
-   - Select and import `WatchDog_BD`
-   - Framework Preset: **Other** (Root directory: `./`)
-3. **Set Environment Variables in Vercel Settings**:
-   - `MONGODB_URI`: `mongodb+srv://jackknee6_db_user:LPzlditmCsfShxpX@dog.5kigqw5.mongodb.net/safemap?retryWrites=true&w=majority&appName=dog`
-   - `SAFEMAP_ADMIN_PASSWORD`: Your secret admin password (e.g. `admin123`)
-4. **Deploy**: Click **Deploy** and your site will be live!
+Open **http://localhost:8000** in your browser.  
+Admin Portal is at **http://localhost:8000/admin** (Default dev password: `admin123`).
 
 ---
 
-## 📊 Analytics & Visitor Tracking
+## 🌐 Deploy to Vercel (Production)
 
-- **Public View**: Shows total website visits and today's visits directly in the top KPI stats bar.
-- **Admin Workspace Analytics**:
-  - Secure Moderation & Analytics Tab switcher.
-  - KPI Cards: Total Visits, Today Visits, Total Reports, Pending Moderation.
-  - Report Status Split: Approved vs. Rejected count.
-  - **7-Day Visitor Trend Chart**: Visual bar chart rendered with Chart.js showing daily traffic over the last week.
-  - Data is stored atomically in MongoDB Atlas (`analytics` and `visits` collections).
-
----
-
-## 🔒 Dedicated Admin Portal (`/admin`)
-
-The Admin control interface is **completely separated** from the public citizen interface:
-- **Zero Public Exposure**: The main public website (`/`) contains NO "Admin" button, links, or login modals.
-- **Dedicated URL**: Only reachable by directly browsing to `/admin`.
-- **Protected Workspace**:
-  - Secure password gate (default: `admin123`).
-  - **Report Moderation**: Real-time queue to approve or reject submitted community incident reports.
-  - **Site Analytics**: Total & today visits, report counts, approval breakdown, and 7-day traffic chart.
-
----
-
-## Files
-
-- `server.js` — Node.js / Express backend with MongoDB Atlas, `/admin` route & Vercel serverless support
-- `vercel.json` — Vercel serverless function routing configuration
-- `package.json` — Node.js project manifest & dependencies
-- `public/index.html` — Public citizen map & report UI (clean, no admin links)
-- `public/app.js` — Public frontend interactions, map rendering, and citizen submissions
-- `public/admin.html` — Isolated Admin Portal (moderation queue & analytics dashboard)
-- `public/admin.js` — Admin portal logic, session management, and Chart.js analytics
-- `public/style.css` — Responsive design for public app and admin portal
-- `public/districts.geojson` — Authentic 64-district boundaries
-- `.env.example` — Environment configuration template
-
+1. Import the repository in **[Vercel](https://vercel.com/new)**.
+2. In **Settings ➜ Environment Variables**, configure:
+   - `MONGODB_URI`: `mongodb+srv://<user>:<password>@<cluster>.mongodb.net/<database>?retryWrites=true&w=majority`
+   - `SAFEMAP_ADMIN_PASSWORD`: A strong, random administrator password (minimum 12 characters).
+   - `SAFEMAP_SECRET`: A 64-character random hex string for signing admin JWT/tokens.
+   - `NODE_ENV`: `production`
+3. Click **Deploy**.

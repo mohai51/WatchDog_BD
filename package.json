@@ -1,7 +1,7 @@
 {
-  "name": "bangladesh-safemap",
+  "name": "watchdog-bd",
   "version": "1.0.0",
-  "description": "Bangladesh SafeMap - 64 District Crowdsourced Crime Reporting & Geographic Analytics Platform",
+  "description": "WatchDog BD — Community-Powered Crime Reporting & Public Safety Intelligence for Bangladesh",
   "main": "server.js",
   "type": "commonjs",
   "scripts": {
@@ -9,9 +9,10 @@
     "dev": "node --watch server.js"
   },
   "keywords": [
+    "watchdog",
     "bangladesh",
-    "safemap",
     "crime-reporting",
+    "public-safety",
     "geospatial",
     "leaflet",
     "mongodb"
