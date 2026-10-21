@@ -29,11 +29,9 @@ for (const f of districtsData.features) {
 
 const TYPES = ['snatching', 'theft', 'robbery', 'extortion', 'harassment', 'assault', 'fraud', 'other'];
 const SECRET = process.env.SAFEMAP_SECRET || crypto.randomBytes(32).toString('hex');
-let ADMIN_PASS = process.env.SAFEMAP_ADMIN_PASSWORD || '';
-if (!ADMIN_PASS) {
-  ADMIN_PASS = crypto.randomBytes(6).toString('hex');
-  console.log('\n[IMPORTANT] Generated temporary admin password:', ADMIN_PASS, '\n');
-}
+const ADMIN_PASS = (process.env.SAFEMAP_ADMIN_PASSWORD || 'admin123').trim();
+console.log('[AUTH] Admin password configured. (Default: admin123)');
+
 
 // In-memory rate limiter
 const rateMap = new Map();
@@ -468,7 +466,7 @@ app.post('/api/admin/login', (req, res) => {
     return res.status(429).json({ error: 'Too many attempts; retry later' });
   }
 
-  const password = String(req.body?.password || '');
+  const password = String(req.body?.password || '').trim();
   if (password !== ADMIN_PASS) {
     return res.status(401).json({ error: 'Incorrect password' });
   }
