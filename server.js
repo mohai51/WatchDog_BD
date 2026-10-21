@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Bangladesh SafeMap — 100% Full-Stack JavaScript Backend
- * Express.js + MongoDB Atlas (with zero-config local fallback)
+ * Express.js + MongoDB Atlas (Vercel Serverless Ready)
  */
 
 require('dotenv').config();
@@ -17,7 +17,7 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 const DATA_DIR = path.join(__dirname, 'data');
 
 if (!fs.existsSync(DATA_DIR)) {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
+  try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch {}
 }
 
 // Load district GeoJSON
@@ -37,7 +37,7 @@ if (!ADMIN_PASS) {
 
 // In-memory rate limiter
 const rateMap = new Map();
-function isRateLimited(key, maxRequests = 8, windowSec = 3600) {
+function isRateLimited(key, maxRequests = 15, windowSec = 3600) {
   const now = Date.now();
   const timestamps = (rateMap.get(key) || []).filter(t => now - t < windowSec * 1000);
   if (timestamps.length >= maxRequests) {
@@ -72,7 +72,7 @@ function verifyToken(authHeader) {
   }
 }
 
-// Database Abstraction (MongoDB with local fallback)
+// Database Service with MongoDB Atlas & Vercel caching
 class DatabaseService {
   constructor() {
     this.mode = 'local';
@@ -80,35 +80,44 @@ class DatabaseService {
     this.db = null;
     this.localFilePath = path.join(DATA_DIR, 'local_reports.json');
     this.localReports = [];
+    this.localVisits = [];
+    this.initDone = false;
   }
 
   async init() {
+    if (this.initDone && this.db) return;
     const mongoUri = (process.env.MONGODB_URI || '').trim();
     if (mongoUri) {
       try {
-        const dbName = (process.env.MONGODB_DB_NAME || 'safemap').trim();
-        this.client = new MongoClient(mongoUri, { serverSelectionTimeoutMS: 4000 });
-        await this.client.connect();
+        const dbName = (process.env.MONGODB_DB_NAME || 'safemap').trim() || 'safemap';
+        if (!this.client) {
+          this.client = new MongoClient(mongoUri, {
+            serverSelectionTimeoutMS: 5000,
+            maxPoolSize: 10
+          });
+          await this.client.connect();
+        }
         await this.client.db('admin').command({ ping: 1 });
         this.db = this.client.db(dbName);
 
         // Setup indexes
         await this.db.collection('reports').createIndex({ status: 1, district_code: 1 });
         await this.db.collection('reports').createIndex({ created_at: -1 });
+        await this.db.collection('visits').createIndex({ date: -1 });
 
         this.mode = 'mongodb';
+        this.initDone = true;
         console.log(`[DATABASE] Connected to MongoDB Atlas successfully! (Database: ${dbName})`);
         return;
       } catch (err) {
         console.warn(`[DATABASE WARNING] MongoDB connection failed: ${err.message}. Falling back to local storage.`);
       }
     } else {
-      console.log('[DATABASE] MONGODB_URI not set. Operating on local JSON storage (data/local_reports.json).');
-      console.log('[DATABASE TIP] Add MONGODB_URI in .env to connect MongoDB Free Tier.');
+      console.log('[DATABASE] MONGODB_URI not set. Operating on local JSON storage.');
     }
 
-    // Local JSON fallback
     this.mode = 'local';
+    this.initDone = true;
     if (fs.existsSync(this.localFilePath)) {
       try {
         this.localReports = JSON.parse(fs.readFileSync(this.localFilePath, 'utf8'));
@@ -120,7 +129,7 @@ class DatabaseService {
 
   saveLocal() {
     if (this.mode === 'local') {
-      fs.writeFileSync(this.localFilePath, JSON.stringify(this.localReports, null, 2), 'utf8');
+      try { fs.writeFileSync(this.localFilePath, JSON.stringify(this.localReports, null, 2), 'utf8'); } catch {}
     }
   }
 
@@ -130,10 +139,7 @@ class DatabaseService {
         .find({ status: 'approved' })
         .sort({ incident_date: -1, _id: -1 })
         .toArray();
-      return docs.map(doc => {
-        const id = doc._id ? doc._id.toString() : '';
-        return { ...doc, id };
-      });
+      return docs.map(doc => ({ ...doc, id: doc._id ? doc._id.toString() : '' }));
     }
     return this.localReports
       .filter(r => r.status === 'approved')
@@ -193,21 +199,128 @@ class DatabaseService {
     this.saveLocal();
     return true;
   }
+
+  // --- Visitor & Analytics Tracking ---
+  async recordVisit(meta = {}) {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (this.mode === 'mongodb') {
+      try {
+        await this.db.collection('visits').insertOne({
+          timestamp: new Date(),
+          date: todayStr,
+          ip: meta.ip || '',
+          ua: meta.ua || ''
+        });
+        const counter = await this.db.collection('analytics').findOneAndUpdate(
+          { _id: 'global_counter' },
+          { $inc: { total_visits: 1 } },
+          { upsert: true, returnDocument: 'after' }
+        );
+        const total = counter?.total_visits || await this.db.collection('visits').countDocuments();
+        const today = await this.db.collection('visits').countDocuments({ date: todayStr });
+        return { total, today };
+      } catch (err) {
+        console.error('Error recording visit:', err);
+      }
+    }
+    this.localVisits.push({ timestamp: new Date().toISOString(), date: todayStr });
+    const today = this.localVisits.filter(v => v.date === todayStr).length;
+    return { total: this.localVisits.length, today };
+  }
+
+  async getVisitStats() {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (this.mode === 'mongodb') {
+      try {
+        const counter = await this.db.collection('analytics').findOne({ _id: 'global_counter' });
+        const total = counter?.total_visits || await this.db.collection('visits').countDocuments();
+        const today = await this.db.collection('visits').countDocuments({ date: todayStr });
+        return { total, today };
+      } catch {
+        return { total: 0, today: 0 };
+      }
+    }
+    const today = this.localVisits.filter(v => v.date === todayStr).length;
+    return { total: this.localVisits.length, today };
+  }
+
+  async getFullAnalytics() {
+    const todayStr = new Date().toISOString().slice(0, 10);
+    if (this.mode === 'mongodb') {
+      const counter = await this.db.collection('analytics').findOne({ _id: 'global_counter' });
+      const totalVisits = counter?.total_visits || await this.db.collection('visits').countDocuments();
+      const todayVisits = await this.db.collection('visits').countDocuments({ date: todayStr });
+
+      const totalReports = await this.db.collection('reports').countDocuments();
+      const pendingReports = await this.db.collection('reports').countDocuments({ status: 'pending' });
+      const approvedReports = await this.db.collection('reports').countDocuments({ status: 'approved' });
+      const rejectedReports = await this.db.collection('reports').countDocuments({ status: 'rejected' });
+
+      // Last 7 days visit trend
+      const dailyVisits = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 86400000);
+        const dayKey = d.toISOString().slice(0, 10);
+        const count = await this.db.collection('visits').countDocuments({ date: dayKey });
+        dailyVisits.push({ date: dayKey, count });
+      }
+
+      return {
+        total_visits: totalVisits,
+        today_visits: todayVisits,
+        total_reports: totalReports,
+        pending_reports: pendingReports,
+        approved_reports: approvedReports,
+        rejected_reports: rejectedReports,
+        daily_visits: dailyVisits
+      };
+    }
+
+    // Local fallback
+    const todayVisits = this.localVisits.filter(v => v.date === todayStr).length;
+    const totalReports = this.localReports.length;
+    const pendingReports = this.localReports.filter(r => r.status === 'pending').length;
+    const approvedReports = this.localReports.filter(r => r.status === 'approved').length;
+    const rejectedReports = this.localReports.filter(r => r.status === 'rejected').length;
+
+    const dailyVisits = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400000);
+      const dayKey = d.toISOString().slice(0, 10);
+      const count = this.localVisits.filter(v => v.date === dayKey).length;
+      dailyVisits.push({ date: dayKey, count });
+    }
+
+    return {
+      total_visits: this.localVisits.length,
+      today_visits: todayVisits,
+      total_reports: totalReports,
+      pending_reports: pendingReports,
+      approved_reports: approvedReports,
+      rejected_reports: rejectedReports,
+      daily_visits: dailyVisits
+    };
+  }
 }
 
 const dbService = new DatabaseService();
 
 // Middleware
-app.use((req, res, next) => {
+let dbInitPromise = null;
+app.use(async (req, res, next) => {
   res.setHeader('Cache-Control', 'no-store');
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('Content-Security-Policy', "frame-ancestors 'none'");
+  if (!dbInitPromise) {
+    dbInitPromise = dbService.init();
+  }
+  await dbInitPromise;
   next();
 });
 
 app.use(express.json({ limit: '16kb' }));
 
-// Static files from public/
+// Static files
 app.use(express.static(PUBLIC_DIR));
 
 // 1. Metadata endpoint
@@ -218,7 +331,7 @@ app.get('/api/meta', (req, res) => {
   });
 });
 
-// 2. Statistics endpoint
+// 2. Statistics & Public Visits Endpoint
 app.get('/api/stats', async (req, res) => {
   const district = (req.query.district || '').toString();
   if (district && !DISTRICT_MAP[district]) {
@@ -226,6 +339,8 @@ app.get('/api/stats', async (req, res) => {
   }
 
   const approved = await dbService.getApprovedReports();
+  const visitStats = await dbService.getVisitStats();
+
   const counts = {};
   for (const code of Object.keys(DISTRICT_MAP)) {
     counts[code] = 0;
@@ -279,17 +394,27 @@ app.get('/api/stats', async (req, res) => {
     months,
     district,
     incidents,
+    total_visits: visitStats.total,
+    today_visits: visitStats.today,
     db_mode: dbService.mode,
     data_status: 'live_approved_reports',
     risk_method: 'relative_report_count_not_crime_rate'
   });
 });
 
-// 3. Submit Report
+// 3. Record visitor hit
+app.post('/api/analytics/visit', async (req, res) => {
+  const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+  const ua = req.headers['user-agent'] || '';
+  const result = await dbService.recordVisit({ ip: clientIp, ua });
+  res.json(result);
+});
+
+// 4. Submit Report
 app.post('/api/reports', async (req, res) => {
   const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
-  if (isRateLimited(`report:${clientIp}`, 8, 3600)) {
-    return res.status(429).json({ error: 'Submission limit reached (8 per hour)' });
+  if (isRateLimited(`report:${clientIp}`, 12, 3600)) {
+    return res.status(429).json({ error: 'Submission limit reached (12 per hour)' });
   }
 
   const body = req.body || {};
@@ -336,10 +461,10 @@ app.post('/api/reports', async (req, res) => {
   res.status(201).json({ id: rid, status: 'pending', message: 'Submitted for moderation' });
 });
 
-// 4. Admin Login
+// 5. Admin Login
 app.post('/api/admin/login', (req, res) => {
   const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
-  if (isRateLimited(`login:${clientIp}`, 10, 3600)) {
+  if (isRateLimited(`login:${clientIp}`, 15, 3600)) {
     return res.status(429).json({ error: 'Too many attempts; retry later' });
   }
 
@@ -351,7 +476,7 @@ app.post('/api/admin/login', (req, res) => {
   res.json({ token: generateToken() });
 });
 
-// 5. Admin Reports Queue
+// 6. Admin Reports Queue
 app.get('/api/admin/reports', async (req, res) => {
   if (!verifyToken(req.headers.authorization)) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -366,7 +491,7 @@ app.get('/api/admin/reports', async (req, res) => {
   res.json({ reports });
 });
 
-// 6. Admin Update Status
+// 7. Admin Update Status
 app.post('/api/admin/reports/:id/status', async (req, res) => {
   if (!verifyToken(req.headers.authorization)) {
     return res.status(401).json({ error: 'Unauthorized' });
@@ -386,11 +511,24 @@ app.post('/api/admin/reports/:id/status', async (req, res) => {
   res.json({ id: rid, status: state });
 });
 
-// Start server
-(async () => {
-  await dbService.init();
-  app.listen(PORT, '127.0.0.1', () => {
-    console.log(`Bangladesh SafeMap (Node.js): http://localhost:${PORT}`);
-    console.log('Admin password is read from SAFEMAP_ADMIN_PASSWORD (or generated at startup).');
+// 8. Admin Detailed Analytics
+app.get('/api/admin/analytics', async (req, res) => {
+  if (!verifyToken(req.headers.authorization)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const analytics = await dbService.getFullAnalytics();
+  res.json(analytics);
+});
+
+// Server bootstrap (works locally and on Vercel)
+if (process.env.VERCEL !== '1') {
+  dbService.init().then(() => {
+    app.listen(PORT, '127.0.0.1', () => {
+      console.log(`Bangladesh SafeMap (Node.js): http://localhost:${PORT}`);
+      console.log('Admin password is read from SAFEMAP_ADMIN_PASSWORD (or generated at startup).');
+    });
   });
-})();
+}
+
+module.exports = app;
