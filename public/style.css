@@ -105,6 +105,15 @@ header {
   color: var(--ink);
 }
 
+.brand-logo-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: block;
+}
+
 .brand-radar {
   width: 38px;
   height: 38px;
@@ -121,6 +130,38 @@ header {
 body.dark .brand-radar {
   background: var(--sub);
   border-color: var(--teal);
+}
+
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(42, 165, 121, 0.6);
+  vertical-align: middle;
+}
+
+.status-dot.red {
+  background: var(--red);
+  box-shadow: 0 0 8px rgba(216, 93, 85, 0.6);
+}
+
+.ui-icon {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.success-icon-wrap {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--green-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
 }
 
 .brand-text strong {

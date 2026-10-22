@@ -19,9 +19,9 @@ const I18N = {
     heroEyebrow: 'নাগরিক অংশগ্রহণমূলক অপরাধ পর্যবেক্ষণ ও নিরাপত্তা তথ্য',
     heroHeading: 'আপনার এলাকার অপরাধ পরিস্থিতি সম্পর্কে জানুন',
     heroSub: 'বাংলাদেশের ৬৪ জেলার অপরাধসংক্রান্ত রিপোর্ট, নিরাপত্তা তথ্য ও বিশ্লেষণ এক প্ল্যাটফর্মে। নাগরিক সতর্কতা ও সঠিক তথ্যের জন্য উন্মুক্ত উদ্যোগ।',
-    ctaExplore: '🗺️ ম্যাপ অনুসন্ধান করুন',
-    ctaReportSecondary: '📝 একটি ঘটনা রিপোর্ট করুন',
-    trustNotice: '🛡️ রিপোর্টগুলো যাচাইকৃত • কোনো মনগড়া পরিসংখ্যান নয়',
+    ctaExplore: 'ম্যাপ অনুসন্ধান করুন',
+    ctaReportSecondary: 'একটি ঘটনা রিপোর্ট করুন',
+    trustNotice: 'রিপোর্টগুলো যাচাইকৃত • কোনো মনগড়া পরিসংখ্যান নয়',
     statTotalReports: 'প্রকাশিত মোট রিপোর্ট',
     statTotalNote: 'সারাদেশের যাচাইকৃত রেকর্ড',
     statDistricts: 'আওতাভুক্ত জেলা',
@@ -45,7 +45,7 @@ const I18N = {
     range7d: 'গত ৭ দিন (Last 7 Days)',
     range30d: 'গত ৩০ দিন (Last 30 Days)',
     range6m: 'গত ৬ মাস (Last 6 Months)',
-    btnReset: '🔄 রিসেট',
+    btnReset: 'রিসেট',
     divAll: 'সব বিভাগ',
     legendTitle: 'অনুমোদিত রিপোর্ট সংখ্যা',
     legendLow: '০-১ (কম)',
@@ -53,14 +53,14 @@ const I18N = {
     legendHigh: '১০+ (বেশি)',
     drawerTotalReports: 'মোট অনুমোদিত রিপোর্ট',
     drawerNationalShare: 'জাতীয় অনুপাত',
-    btnReportHere: '+ এই জেলায় রিপোর্ট করুন',
-    btnShare: '🔗 শেয়ার',
+    btnReportHere: 'এই জেলায় রিপোর্ট করুন',
+    btnShare: 'শেয়ার',
     headingCategories: 'ঘটনার ধরন অনুযায়ী বিন্যাস',
     headingMonthly: 'গত ৬ মাসের ট্রেন্ড',
     headingVerifiedIncidents: 'যাচাইকৃত ঘটনার বিবরণ',
     methodologyDisclaimer: 'এই তথ্য নাগরিক রিপোর্ট এবং গণমাধ্যমে প্রকাশিত সত্য ঘটনার ওপর ভিত্তি করে তৈরি। এটি অপরাধের হার বা কোনো জেলার সামগ্রিক নিরাপত্তার চূড়ান্ত মাপকাঠি নয়।',
-    mapFooterVector: '🇧🇩 খাঁটি ৬৪ জেলার সীমানা • কোনো বাহ্যিক ট্র্যাকিং বা রাস্তার লেয়ার নেই',
-    mapReady: '🟢 ম্যাপ প্রস্তুত',
+    mapFooterVector: 'খাঁটি ৬৪ জেলার সীমানা • কোনো বাহ্যিক ট্র্যাকিং বা রাস্তার লেয়ার নেই',
+    mapReady: 'ম্যাপ প্রস্তুত',
     modalReportTitle: 'ঘটনার রিপোর্ট জমা দিন',
     modalReportSubtitle: 'সচেতন নাগরিক হিসেবে সত্য তথ্য দিয়ে জননিরাপত্তায় ভূমিকা রাখুন।',
     step1Title: 'ধাপ ১: ঘটনার প্রাথমিক তথ্য',
@@ -69,7 +69,7 @@ const I18N = {
     fieldDate: 'ঘটনার তারিখ',
     fieldTime: 'আনুমানিক সময়',
     fieldLocation: 'আনুমানিক এলাকা / স্থান (বাসা বা ব্যক্তিগত ঠিকানা দেবেন না)',
-    btnNext: 'পরবর্তী ধাপ ➜',
+    btnNext: 'পরবর্তী ধাপ',
     step2Title: 'ধাপ ২: ঘটনার বিস্তারিত ও সত্যতা',
     fieldWitness: 'ঘটনায় আপনার সংশ্লিষ্টতা',
     optVictim: 'আমি নিজেই ঘটনার ভুক্তভোগী',
@@ -79,7 +79,7 @@ const I18N = {
     fieldReference: 'তথ্যসূত্র বা সংবাদের লিংক (যদি থাকে)',
     fieldName: 'আপনার নাম (ঐচ্ছিক - জনসম্মুখে গোপন রাখা হবে)',
     fieldContact: 'যোগাযোগের নম্বর/ইমেইল (ঐচ্ছিক - সম্পূর্ণ গোপন)',
-    btnBack: '⬅ পূর্ববর্তী ধাপ',
+    btnBack: 'পূর্ববর্তী ধাপ',
     step3Title: 'ধাপ ৩: চূড়ান্ত পর্যালোচনা ও জমা',
     confirmDeclaration: 'আমি ঘোষণা করছি যে এই তথ্য আমার জানা মতে সম্পূর্ণ সত্য এবং কোনো ব্যক্তিকে হয়রানি করার উদ্দেশ্যে উদ্দেশ্যপ্রণোদিতভাবে মিথ্যা তথ্য দেওয়া হচ্ছে না।',
     btnSubmit: 'জমা দিন (Submit Report)',
@@ -109,13 +109,13 @@ const I18N = {
     navSafety: 'Safety Resources',
     navTrack: 'Track Report',
     navCompare: 'Compare Districts',
-    ctaReport: '+ Report Incident',
+    ctaReport: 'Report Incident',
     heroEyebrow: 'COMMUNITY-POWERED CRIME REPORTING & PUBLIC SAFETY INTELLIGENCE',
     heroHeading: 'Understand Crime & Safety In Your District',
     heroSub: 'Nationwide crowd-sourced incident reporting, moderated records, and civic intelligence across all 64 districts of Bangladesh.',
-    ctaExplore: '🗺️ Explore Safety Map',
-    ctaReportSecondary: '📝 Report an Incident',
-    trustNotice: '🛡️ Moderated community data • Not official police crime stats',
+    ctaExplore: 'Explore Safety Map',
+    ctaReportSecondary: 'Report an Incident',
+    trustNotice: 'Moderated community data • Not official police crime stats',
     statTotalReports: 'Published Reports',
     statTotalNote: 'Nationwide verified records',
     statDistricts: 'Districts Covered',
@@ -139,7 +139,7 @@ const I18N = {
     range7d: 'Last 7 Days',
     range30d: 'Last 30 Days',
     range6m: 'Last 6 Months',
-    btnReset: '🔄 Reset',
+    btnReset: 'Reset',
     divAll: 'All Divisions',
     legendTitle: 'Approved Incident Reports',
     legendLow: '0-1 (Low)',
@@ -147,14 +147,14 @@ const I18N = {
     legendHigh: '10+ (High)',
     drawerTotalReports: 'Approved Reports',
     drawerNationalShare: 'National Share',
-    btnReportHere: '+ Report in this District',
-    btnShare: '🔗 Share',
+    btnReportHere: 'Report in this District',
+    btnShare: 'Share',
     headingCategories: 'Category Breakdown',
     headingMonthly: '6-Month Trend',
     headingVerifiedIncidents: 'Verified Incident Records',
     methodologyDisclaimer: 'This data reflects citizen submissions and verified media reports. It is not equivalent to official police crime statistics or definitive safety ratings.',
-    mapFooterVector: '🇧🇩 Authentic 64 district polygons • Zero external tile trackers',
-    mapReady: '🟢 Map Ready',
+    mapFooterVector: 'Authentic 64 district polygons • Zero external tile trackers',
+    mapReady: 'Map Ready',
     modalReportTitle: 'Submit an Incident Report',
     modalReportSubtitle: 'Contribute to public safety intelligence with truthful information.',
     step1Title: 'Step 1: Incident Overview',
@@ -163,7 +163,7 @@ const I18N = {
     fieldDate: 'Incident Date',
     fieldTime: 'Approximate Time',
     fieldLocation: 'Approximate Locality / Area (Never provide home addresses)',
-    btnNext: 'Next Step ➜',
+    btnNext: 'Next Step',
     step2Title: 'Step 2: Details & Evidence',
     fieldWitness: 'Your Connection to Incident',
     optVictim: 'I am the direct victim',
@@ -173,7 +173,7 @@ const I18N = {
     fieldReference: 'Source Reference or News URL (optional)',
     fieldName: 'Your Name (optional - strictly confidential)',
     fieldContact: 'Contact Info (optional - strictly confidential)',
-    btnBack: '⬅ Previous Step',
+    btnBack: 'Previous Step',
     step3Title: 'Step 3: Review & Submit',
     confirmDeclaration: 'I declare that this information is truthful to the best of my knowledge and is not intended to harass or defame any individual.',
     btnSubmit: 'Submit Report',
@@ -367,13 +367,13 @@ function renderDistrictIncidents(list) {
     const timeSpan = document.createElement('span');
     timeSpan.style.fontSize = '11px';
     timeSpan.style.color = 'var(--muted)';
-    timeSpan.textContent = `📅 ${item.incident_date} · 🕒 ${item.incident_time}`;
+    timeSpan.textContent = `${item.incident_date} · ${item.incident_time}`;
 
     top.append(catBadge, timeSpan);
 
     const loc = document.createElement('div');
     loc.className = 'incident-loc';
-    loc.textContent = `📍 ${item.location}`;
+    loc.textContent = item.location;
 
     const narrative = document.createElement('p');
     narrative.className = 'incident-narrative';
@@ -382,9 +382,9 @@ function renderDistrictIncidents(list) {
     // Verification Badge
     const verif = document.createElement('div');
     verif.className = 'verification-badge verif-' + (item.verification_status || 'moderated');
-    let verifLabel = '⚖️ Moderated';
-    if (item.verification_status === 'published_news_report') verifLabel = '📰 Published News Report';
-    else if (item.verification_status === 'independently_verified') verifLabel = '✅ Independently Verified';
+    let verifLabel = lang === 'bn' ? 'যাচাইকৃত' : 'Moderated';
+    if (item.verification_status === 'published_news_report') verifLabel = lang === 'bn' ? 'সংবাদে প্রকাশিত' : 'Published News Report';
+    else if (item.verification_status === 'independently_verified') verifLabel = lang === 'bn' ? 'নিরপেক্ষভাবে প্রমাণিত' : 'Independently Verified';
     verif.textContent = verifLabel;
 
     card.append(top, loc, narrative, verif);
@@ -705,7 +705,7 @@ $('trackForm').onsubmit = async (e) => {
       </div>
     `;
   } catch (err) {
-    box.innerHTML = `<div style="color:var(--red);font-size:13px;padding:10px;background:var(--red-subtle);border-radius:8px">❌ ${err.message}</div>`;
+    box.innerHTML = `<div style="color:var(--red);font-size:13px;padding:10px;background:var(--red-subtle);border-radius:8px">${err.message}</div>`;
   }
 };
 
@@ -740,7 +740,7 @@ $('runCompareBtn').onclick = async () => {
         </div>
       </div>
       <div style="font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:8px 12px;border-radius:8px">
-        ℹ️ ${res.caveat}
+        ${res.caveat}
       </div>
     `;
   } catch (err) {
@@ -765,7 +765,7 @@ document.addEventListener('keydown', e => {
 // Triggers
 $('openReportBtn').onclick = () => { showStep(1); openModal('reportModal'); };
 $('mOpenReportBtn').onclick = () => { $('mobileNavDrawer').classList.remove('open'); showStep(1); openModal('reportModal'); };
-$('heroReportBtn').onclick = () => { showStep(1); openModal('reportModal'); };
+if ($('heroReportBtn')) $('heroReportBtn').onclick = () => { showStep(1); openModal('reportModal'); };
 $('drawerSubmitBtn').onclick = () => {
   showStep(1);
   if (selectedDistrictCode) $('formDistrict').value = selectedDistrictCode;
@@ -792,10 +792,21 @@ $('mobileMenuBtn').onclick = () => {
 };
 
 // 14. Theme & Language Toggles
+function updateThemeIcon() {
+  const isDark = document.body.classList.contains('dark');
+  const btn = $('themeBtn');
+  if (!btn) return;
+  if (isDark) {
+    btn.innerHTML = `<svg class="ui-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+  } else {
+    btn.innerHTML = `<svg class="ui-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+  }
+}
+
 $('themeBtn').onclick = () => {
   document.body.classList.toggle('dark');
   const isDark = document.body.classList.contains('dark');
-  $('themeBtn').textContent = isDark ? '☀' : '☾';
+  updateThemeIcon();
   localStorage.setItem('watchdog_theme', isDark ? 'dark' : 'light');
   paintMap();
   if (statsData) drawCharts(statsData);
@@ -803,8 +814,8 @@ $('themeBtn').onclick = () => {
 
 if (localStorage.getItem('watchdog_theme') === 'dark') {
   document.body.classList.add('dark');
-  $('themeBtn').textContent = '☀';
 }
+updateThemeIcon();
 
 $('langBtn').onclick = () => {
   lang = lang === 'bn' ? 'en' : 'bn';
@@ -814,7 +825,8 @@ $('langBtn').onclick = () => {
 
 function renderLanguage() {
   document.documentElement.lang = lang;
-  $text('langBtn', lang === 'bn' ? 'EN' : 'বাং');
+  if ($('langText')) $('langText').textContent = lang === 'bn' ? 'EN' : 'বাং';
+  else $text('langBtn', lang === 'bn' ? 'EN' : 'বাং');
 
   document.querySelectorAll('[data-i]').forEach(el => {
     const key = el.dataset.i;
@@ -886,14 +898,16 @@ async function init() {
 
     map.fitBounds(geoLayer.getBounds(), { padding: [20, 20] });
     $text('districtTotal', geoFeatures.length);
-    $text('mapStatusIndicator', I18N[lang].mapReady);
+    if ($('mapStatusText')) $('mapStatusText').textContent = I18N[lang].mapReady;
+    else $text('mapStatusIndicator', I18N[lang].mapReady);
 
     renderLanguage();
     await recordPageHit();
     await refreshStats();
   } catch (err) {
     console.error('App init error:', err);
-    $text('mapStatusIndicator', '❌ Error: ' + err.message);
+    if ($('mapStatusText')) $('mapStatusText').textContent = 'Error: ' + err.message;
+    else $text('mapStatusIndicator', 'Error: ' + err.message);
   }
 }
 

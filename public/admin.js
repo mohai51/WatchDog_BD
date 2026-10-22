@@ -16,8 +16,8 @@ const I18N = {
     loginSubtitle: 'নাগরিক রিপোর্ট যাচাই, তথ্যসূত্র যাচাইকরণ ও ট্রাফিক অ্যানালিটিক্স অ্যাক্সেস করতে পাসওয়ার্ড দিন।',
     loginBtn: 'লগইন করুন (Login)',
     dashboardHeading: 'মডারেশন ও ইনটেলিজেন্স ওয়ার্কস্পেস',
-    tabReports: '📋 রিপোর্ট মডারেশন কিউ',
-    tabAnalytics: '📊 সাইট ট্রাফিক ও অ্যানালিটিক্স',
+    tabReports: 'রিপোর্ট মডারেশন কিউ',
+    tabAnalytics: 'সাইট ট্রাফিক ও অ্যানালিটিক্স',
     logout: 'লগআউট (Logout)',
     noQueue: 'এই ফিল্টারে কোনো রিপোর্ট পাওয়া যায়নি।',
     incorrectPassword: 'ভুল পাসওয়ার্ড! সঠিক পাসওয়ার্ড দিন।'
@@ -27,8 +27,8 @@ const I18N = {
     loginSubtitle: 'Enter administrator credentials to moderate community reports and view traffic intelligence.',
     loginBtn: 'Login',
     dashboardHeading: 'Moderation & Intelligence Workspace',
-    tabReports: '📋 Moderation Queue',
-    tabAnalytics: '📊 Site Traffic & Analytics',
+    tabReports: 'Moderation Queue',
+    tabAnalytics: 'Site Traffic & Analytics',
     logout: 'Logout',
     noQueue: 'No reports found matching this filter.',
     incorrectPassword: 'Incorrect password! Please check credentials.'
@@ -47,11 +47,23 @@ async function api(url, opts = {}) {
 }
 
 // 1. Theme & Language Controls
+function updateAdminThemeIcon() {
+  const isDark = document.body.classList.contains('dark');
+  const btn = $('themeBtn');
+  if (!btn) return;
+  if (isDark) {
+    btn.innerHTML = `<svg class="ui-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+  } else {
+    btn.innerHTML = `<svg class="ui-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+  }
+}
+
 $('themeBtn').onclick = () => {
   document.body.classList.toggle('dark');
-  $('themeBtn').textContent = document.body.classList.contains('dark') ? '☀' : '☾';
+  updateAdminThemeIcon();
   if (adminVisitChart) loadAnalytics();
 };
+updateAdminThemeIcon();
 
 $('langBtn').onclick = () => {
   lang = lang === 'bn' ? 'en' : 'bn';
@@ -60,7 +72,8 @@ $('langBtn').onclick = () => {
 };
 
 function renderLanguage() {
-  $text('langBtn', lang === 'bn' ? 'EN' : 'বাং');
+  if ($('langText')) $('langText').textContent = lang === 'bn' ? 'EN' : 'বাং';
+  else $text('langBtn', lang === 'bn' ? 'EN' : 'বাং');
   $text('loginTitle', I18N[lang].loginTitle);
   $text('loginSubtitle', I18N[lang].loginSubtitle);
   $text('loginBtnSubmit', I18N[lang].loginBtn);
@@ -203,7 +216,7 @@ async function loadQueue() {
       const meta = document.createElement('div');
       meta.style.fontSize = '12px';
       meta.style.color = 'var(--muted)';
-      meta.textContent = `📅 ${item.incident_date} ${item.incident_time} | 📍 ${item.location}`;
+      meta.textContent = `${item.incident_date} ${item.incident_time} | ${item.location}`;
       card.append(meta);
 
       // Narrative
@@ -259,13 +272,13 @@ async function loadQueue() {
 
         const btnApprove = document.createElement('button');
         btnApprove.className = 'button primary';
-        btnApprove.textContent = '✓ অনুমোদন ও প্রকাশ (Approve)';
+        btnApprove.textContent = 'অনুমোদন ও প্রকাশ (Approve)';
         btnApprove.onclick = () => updateStatus(item.id, 'approved', verifSelect.value, noteInput.value);
 
         const btnReject = document.createElement('button');
         btnReject.className = 'button ghost';
         btnReject.style.color = 'var(--red)';
-        btnReject.textContent = '✕ বাতিল (Reject)';
+        btnReject.textContent = 'বাতিল (Reject)';
         btnReject.onclick = () => updateStatus(item.id, 'rejected', null, noteInput.value);
 
         actionBox.append(verifSelect, noteInput, btnApprove, btnReject);
@@ -285,7 +298,7 @@ async function loadQueue() {
         btnWithdraw.className = 'button ghost';
         btnWithdraw.style.fontSize = '11px';
         btnWithdraw.style.color = 'var(--red)';
-        btnWithdraw.textContent = '🚫 প্রত্যাহার / Takedown';
+        btnWithdraw.textContent = 'প্রত্যাহার (Takedown)';
         btnWithdraw.onclick = () => updateStatus(item.id, 'rejected', 'withdrawn', 'Takedown requested');
 
         actionBox.append(statusPill, btnWithdraw);

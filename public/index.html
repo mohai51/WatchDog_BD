@@ -18,6 +18,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   
+  <link rel="icon" type="image/png" href="/logo.png">
+  
   <!-- Leaflet Vector Map CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="/style.css">
@@ -26,7 +28,7 @@
   <!-- Header -->
   <header>
     <a href="/" class="brand" aria-label="WatchDog BD Home">
-      <div class="brand-radar">🛡️</div>
+      <img src="/logo.png" alt="WatchDog BD" class="brand-logo-img">
       <div class="brand-text">
         <strong>WatchDog <span>BD</span></strong>
         <small data-i="brandTag">Public Safety Intelligence</small>
@@ -44,10 +46,23 @@
 
     <!-- Header Actions -->
     <div class="header-actions">
-      <button class="button ghost" id="langBtn" aria-label="Switch Language">EN</button>
-      <button class="button ghost" id="themeBtn" aria-label="Toggle Theme">☾</button>
-      <button class="button primary pill" id="openReportBtn" data-i="ctaReport">+ রিপোর্ট করুন</button>
-      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Menu">☰</button>
+      <button class="button ghost" id="langBtn" aria-label="Switch Language">
+        <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        <span id="langText">EN</span>
+      </button>
+      <button class="button ghost" id="themeBtn" aria-label="Toggle Theme">
+        <svg class="ui-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
+      <button class="button primary pill" id="openReportBtn" data-i="ctaReport">রিপোর্ট জমা দিন</button>
+      <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Toggle Menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
     </div>
   </header>
 
@@ -58,7 +73,7 @@
     <a href="#safetyResources" class="nav-link" id="mNavSafety" data-i="navSafety">Safety Resources</a>
     <a href="#trackReport" class="nav-link" id="mNavTrack" data-i="navTrack">Track Report</a>
     <a href="#compare" class="nav-link" id="mNavCompare" data-i="navCompare">Compare Districts</a>
-    <button class="button primary" id="mOpenReportBtn" style="margin-top:10px" data-i="ctaReport">+ রিপোর্ট করুন</button>
+    <button class="button primary" id="mOpenReportBtn" style="margin-top:10px" data-i="ctaReport">রিপোর্ট জমা দিন</button>
   </div>
 
   <main class="container">
@@ -70,9 +85,7 @@
         <p data-i="heroSub">বাংলাদেশের ৬৪ জেলার অপরাধসংক্রান্ত রিপোর্ট, নিরাপত্তা তথ্য ও বিশ্লেষণ এক প্ল্যাটফর্মে। নাগরিক সতর্কতা ও সঠিক তথ্যের জন্য উন্মুক্ত উদ্যোগ।</p>
         
         <div class="hero-actions">
-          <a href="#mapWorkspace" class="button primary" id="heroExploreBtn" data-i="ctaExplore">🗺️ Explore Safety Map</a>
-          <button class="button ghost" id="heroReportBtn" data-i="ctaReportSecondary">📝 Report an Incident</button>
-          <span class="trust-badge" data-i="trustNotice">🛡️ রিপোর্টগুলো যাচাইকৃত • কোনো মনগড়া পরিসংখ্যান নয়</span>
+          <a href="#mapWorkspace" class="button primary" id="heroExploreBtn" data-i="ctaExplore">ম্যাপ অনুসন্ধান করুন</a>
         </div>
       </div>
     </section>
@@ -82,37 +95,29 @@
       <div class="stat-card">
         <div class="stat-card-top">
           <small data-i="statTotalReports">প্রকাশিত মোট রিপোর্ট</small>
-          <span class="stat-card-icon">📋</span>
         </div>
         <strong id="totalReports">0</strong>
-        <span data-i="statTotalNote">সারাদেশের যাচাইকৃত রেকর্ড</span>
       </div>
 
       <div class="stat-card">
         <div class="stat-card-top">
           <small data-i="statDistricts">আওতাভুক্ত জেলা</small>
-          <span class="stat-card-icon">🗺️</span>
         </div>
         <strong id="districtTotal">64</strong>
-        <span data-i="statDistrictsNote">খাঁটি বাস্তব GeoJSON সীমানা</span>
       </div>
 
       <div class="stat-card">
         <div class="stat-card-top">
           <small data-i="statDrugReports">মাদকসংক্রান্ত রেকর্ড</small>
-          <span class="stat-card-icon">⚠️</span>
         </div>
         <strong id="drugReportsCount" class="teal-val">0</strong>
-        <span data-i="statDrugNote">প্রকাশিত ও পর্যালোচিত</span>
       </div>
 
       <div class="stat-card">
         <div class="stat-card-top">
           <small data-i="statLastUpdate">সর্বশেষ আপডেট</small>
-          <span class="stat-card-icon">🕒</span>
         </div>
-        <strong id="lastDataUpdate" style="font-size:18px;line-height:1.6">—</strong>
-        <span data-i="statUpdateNote">লাইভ ডাটাবেস সিঙ্ক</span>
+        <strong id="lastDataUpdate" style="font-size:16px;line-height:1.6">—</strong>
       </div>
     </section>
 
@@ -147,7 +152,13 @@
           </select>
 
           <!-- Reset Filter Button -->
-          <button class="button ghost" id="resetMapBtn" data-i="btnReset">🔄 রিসেট</button>
+          <button class="button ghost" id="resetMapBtn" data-i="btnReset">
+            <svg class="ui-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            <span>রিসেট</span>
+          </button>
         </div>
 
         <!-- Division Selector Pills -->
@@ -192,7 +203,9 @@
               <h2 id="drawerDistrictName">বাংলাদেশ</h2>
               <p id="drawerDistrictDivision">জেলা নির্বাচন করুন</p>
             </div>
-            <button class="drawer-close" id="closeDrawerBtn" aria-label="Close Drawer">✕</button>
+            <button class="drawer-close" id="closeDrawerBtn" aria-label="Close Drawer">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
           </div>
 
           <div class="drawer-body">
@@ -210,8 +223,17 @@
 
             <!-- Drawer Quick Actions -->
             <div class="drawer-actions">
-              <button class="button primary" id="drawerSubmitBtn" style="flex:1" data-i="btnReportHere">+ এই জেলায় রিপোর্ট করুন</button>
-              <button class="button ghost" id="drawerShareBtn" title="Share District URL" data-i="btnShare">🔗 শেয়ার</button>
+              <button class="button primary" id="drawerSubmitBtn" style="flex:1" data-i="btnReportHere">এই জেলায় রিপোর্ট করুন</button>
+              <button class="button ghost" id="drawerShareBtn" title="Share District URL" data-i="btnShare">
+                <svg class="ui-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="18" cy="5" r="3"></circle>
+                  <circle cx="6" cy="12" r="3"></circle>
+                  <circle cx="18" cy="19" r="3"></circle>
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                </svg>
+                <span>শেয়ার</span>
+              </button>
             </div>
 
             <!-- Category Chart -->
@@ -242,7 +264,7 @@
 
             <!-- Caveat -->
             <div style="background:var(--sub);padding:10px 12px;border-radius:8px;font-size:11px;color:var(--muted);line-height:1.5">
-              ⚠️ <span data-i="methodologyDisclaimer">এই তথ্য নাগরিক রিপোর্ট এবং গণমাধ্যমে প্রকাশিত সত্য ঘটনার ওপর ভিত্তি করে তৈরি। এটি অপরাধের হার বা কোনো জেলার সামগ্রিক নিরাপত্তার চূড়ান্ত মাপকাঠি নয়।</span>
+              <span data-i="methodologyDisclaimer">এই তথ্য নাগরিক রিপোর্ট এবং গণমাধ্যমে প্রকাশিত সত্য ঘটনার ওপর ভিত্তি করে তৈরি। এটি অপরাধের হার বা কোনো জেলার সামগ্রিক নিরাপত্তার চূড়ান্ত মাপকাঠি নয়।</span>
             </div>
           </div>
         </aside>
@@ -250,8 +272,8 @@
 
       <!-- Map Footer Bar -->
       <div class="map-footer-bar">
-        <span data-i="mapFooterVector">🇧🇩 খাঁটি ৬৪ জেলার সীমানা • কোনো বাহ্যিক ট্র্যাকিং বা রাস্তার লেয়ার নেই</span>
-        <span id="mapStatusIndicator">🟢 ম্যাপ প্রস্তুত</span>
+        <span>WatchDog BD • Live Incident Engine</span>
+        <span id="mapStatusIndicator"><span class="status-dot"></span> <span id="mapStatusText">ম্যাপ প্রস্তুত</span></span>
       </div>
     </section>
   </main>
@@ -264,7 +286,9 @@
           <h2 id="reportModalTitle" data-i="modalReportTitle">ঘটনার রিপোর্ট জমা দিন</h2>
           <p data-i="modalReportSubtitle">সচেতন নাগরিক হিসেবে সত্য তথ্য দিয়ে জননিরাপত্তায় ভূমিকা রাখুন।</p>
         </div>
-        <button class="drawer-close" data-close="reportModal" aria-label="Close">✕</button>
+        <button class="drawer-close" data-close="reportModal" aria-label="Close">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
 
       <!-- Progress Step Indicator -->
@@ -304,7 +328,7 @@
 
           <div class="step-actions">
             <span></span>
-            <button type="button" class="button primary" id="nextToStep2Btn" data-i="btnNext">পরবর্তী ধাপ ➜</button>
+            <button type="button" class="button primary" id="nextToStep2Btn" data-i="btnNext">পরবর্তী ধাপ</button>
           </div>
         </div>
 
@@ -343,12 +367,12 @@
           </div>
 
           <div style="background:var(--sub);padding:10px 12px;border-radius:8px;font-size:11px;color:var(--muted);margin-bottom:14px">
-            🔒 <strong>গোপনীয়তার প্রতিশ্রুতি:</strong> আপনার নাম বা ব্যক্তিগত যোগাযোগের তথ্য কখনোই পাবলিক পেজে দেখানো হবে না।
+            <strong>গোপনীয়তার প্রতিশ্রুতি:</strong> আপনার নাম বা ব্যক্তিগত যোগাযোগের তথ্য কখনোই পাবলিক পেজে দেখানো হবে না।
           </div>
 
           <div class="step-actions">
-            <button type="button" class="button ghost" id="backToStep1Btn" data-i="btnBack">⬅ পূর্ববর্তী ধাপ</button>
-            <button type="button" class="button primary" id="nextToStep3Btn" data-i="btnNext">পর্যালোচনা ও ঘোষণা ➜</button>
+            <button type="button" class="button ghost" id="backToStep1Btn" data-i="btnBack">পূর্ববর্তী ধাপ</button>
+            <button type="button" class="button primary" id="nextToStep3Btn" data-i="btnNext">পর্যালোচনা ও ঘোষণা</button>
           </div>
         </div>
 
@@ -366,13 +390,13 @@
           </label>
 
           <div style="background:var(--red-subtle);color:var(--red);border:1px solid var(--red);border-radius:8px;padding:10px 12px;font-size:11px;margin:12px 0">
-            🚨 <strong>জরুরি সতর্কবার্তা:</strong> WatchDog BD পুলিশ বা জরুরি সেবার বিকল্প নয়। তাৎক্ষণিক বিপদে জাতীয় জরুরি সেবা <strong>৯৯৯</strong>-এ কল করুন।
+            <strong>জরুরি সতর্কবার্তা:</strong> WatchDog BD পুলিশ বা জরুরি সেবার বিকল্প নয়। তাৎক্ষণিক বিপদে জাতীয় জরুরি সেবা <strong>৯৯৯</strong>-এ কল করুন।
           </div>
 
           <div id="submissionError" class="form-message" style="color:var(--red);margin:8px 0;font-weight:600"></div>
 
           <div class="step-actions">
-            <button type="button" class="button ghost" id="backToStep2Btn" data-i="btnBack">⬅ পূর্ববর্তী ধাপ</button>
+            <button type="button" class="button ghost" id="backToStep2Btn" data-i="btnBack">পূর্ববর্তী ধাপ</button>
             <button type="submit" class="button primary" id="submitReportFinalBtn" data-i="btnSubmit">জমা দিন (Submit Report)</button>
           </div>
         </div>
@@ -380,7 +404,12 @@
         <!-- SUCCESS STATE WITH TRACKING CODE -->
         <div class="step-pane" id="stepSuccess">
           <div style="text-align:center;padding:20px 10px">
-            <div style="font-size:48px;margin-bottom:10px">✅</div>
+            <div class="success-icon-wrap">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2AA579" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
             <h3 style="font-size:20px;margin:0 0 6px" data-i="successTitle">রিপোর্টটি সফলভাবে জমা হয়েছে!</h3>
             <p style="color:var(--muted);font-size:13px;max-width:480px;margin:0 auto 16px" data-i="successSub">আমাদের মডারেশন টিম তথ্য যাচাইয়ের পর এটি প্ল্যাটফর্মে প্রকাশ করবে। আপনার রিপোর্টের অবস্থা ট্র্যাক করতে নিচের গোপন রেফারেন্স কোডটি সংরক্ষণ করুন:</p>
 
@@ -388,7 +417,13 @@
               <small style="color:var(--muted);font-weight:700;display:block">আপনার গোপন ট্র্যাকিং কোড (Private Reference):</small>
               <span class="tracking-code-val" id="generatedTrackingCode">WD-XXXXXXXX</span>
               <div>
-                <button type="button" class="button ghost" id="copyTrackingCodeBtn" style="font-size:11px;padding:6px 12px">📋 কোড কপি করুন</button>
+                <button type="button" class="button ghost" id="copyTrackingCodeBtn" style="font-size:11px;padding:6px 12px">
+                  <svg class="ui-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                  <span>কোড কপি করুন</span>
+                </button>
               </div>
             </div>
 
@@ -407,7 +442,9 @@
           <h2 data-i="trackModalTitle">রিপোর্টের অবস্থা জানুন</h2>
           <p data-i="trackModalSub">আপনার সাবমিশন কোড দিয়ে মডারেশন ও অনুমোদনের লাইভ স্ট্যাটাস দেখুন।</p>
         </div>
-        <button class="drawer-close" data-close="trackModal">✕</button>
+        <button class="drawer-close" data-close="trackModal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
 
       <form id="trackForm">
@@ -430,7 +467,9 @@
           <h2 data-i="compareTitle">দুই জেলার তথ্যভিত্তিক তুলনা</h2>
           <p data-i="compareSub">দুটি জেলার যাচাইকৃত রিপোর্টের সংখ্যা ও অপরাধের ধরনের তুলনামূলক বিশ্লেষণ।</p>
         </div>
-        <button class="drawer-close" data-close="compareModal">✕</button>
+        <button class="drawer-close" data-close="compareModal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
 
       <div class="form-grid" style="margin-bottom:14px">
@@ -458,24 +497,26 @@
           <h2 data-i="safetyTitle">জরুরি যোগাযোগ ও নিরাপত্তা নির্দেশিকা</h2>
           <p data-i="safetySub">বাংলাদেশে তাত্ক্ষণিক বিপদ বা অপরাধের শিকার হলে করণীয় ও অফিসিয়াল হেল্পলাইন।</p>
         </div>
-        <button class="drawer-close" data-close="safetyModal">✕</button>
+        <button class="drawer-close" data-close="safetyModal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
         <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
-          <strong style="color:var(--red);font-size:16px">🚨 ৯৯৯ (999)</strong>
+          <strong style="color:var(--red);font-size:16px;display:block">৯৯৯ (999)</strong>
           <small style="display:block;color:var(--muted)">জাতীয় জরুরি সেবা (পুলিশ, অ্যাম্বুলেন্স, ফায়ার)</small>
         </div>
         <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
-          <strong style="color:var(--teal);font-size:16px">📞 ১০৯ (109)</strong>
+          <strong style="color:var(--teal);font-size:16px;display:block">১০৯ (109)</strong>
           <small style="display:block;color:var(--muted)">নারী ও শিশু নির্যাতন প্রতিরোধ হেল্পলাইন</small>
         </div>
         <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
-          <strong style="color:#d97706;font-size:16px">⚖️ ১০৬ (106)</strong>
+          <strong style="color:#d97706;font-size:16px;display:block">১০৬ (106)</strong>
           <small style="display:block;color:var(--muted)">দুদক অভিযোগ কেন্দ্র (দুর্নীতি ও চাঁদাবাজি)</small>
         </div>
         <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
-          <strong style="color:#2563eb;font-size:16px">💻 ০১৩২০০০১২৩৪</strong>
+          <strong style="color:#2563eb;font-size:16px;display:block">০১৩২০০০১২৩৪</strong>
           <small style="display:block;color:var(--muted)">পুলিশ সাইবার ক্রাইম তদন্ত হেল্পডেস্ক</small>
         </div>
       </div>
@@ -499,7 +540,9 @@
           <h2 data-i="methodTitle">তথ্য সংগ্রহের পদ্ধতি ও সীমাবদ্ধতা</h2>
           <p data-i="methodSub">WatchDog BD কীভাবে তথ্য সংগ্রহ, যাচাই ও প্রদর্শন করে।</p>
         </div>
-        <button class="drawer-close" data-close="methodologyModal">✕</button>
+        <button class="drawer-close" data-close="methodologyModal">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
 
       <div style="font-size:13px;line-height:1.7;color:var(--ink)">

@@ -8,12 +8,13 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="icon" type="image/png" href="/logo.png">
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
   <header>
     <div class="brand">
-      <div class="brand-radar">🛡️</div>
+      <img src="/logo.png" alt="WatchDog BD Admin" class="brand-logo-img">
       <div class="brand-text">
         <strong>WatchDog <span>BD</span> Admin</strong>
         <small>INTERNAL MODERATION & ANALYTICS</small>
@@ -21,8 +22,19 @@
     </div>
     <div class="header-actions">
       <span class="admin-badge-live" id="dbStatusBadge">MongoDB Connected</span>
-      <button class="button ghost" id="langBtn">EN</button>
-      <button class="button ghost" id="themeBtn" aria-label="Theme">☾</button>
+      <button class="button ghost" id="langBtn" aria-label="Switch Language">
+        <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="2" y1="12" x2="22" y2="12"></line>
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+        </svg>
+        <span id="langText">EN</span>
+      </button>
+      <button class="button ghost" id="themeBtn" aria-label="Theme">
+        <svg class="ui-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+        </svg>
+      </button>
       <a href="/" class="admin-public-link" target="_blank" rel="noopener">পাবলিক সাইট ↗</a>
     </div>
   </header>
@@ -30,7 +42,12 @@
   <main class="admin-portal-wrap">
     <!-- 1. Secure Centered Login Screen -->
     <div id="adminAuthSection" class="admin-login-card">
-      <div class="admin-login-icon">🔒</div>
+      <div class="admin-login-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+        </svg>
+      </div>
       <h2 id="loginTitle">অ্যাডমিন কন্ট্রোল পোর্টাল</h2>
       <p id="loginSubtitle">নাগরিক রিপোর্ট যাচাই, তথ্যসূত্র যাচাইকরণ ও ট্রাফিক অ্যানালিটিক্স অ্যাক্সেস করতে পাসওয়ার্ড দিন।</p>
       
@@ -56,8 +73,8 @@
 
       <!-- Navigation Tabs -->
       <div class="admin-tabs">
-        <button class="button active" id="tabReportsBtn">📋 রিপোর্ট মডারেশন কিউ</button>
-        <button class="button ghost" id="tabAnalyticsBtn">📊 সাইট ট্রাফিক ও অ্যানালিটিক্স</button>
+        <button class="button active" id="tabReportsBtn">রিপোর্ট মডারেশন কিউ</button>
+        <button class="button ghost" id="tabAnalyticsBtn">সাইট ট্রাফিক ও অ্যানালিটিক্স</button>
       </div>
 
       <!-- Tab 1: Moderation Queue -->
@@ -86,7 +103,13 @@
             </label>
           </div>
 
-          <button class="button ghost" id="refreshAdminBtn" style="font-size:12px">🔄 Refresh Queue</button>
+          <button class="button ghost" id="refreshAdminBtn" style="font-size:12px">
+            <svg class="ui-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            <span>রিফ্রেশ কিউ</span>
+          </button>
         </div>
         
         <div id="reportQueue" style="margin-top:16px"></div>
@@ -120,26 +143,32 @@
         <!-- Verification Breakdown Mini Cards -->
         <div class="analytics-subgrid">
           <div class="analytics-card-mini">
-            <span>📰 জাতীয় গণমাধ্যমে প্রকাশিত রিপোর্ট:</span>
+            <span>জাতীয় গণমাধ্যমে প্রকাশিত রিপোর্ট:</span>
             <b id="analyticsNewsReports" style="color:var(--teal)">0</b>
           </div>
           <div class="analytics-card-mini">
-            <span>✅ নিরপেক্ষভাবে প্রমাণিত ঘটনা:</span>
+            <span>নিরপেক্ষভাবে প্রমাণিত ঘটনা:</span>
             <b id="analyticsIndVerified" style="color:var(--green)">0</b>
           </div>
           <div class="analytics-card-mini">
-            <span>⚖️ প্রাথমিক যাচাইকৃত রিপোর্ট:</span>
+            <span>প্রাথমিক যাচাইকৃত রিপোর্ট:</span>
             <b id="analyticsModerated" style="color:var(--ink)">0</b>
           </div>
           <div class="analytics-card-mini">
-            <span>❌ বাতিলকৃত / ভিত্তিহীন রিপোর্ট:</span>
+            <span>বাতিলকৃত / ভিত্তিহীন রিপোর্ট:</span>
             <b id="analyticsRejectedReports" style="color:var(--red)">0</b>
           </div>
         </div>
 
         <div style="display:flex;align-items:center;justify-content:space-between;margin:24px 0 10px">
           <h3 style="margin:0;font-size:14px">গত ৭ দিনের ভিজিটর ট্রাফিক ট্রেন্ড (7-Day Daily Visits)</h3>
-          <button class="button ghost" id="refreshAnalyticsBtn" style="font-size:11px;padding:6px 10px">🔄 Refresh Graph</button>
+          <button class="button ghost" id="refreshAnalyticsBtn" style="font-size:11px;padding:6px 10px">
+            <svg class="ui-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="1 4 1 10 7 10"></polyline>
+              <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+            </svg>
+            <span>রিফ্রেশ গ্রাফ</span>
+          </button>
         </div>
         
         <div class="chart-wrap" style="height:220px;background:var(--sub);border-radius:12px;padding:12px;border:1px solid var(--line)">
