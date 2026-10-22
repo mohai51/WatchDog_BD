@@ -43,16 +43,13 @@ if (!SECRET) {
   }
 }
 
-let ADMIN_PASS = (process.env.SAFEMAP_ADMIN_PASSWORD || '').trim();
-if (IS_PROD) {
-  if (!ADMIN_PASS || ADMIN_PASS === 'admin123') {
-    console.error('[SECURITY CRITICAL] Production detected but SAFEMAP_ADMIN_PASSWORD is unset or default! Admin login disabled.');
-    ADMIN_PASS = null; // Insecure password disabled in production
-  }
-} else if (!ADMIN_PASS) {
-  ADMIN_PASS = 'admin123';
-  console.log('[AUTH] Dev mode active. Default admin password: admin123 (Configure SAFEMAP_ADMIN_PASSWORD for production).');
+let ADMIN_PASS = (process.env.SAFEMAP_ADMIN_PASSWORD || 'admin123').trim();
+if (!process.env.SAFEMAP_ADMIN_PASSWORD) {
+  console.log('[AUTH] SAFEMAP_ADMIN_PASSWORD not set. Using default admin password: admin123');
+} else {
+  console.log('[AUTH] Admin password configured from environment variable.');
 }
+
 
 // Rate Limiting (In-memory fallback + Mongo TTL supported)
 const rateMap = new Map();
