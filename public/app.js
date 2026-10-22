@@ -233,14 +233,62 @@ let activeCategory = '';
 let activeDateRange = 'all';
 let searchKeyword = '';
 
-// 2. Leaflet Map Setup
+// 2. Leaflet Map Setup (scrollWheelZoom: false prevents mouse scroll trap)
 const map = L.map('map', {
   zoomControl: true,
   attributionControl: false,
   preferCanvas: true,
   minZoom: 6,
-  maxZoom: 12
+  maxZoom: 12,
+  scrollWheelZoom: false, // Prevents hijacking page scroll!
+  touchZoom: true
 }).setView([23.75, 90.35], 7);
+
+// 2b. Smart Mobile Touch Handling (1 finger scrolls page, 2 fingers pan map)
+const mapEl = $('map');
+if (mapEl) {
+  const hintToast = document.createElement('div');
+  hintToast.className = 'map-gesture-hint';
+  hintToast.textContent = lang === 'bn' ? 'ম্যাপ সরাতে দুটি আঙুল ব্যবহার করুন' : 'Use two fingers to move map';
+  mapEl.appendChild(hintToast);
+
+  let hintTimer = null;
+
+  mapEl.addEventListener('touchstart', (e) => {
+    if (e.touches.length > 1) {
+      map.dragging.enable();
+      hintToast.classList.remove('show');
+    } else {
+      // 1 finger: disable map drag so browser naturally scrolls the page down!
+      map.dragging.disable();
+    }
+  }, { passive: true });
+
+  mapEl.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 1 && !map.dragging.enabled()) {
+      if (!hintTimer) {
+        hintTimer = setTimeout(() => {
+          hintToast.textContent = lang === 'bn' ? 'ম্যাপ সরাতে দুটি আঙুল ব্যবহার করুন' : 'Use two fingers to move map';
+          hintToast.classList.add('show');
+          setTimeout(() => hintToast.classList.remove('show'), 2000);
+          hintTimer = null;
+        }, 500);
+      }
+    } else if (e.touches.length > 1) {
+      map.dragging.enable();
+      hintToast.classList.remove('show');
+    }
+  }, { passive: true });
+
+  mapEl.addEventListener('touchend', () => {
+    if (hintTimer) {
+      clearTimeout(hintTimer);
+      hintTimer = null;
+    }
+    // Re-enable dragging for desktop mouse pointers
+    map.dragging.enable();
+  }, { passive: true });
+}
 
 const districtName = f => lang === 'bn' ? (BN_DISTRICTS[f.properties.name] || f.properties.name) : f.properties.name;
 
@@ -326,15 +374,18 @@ function selectDistrict(code, fitBounds = true) {
 
 function openDrawer() {
   $('districtDrawer').classList.add('open');
+  if ($('drawerBackdrop')) $('drawerBackdrop').classList.add('open');
 }
 
 function closeDrawer() {
   $('districtDrawer').classList.remove('open');
+  if ($('drawerBackdrop')) $('drawerBackdrop').classList.remove('open');
   selectedDistrictCode = '';
   paintMap();
 }
 
 $('closeDrawerBtn').onclick = closeDrawer;
+if ($('drawerBackdrop')) $('drawerBackdrop').onclick = closeDrawer;
 
 // 6. Render Incidents Feed in Drawer
 function renderDistrictIncidents(list) {
@@ -790,6 +841,21 @@ $('fMethodBtn').onclick = e => { e.preventDefault(); openModal('methodologyModal
 $('mobileMenuBtn').onclick = () => {
   $('mobileNavDrawer').classList.toggle('open');
 };
+
+document.querySelectorAll('#mobileNavDrawer a').forEach(link => {
+  link.addEventListener('click', () => {
+    $('mobileNavDrawer').classList.remove('open');
+  });
+});
+
+if ($('mapResetBtn')) {
+  $('mapResetBtn').onclick = () => {
+    selectedDistrictCode = '';
+    closeDrawer();
+    if (geoLayer) map.fitBounds(geoLayer.getBounds(), { padding: [20, 20] });
+    paintMap();
+  };
+}
 
 // 14. Theme & Language Toggles
 function updateThemeIcon() {

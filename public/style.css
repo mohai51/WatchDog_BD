@@ -1115,7 +1115,71 @@ footer {
   font-size: 12px;
 }
 
-/* Responsive Breakpoints */
+/* Map Interactive Controls & Mobile Drawer Backdrop */
+.map-reset-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 400;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  box-shadow: var(--shadow-sm);
+  transition: all .15s ease;
+  cursor: pointer;
+}
+
+.map-reset-btn:hover {
+  background: var(--sub);
+  border-color: var(--teal);
+}
+
+.map-gesture-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(11, 25, 48, 0.88);
+  backdrop-filter: blur(6px);
+  color: #ffffff;
+  padding: 10px 18px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 600;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 1000;
+  text-align: center;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  white-space: nowrap;
+}
+
+.map-gesture-hint.show {
+  opacity: 1;
+}
+
+.drawer-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(7, 15, 30, 0.65);
+  backdrop-filter: blur(2px);
+  z-index: 1040;
+}
+
+.drawer-backdrop.open {
+  display: block;
+}
+
+/* Responsive Breakpoints — 100% Mobile Optimized */
 @media (max-width: 1024px) {
   .stats {
     grid-template-columns: repeat(2, 1fr);
@@ -1132,7 +1196,7 @@ footer {
   .hero {
     flex-direction: column;
     align-items: flex-start;
-    padding: 22px;
+    padding: 22px 20px;
   }
   .district-drawer {
     position: fixed;
@@ -1141,12 +1205,14 @@ footer {
     right: 0;
     bottom: 0;
     width: 100%;
-    height: 75vh;
+    height: 78vh;
+    max-height: 85vh;
     border-left: none;
     border-top: 1px solid var(--line);
     border-radius: 20px 20px 0 0;
     transform: translateY(100%);
-    box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.35);
+    z-index: 1050;
   }
   .district-drawer.open {
     transform: translateY(0);
@@ -1163,21 +1229,250 @@ footer {
 }
 
 @media (max-width: 640px) {
-  .stats {
-    grid-template-columns: 1fr;
+  /* Layout & Container */
+  .container {
+    padding: 12px 12px 32px;
   }
+  
+  /* Header */
+  header {
+    padding: 10px 14px;
+    gap: 8px;
+  }
+  .brand {
+    gap: 8px;
+  }
+  .brand-logo-img {
+    width: 32px;
+    height: 32px;
+  }
+  .brand-text strong {
+    font-size: 15px;
+  }
+  .brand-text small {
+    display: none; /* Hide subtitle to keep phone header single-line */
+  }
+  .header-actions {
+    gap: 6px;
+  }
+  #openReportBtn {
+    padding: 6px 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  #langBtn, #themeBtn {
+    padding: 6px 8px;
+    min-width: 32px;
+    height: 32px;
+  }
+  #mobileMenuBtn {
+    width: 34px;
+    height: 34px;
+    padding: 5px;
+    display: grid;
+    place-items: center;
+  }
+
+  /* Mobile Nav Drawer */
+  .mobile-nav-drawer {
+    top: 54px;
+    height: calc(100vh - 54px);
+    z-index: 1000;
+    padding: 16px;
+    gap: 10px;
+  }
+  .mobile-nav-drawer .nav-link {
+    font-size: 14px;
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+  }
+
+  /* Hero Section */
+  .hero {
+    padding: 18px 16px;
+    margin-bottom: 14px;
+    border-radius: 14px;
+  }
+  .hero-eyebrow {
+    font-size: 9px;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .hero h1 {
+    font-size: 20px;
+    line-height: 1.3;
+    margin: 0 0 8px;
+  }
+  .hero p {
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+  }
+  .hero-actions {
+    width: 100%;
+  }
+  .hero-actions .button {
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
+  }
+
+  /* Compact 2x2 Stats Grid for Mobile */
+  .stats {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    padding: 10px 12px;
+    border-radius: 12px;
+  }
+  .stat-card small {
+    font-size: 10px;
+  }
+  .stat-card strong {
+    font-size: 19px;
+    margin: 2px 0;
+  }
+
+  /* Map Workspace Controls */
+  .map-workspace {
+    border-radius: 14px;
+    margin-bottom: 16px;
+  }
+  .map-controls-bar {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .map-filters {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .map-filters input#districtSearch {
+    width: 100%;
+    min-width: 0;
+    font-size: 14px;
+    padding: 8px 10px;
+  }
+  .map-filters select {
+    flex: 1 1 calc(50% - 3px);
+    min-width: 0;
+    font-size: 12px;
+    padding: 7px 8px;
+  }
+  .map-filters #resetMapBtn {
+    width: 100%;
+    padding: 7px;
+    font-size: 12px;
+    justify-content: center;
+  }
+  .division-pills {
+    width: 100%;
+    overflow-x: auto;
+    display: flex;
+    gap: 5px;
+    padding: 4px 0 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .division-pills::-webkit-scrollbar {
+    display: none;
+  }
+  .division-pills button {
+    flex-shrink: 0;
+    padding: 5px 9px;
+    font-size: 11px;
+  }
+
+  /* Map Canvas */
   .map-canvas-container {
-    height: 480px;
+    height: 450px;
+  }
+  .map-reset-btn {
+    top: 8px;
+    right: 8px;
+    padding: 5px 9px;
+    font-size: 11px;
+  }
+  .map-legend-box {
+    left: 8px;
+    bottom: 8px;
+    padding: 6px 10px;
+    border-radius: 8px;
+  }
+  .map-legend-title {
+    font-size: 9px;
+    margin-bottom: 3px;
+  }
+  .legend-bars span {
+    width: 18px;
+    height: 6px;
+  }
+  .legend-labels {
+    font-size: 9px;
+  }
+  .map-footer-bar {
+    padding: 8px 12px;
+    font-size: 10px;
+    gap: 4px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  /* Forms and Modals */
+  .modal-backdrop {
+    padding: 8px;
+  }
+  .modal {
+    padding: 18px 14px;
+    border-radius: 14px;
+    max-height: 92vh;
+  }
+  .modal-head h2 {
+    font-size: 18px;
+  }
+  .modal-head p {
+    font-size: 12px;
+  }
+  .step-progress-bar {
+    margin-bottom: 16px;
+  }
+  .step-bubble {
+    width: 28px;
+    height: 28px;
+    font-size: 12px;
   }
   .form-grid {
     grid-template-columns: 1fr;
+    gap: 8px;
   }
-  .container {
-    padding: 16px;
+  /* Crucial: Prevent iOS Safari Auto-Zoom on form input focus */
+  input, select, textarea {
+    font-size: 16px !important;
   }
-  .map-legend-box {
-    left: 10px;
-    bottom: 10px;
-    padding: 8px 12px;
+
+  /* Footer */
+  footer {
+    padding: 18px 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .footer-nav {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+}
+
+@media (max-width: 360px) {
+  #openReportBtn {
+    padding: 5px 8px;
+    font-size: 10px;
+  }
+  .brand-text strong {
+    font-size: 14px;
   }
 }
