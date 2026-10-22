@@ -100,7 +100,11 @@ const I18N = {
     methodTitle: 'তথ্য সংগ্রহের পদ্ধতি ও সীমাবদ্ধতা',
     methodSub: 'WatchDog BD কীভাবে তথ্য সংগ্রহ, যাচাই ও প্রদর্শন করে।',
     navMethodology: 'তথ্যের সীমাবদ্ধতা',
-    noIncidentsFound: 'এই ফিল্টারে কোনো প্রকাশিত ঘটনা পাওয়া যায়নি।'
+    noIncidentsFound: 'এই ফিল্টারে কোনো প্রকাশিত ঘটনা পাওয়া যায়নি।',
+    insightHeaderTitle: 'লাইভ জেলা অপরাধ বিশ্লেষণ',
+    insightViewMap: 'ম্যাপে এই জেলা দেখুন',
+    insightHighLabel: 'সবচেয়ে বেশি সংঘটিত অপরাধ',
+    insightLowLabel: 'তুলনামূলক কম সংঘটিত অপরাধ'
   },
   en: {
     brandTag: 'Community Public Safety Intelligence',
@@ -194,7 +198,11 @@ const I18N = {
     methodTitle: 'Methodology & Data Limitations',
     methodSub: 'How WatchDog BD collects, verifies, and maps public safety reports.',
     navMethodology: 'Data Limitations',
-    noIncidentsFound: 'No published incidents found matching this filter.'
+    noIncidentsFound: 'No published incidents found matching this filter.',
+    insightHeaderTitle: 'Live District Crime Intelligence',
+    insightViewMap: 'Explore on Map',
+    insightHighLabel: 'Highest Reported Crime',
+    insightLowLabel: 'Lowest Reported Crime'
   }
 };
 
@@ -232,6 +240,14 @@ let activeDivision = '';
 let activeCategory = '';
 let activeDateRange = 'all';
 let searchKeyword = '';
+
+// District Crime Intelligence Carousel (5s Rotation)
+let districtInsights = [];
+let currentInsightIndex = 0;
+let insightProgressTimer = null;
+let insightStartTime = 0;
+const INSIGHT_DURATION = 5000;
+let isInsightPaused = false;
 
 // 2. Leaflet Map Setup (scrollWheelZoom: false prevents mouse scroll trap)
 const map = L.map('map', {
@@ -453,6 +469,136 @@ function renderDistrictIncidents(list) {
   }
 }
 
+// 6b. Dynamic District Crime Intelligence Carousel (5s Rotation)
+function renderDistrictInsight(index) {
+  if (!districtInsights || !districtInsights.length) {
+    $text('insightDistrictName', lang === 'bn' ? 'সারাদেশ' : 'National');
+    $text('insightDistrictSub', lang === 'bn' ? 'যাচাইকৃত অপরাধের কোনো রেকর্ড পাওয়া যায়নি' : 'No verified crime records available');
+    $text('insightHighCrime', '—');
+    $text('insightHighCount', '—');
+    $text('insightHighPercent', '0%');
+    $text('insightLowCrime', '—');
+    $text('insightLowCount', '—');
+    $text('insightLowPercent', '0%');
+    $text('insightCounter', '0 / 0');
+    return;
+  }
+
+  currentInsightIndex = ((index % districtInsights.length) + districtInsights.length) % districtInsights.length;
+  const d = districtInsights[currentInsightIndex];
+
+  $text('insightCounter', `${currentInsightIndex + 1} / ${districtInsights.length}`);
+
+  const dName = lang === 'bn' ? (BN_DISTRICTS[d.name] || d.name) : d.name;
+  $text('insightDistrictName', dName);
+
+  const divText = lang === 'bn' ? (d.division + ' বিভাগ') : (d.division + ' Division');
+  const totalReportsText = lang === 'bn' ? `${d.total} টি অনুমোদিত রিপোর্ট` : `${d.total} verified reports`;
+  $text('insightDistrictSub', `${divText} • ${totalReportsText}`);
+
+  // Highest Crime (কি বেশি)
+  if (d.highest_crime) {
+    const highTypeKey = 'cat' + d.highest_crime.type.charAt(0).toUpperCase() + d.highest_crime.type.slice(1);
+    const highTypeName = I18N[lang][highTypeKey] || d.highest_crime.type;
+    $text('insightHighCrime', highTypeName);
+    const countUnit = lang === 'bn' ? 'টি ঘটনা' : 'incidents';
+    $text('insightHighCount', `${d.highest_crime.count} ${countUnit} (${d.highest_crime.percent}%)`);
+    $text('insightHighPercent', `${d.highest_crime.percent}%`);
+  } else {
+    $text('insightHighCrime', '—');
+    $text('insightHighCount', '—');
+    $text('insightHighPercent', '0%');
+  }
+
+  // Lowest Crime (কি কম)
+  if (d.lowest_crime) {
+    const lowTypeKey = 'cat' + d.lowest_crime.type.charAt(0).toUpperCase() + d.lowest_crime.type.slice(1);
+    const lowTypeName = I18N[lang][lowTypeKey] || d.lowest_crime.type;
+    $text('insightLowCrime', lowTypeName);
+    const countUnit = lang === 'bn' ? 'টি ঘটনা' : 'incidents';
+    $text('insightLowCount', `${d.lowest_crime.count} ${countUnit} (${d.lowest_crime.percent}%)`);
+    $text('insightLowPercent', `${d.lowest_crime.percent}%`);
+  } else {
+    $text('insightLowCrime', '—');
+    $text('insightLowCount', '—');
+    $text('insightLowPercent', '0%');
+  }
+
+  // Map inspection button
+  const viewMapBtn = $('insightViewMapBtn');
+  if (viewMapBtn) {
+    viewMapBtn.onclick = () => selectDistrict(d.code, true);
+  }
+}
+
+function resetInsightProgress() {
+  if (insightProgressTimer) cancelAnimationFrame(insightProgressTimer);
+  insightStartTime = performance.now();
+  const progressBar = $('insightProgressBar');
+  if (progressBar) progressBar.style.width = '0%';
+
+  function step(now) {
+    if (!isInsightPaused) {
+      const elapsed = now - insightStartTime;
+      const progress = Math.min(100, (elapsed / INSIGHT_DURATION) * 100);
+      if (progressBar) progressBar.style.width = progress + '%';
+      if (elapsed >= INSIGHT_DURATION) {
+        nextInsight();
+        return;
+      }
+    } else {
+      const currentPct = parseFloat(progressBar?.style.width || '0');
+      insightStartTime = now - ((currentPct / 100) * INSIGHT_DURATION);
+    }
+    insightProgressTimer = requestAnimationFrame(step);
+  }
+  insightProgressTimer = requestAnimationFrame(step);
+}
+
+function startInsightRotation() {
+  if (!districtInsights || !districtInsights.length) return;
+  renderDistrictInsight(currentInsightIndex);
+  resetInsightProgress();
+}
+
+function nextInsight() {
+  if (!districtInsights || !districtInsights.length) return;
+  const wrap = $('insightContentWrap');
+  if (wrap) wrap.classList.add('fade-out');
+  setTimeout(() => {
+    renderDistrictInsight(currentInsightIndex + 1);
+    if (wrap) wrap.classList.remove('fade-out');
+    resetInsightProgress();
+  }, 180);
+}
+
+function prevInsight() {
+  if (!districtInsights || !districtInsights.length) return;
+  const wrap = $('insightContentWrap');
+  if (wrap) wrap.classList.add('fade-out');
+  setTimeout(() => {
+    renderDistrictInsight(currentInsightIndex - 1);
+    if (wrap) wrap.classList.remove('fade-out');
+    resetInsightProgress();
+  }, 180);
+}
+
+function setupInsightListeners() {
+  const nextBtn = $('insightNextBtn');
+  if (nextBtn) nextBtn.onclick = () => nextInsight();
+
+  const prevBtn = $('insightPrevBtn');
+  if (prevBtn) prevBtn.onclick = () => prevInsight();
+
+  const card = $('crimeInsightCard');
+  if (card) {
+    card.addEventListener('mouseenter', () => { isInsightPaused = true; });
+    card.addEventListener('mouseleave', () => { isInsightPaused = false; });
+    card.addEventListener('touchstart', () => { isInsightPaused = true; }, { passive: true });
+    card.addEventListener('touchend', () => { isInsightPaused = false; }, { passive: true });
+  }
+}
+
 // 7. Refresh Stats & Visualizations
 async function refreshStats() {
   try {
@@ -467,6 +613,10 @@ async function refreshStats() {
     if (data.last_updated) {
       $text('lastDataUpdate', data.last_updated);
     }
+
+    // Initialize/Update District Crime Insights
+    districtInsights = data.district_insights || [];
+    startInsightRotation();
 
     paintMap();
     drawCharts(data);
@@ -920,6 +1070,13 @@ function renderLanguage() {
   if (selectedDistrictCode) {
     selectDistrict(selectedDistrictCode, false);
   }
+
+  // Update Crime Insight Card translations
+  $text('insightHeaderTitle', I18N[lang].insightHeaderTitle || 'লাইভ জেলা অপরাধ বিশ্লেষণ');
+  $text('insightViewMapText', I18N[lang].insightViewMap || 'ম্যাপে এই জেলা দেখুন');
+  $text('insightHighLabel', I18N[lang].insightHighLabel || 'সবচেয়ে বেশি সংঘটিত অপরাধ');
+  $text('insightLowLabel', I18N[lang].insightLowLabel || 'তুলনামূলক কম সংঘটিত অপরাধ');
+  renderDistrictInsight(currentInsightIndex);
 }
 
 // 15. Privacy-Preserving Visit Recording
@@ -938,6 +1095,8 @@ async function init() {
     // Set max report date to today
     $('formDate').max = new Date().toISOString().slice(0, 10);
     $('formDate').value = new Date().toISOString().slice(0, 10);
+
+    setupInsightListeners();
 
     const geoData = await api('/districts.geojson');
     geoFeatures = geoData.features;

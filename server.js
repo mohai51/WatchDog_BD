@@ -514,10 +514,44 @@ app.get('/api/stats', async (req, res) => {
   // Counts for drug-related published reports
   const drugRelatedCount = approved.filter(r => r.type === 'drug_related').length;
 
+  // Calculate crime breakdown per district for dynamic intelligence card
+  const districtCrimeBreakdown = {};
+  for (const r of approved) {
+    if (!districtCrimeBreakdown[r.district_code]) {
+      districtCrimeBreakdown[r.district_code] = {};
+    }
+    districtCrimeBreakdown[r.district_code][r.type] = (districtCrimeBreakdown[r.district_code][r.type] || 0) + 1;
+  }
+
+  const district_insights = Object.entries(districtCrimeBreakdown).map(([code, typeCounts]) => {
+    const dInfo = DISTRICT_MAP[code];
+    const sortedTypes = Object.entries(typeCounts).sort((a, b) => b[1] - a[1]);
+    const highest = sortedTypes[0];
+    const lowest = sortedTypes.length > 1 ? sortedTypes[sortedTypes.length - 1] : sortedTypes[0];
+    const totalInDistrict = counts[code] || 0;
+    return {
+      code,
+      name: dInfo ? dInfo.name : code,
+      division: dInfo ? dInfo.division : '',
+      total: totalInDistrict,
+      highest_crime: highest ? {
+        type: highest[0],
+        count: highest[1],
+        percent: Math.round((highest[1] / totalInDistrict) * 100)
+      } : null,
+      lowest_crime: lowest ? {
+        type: lowest[0],
+        count: lowest[1],
+        percent: Math.round((lowest[1] / totalInDistrict) * 100)
+      } : null
+    };
+  }).sort((a, b) => b.total - a.total);
+
   res.json({
     total: approved.length,
     drug_related_total: drugRelatedCount,
     district_counts: counts,
+    district_insights,
     selected_count: scoped.length,
     types,
     months,
