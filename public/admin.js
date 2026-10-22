@@ -281,7 +281,15 @@ async function loadQueue() {
         btnReject.textContent = 'বাতিল (Reject)';
         btnReject.onclick = () => updateStatus(item.id, 'rejected', null, noteInput.value);
 
-        actionBox.append(verifSelect, noteInput, btnApprove, btnReject);
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'button ghost';
+        btnDelete.style.color = 'var(--red)';
+        btnDelete.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        btnDelete.textContent = 'ভুয়া/ডিলিট (Delete)';
+        btnDelete.title = 'ডাটাবেস থেকে স্থায়ীভাবে মুছে ফেলুন';
+        btnDelete.onclick = () => deleteReport(item.id);
+
+        actionBox.append(verifSelect, noteInput, btnApprove, btnReject, btnDelete);
         card.append(actionBox);
       } else if (item.status === 'approved') {
         const actionBox = document.createElement('div');
@@ -289,19 +297,61 @@ async function loadQueue() {
         actionBox.style.display = 'flex';
         actionBox.style.justifyContent = 'space-between';
         actionBox.style.alignItems = 'center';
+        actionBox.style.flexWrap = 'wrap';
+        actionBox.style.gap = '8px';
 
         const statusPill = document.createElement('span');
         statusPill.className = 'verification-badge verif-' + (item.verification_status || 'moderated');
         statusPill.textContent = 'Active: ' + (item.verification_status || 'moderated');
 
+        const btnGroup = document.createElement('div');
+        btnGroup.style.display = 'flex';
+        btnGroup.style.gap = '8px';
+
         const btnWithdraw = document.createElement('button');
         btnWithdraw.className = 'button ghost';
         btnWithdraw.style.fontSize = '11px';
-        btnWithdraw.style.color = 'var(--red)';
+        btnWithdraw.style.color = 'var(--ink)';
         btnWithdraw.textContent = 'প্রত্যাহার (Takedown)';
         btnWithdraw.onclick = () => updateStatus(item.id, 'rejected', 'withdrawn', 'Takedown requested');
 
-        actionBox.append(statusPill, btnWithdraw);
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'button ghost';
+        btnDelete.style.fontSize = '11px';
+        btnDelete.style.color = 'var(--red)';
+        btnDelete.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        btnDelete.textContent = 'ভুয়া রিপোর্ট ডিলিট (Delete)';
+        btnDelete.title = 'ভুয়া প্রমাণিত হওয়ায় ডাটাবেস ও ম্যাপ থেকে সম্পূর্ণ মুছে ফেলুন';
+        btnDelete.onclick = () => deleteReport(item.id);
+
+        btnGroup.append(btnWithdraw, btnDelete);
+        actionBox.append(statusPill, btnGroup);
+        card.append(actionBox);
+      } else if (item.status === 'rejected') {
+        const actionBox = document.createElement('div');
+        actionBox.style.marginTop = '10px';
+        actionBox.style.display = 'flex';
+        actionBox.style.justifyContent = 'space-between';
+        actionBox.style.alignItems = 'center';
+        actionBox.style.flexWrap = 'wrap';
+        actionBox.style.gap = '8px';
+
+        const statusPill = document.createElement('span');
+        statusPill.className = 'badge-tag';
+        statusPill.style.background = 'var(--red-subtle)';
+        statusPill.style.color = 'var(--red)';
+        statusPill.textContent = 'Status: Rejected';
+
+        const btnDelete = document.createElement('button');
+        btnDelete.className = 'button ghost';
+        btnDelete.style.fontSize = '11px';
+        btnDelete.style.color = 'var(--red)';
+        btnDelete.style.borderColor = 'rgba(239, 68, 68, 0.4)';
+        btnDelete.textContent = 'স্থায়ীভাবে ডিলিট (Delete)';
+        btnDelete.title = 'ডাটাবেস থেকে সম্পূর্ণ মুছে ফেলুন';
+        btnDelete.onclick = () => deleteReport(item.id);
+
+        actionBox.append(statusPill, btnDelete);
         card.append(actionBox);
       }
 
@@ -313,6 +363,23 @@ async function loadQueue() {
     } else {
       $('adminMessage').textContent = err.message;
     }
+  }
+}
+
+async function deleteReport(id) {
+  const confirmMsg = 'এই রিপোর্টটি কি ভুয়া বা ভুল প্রমাণিত হয়েছে? আপনি কি এটি ডাটাবেস ও লাইভ ম্যাপ থেকে স্থায়ীভাবে ডিলিট (Permanent Delete) করতে চান? এই অ্যাকশনটি অপরিবর্তনীয়।';
+  if (!confirm(confirmMsg)) return;
+
+  try {
+    await api(`/api/admin/reports/${id}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${adminToken}` }
+    });
+    $('adminMessage').textContent = `রিপোর্ট #${id} সফলভাবে সিস্টেম থেকে স্থায়ীভাবে ডিলিট করা হয়েছে।`;
+    $('adminMessage').style.color = 'var(--teal)';
+    await loadQueue();
+  } catch (err) {
+    alert(err.message || 'রিপোর্ট ডিলিট করা যায়নি।');
   }
 }
 

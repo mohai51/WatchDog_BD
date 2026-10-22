@@ -350,6 +350,29 @@ class DatabaseService {
     return true;
   }
 
+  async deleteReport(rid) {
+    if (this.mode === 'mongodb') {
+      let query;
+      try {
+        query = { $or: [{ _id: new ObjectId(rid) }, { id: rid }, { _id: rid }] };
+      } catch {
+        query = { $or: [{ id: rid }, { _id: rid }] };
+      }
+      const res = await this.db.collection('reports').deleteOne(query);
+      return res.deletedCount === 1;
+    }
+
+    if (this.mode === 'disconnected') return false;
+
+    const initialLen = this.localReports.length;
+    this.localReports = this.localReports.filter(r => r.id !== rid && r._id !== rid);
+    if (this.localReports.length < initialLen) {
+      this.saveLocal();
+      return true;
+    }
+    return false;
+  }
+
   async getReportByTracking(code) {
     const cleanCode = String(code || '').trim().toUpperCase();
     if (!cleanCode) return null;
@@ -917,6 +940,21 @@ app.post('/api/admin/reports/:id/status', async (req, res) => {
   }
 
   res.json({ id: rid, status: state, verification_status: verificationStatus });
+});
+
+// 10.1. Admin Delete / Purge Report Permanently (e.g. Fake / Spurious Report)
+app.delete('/api/admin/reports/:id', async (req, res) => {
+  if (!verifyToken(req.headers.authorization)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const rid = req.params.id;
+  const ok = await dbService.deleteReport(rid);
+  if (!ok) {
+    return res.status(404).json({ error: 'Report not found or could not be deleted.' });
+  }
+
+  res.json({ success: true, id: rid, message: 'Report permanently deleted.' });
 });
 
 // 11. Admin Detailed Analytics
