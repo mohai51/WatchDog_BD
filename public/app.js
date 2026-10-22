@@ -1024,6 +1024,7 @@ $('navHowBtn').onclick = e => { e.preventDefault(); openModal('methodologyModal'
 $('mNavHow').onclick = e => { e.preventDefault(); $('mobileNavDrawer').classList.remove('open'); openModal('methodologyModal'); };
 $('fHowBtn').onclick = e => { e.preventDefault(); openModal('methodologyModal'); };
 $('fMethodBtn').onclick = e => { e.preventDefault(); openModal('methodologyModal'); };
+if ($('devProfileBtn')) $('devProfileBtn').onclick = () => openModal('devProfileModal');
 
 $('mobileMenuBtn').onclick = () => {
   $('mobileNavDrawer').classList.toggle('open');

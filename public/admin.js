@@ -408,3 +408,22 @@ if (adminToken) {
 } else {
   showAuth();
 }
+
+// Developer Profile Modal handlers
+function openModal(id) { const el = document.getElementById(id); if (el) el.classList.add('open'); }
+function closeModal(id) { const el = document.getElementById(id); if (el) el.classList.remove('open'); }
+
+if ($('adminDevProfileBtn')) {
+  $('adminDevProfileBtn').onclick = () => openModal('devProfileModal');
+}
+document.querySelectorAll('[data-close="devProfileModal"]').forEach(b => {
+  b.onclick = () => closeModal('devProfileModal');
+});
+if ($('devProfileModal')) {
+  $('devProfileModal').addEventListener('click', e => {
+    if (e.target === $('devProfileModal')) closeModal('devProfileModal');
+  });
+}
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && $('devProfileModal')) closeModal('devProfileModal');
+});

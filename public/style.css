@@ -1348,6 +1348,190 @@ footer {
   color: inherit;
 }
 
+/* Developer Name Trigger in Footer */
+.dev-name-trigger {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: 700;
+  color: var(--teal);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 3px;
+  transition: all 0.2s ease;
+}
+
+.dev-name-trigger:hover {
+  color: var(--ink);
+  text-decoration-style: solid;
+}
+
+/* Developer Profile Modal Card */
+.dev-profile-modal {
+  max-width: 460px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+
+.dev-profile-modal::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 90px;
+  background: linear-gradient(135deg, rgba(0, 191, 166, 0.25) 0%, rgba(37, 99, 235, 0.2) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dev-profile-body {
+  position: relative;
+  z-index: 1;
+  padding: 10px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.dev-avatar-wrapper {
+  position: relative;
+  width: 108px;
+  height: 108px;
+  margin-top: 10px;
+  margin-bottom: 14px;
+  border-radius: 50%;
+  padding: 3px;
+  background: linear-gradient(135deg, var(--teal), #3b82f6);
+  box-shadow: 0 8px 24px rgba(0, 191, 166, 0.35);
+}
+
+.dev-avatar-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  object-position: center top;
+  border: 2px solid var(--panel);
+  display: block;
+}
+
+.dev-status-indicator {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  width: 15px;
+  height: 15px;
+  background: #10b981;
+  border: 2px solid var(--panel);
+  border-radius: 50%;
+  box-shadow: 0 0 10px #10b981;
+}
+
+.dev-name {
+  font-size: 21px;
+  font-weight: 800;
+  color: var(--ink);
+  letter-spacing: -0.3px;
+  margin: 0 0 4px;
+}
+
+.dev-nickname {
+  color: var(--teal);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.dev-designation {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 14px;
+  letter-spacing: 0.2px;
+}
+
+.dev-bio {
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--sub);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin: 0 0 18px;
+  text-align: center;
+}
+
+.dev-social-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+.dev-social-btn {
+  flex: 1 1 calc(33.333% - 10px);
+  min-width: 105px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  border: 1px solid transparent;
+}
+
+.fb-btn {
+  background: rgba(24, 119, 242, 0.12);
+  color: #1877f2;
+  border-color: rgba(24, 119, 242, 0.25);
+}
+.fb-btn:hover {
+  background: #1877f2;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(24, 119, 242, 0.35);
+}
+
+.ig-btn {
+  background: rgba(225, 48, 108, 0.12);
+  color: #e1306c;
+  border-color: rgba(225, 48, 108, 0.25);
+}
+.ig-btn:hover {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(225, 48, 108, 0.35);
+}
+
+.yt-btn {
+  background: rgba(255, 0, 0, 0.12);
+  color: #ff0000;
+  border-color: rgba(255, 0, 0, 0.25);
+}
+.yt-btn:hover {
+  background: #ff0000;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(255, 0, 0, 0.35);
+}
+
 /* Admin Portal Specifics */
 .admin-portal-wrap {
   max-width: 1100px;
