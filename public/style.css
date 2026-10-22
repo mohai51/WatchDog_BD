@@ -994,6 +994,8 @@ body.dark .hero-overview-overlay {
 
 .badge-extortion { background: rgba(234, 161, 43, 0.15); color: #d68112; }
 .badge-robbery, .badge-snatching { background: var(--red-subtle); color: var(--red); }
+.badge-rape { background: rgba(225, 29, 72, 0.2); color: #e11d48; }
+.badge-assault { background: rgba(239, 68, 68, 0.18); color: #dc2626; }
 .badge-theft { background: rgba(147, 197, 253, 0.2); color: #2563eb; }
 .badge-drug_related { background: rgba(168, 85, 247, 0.18); color: #9333ea; }
 .badge-harassment { background: rgba(20, 184, 166, 0.18); color: #0d9488; }
@@ -1290,6 +1292,60 @@ footer {
 .developed-by-badge:hover {
   border-color: var(--teal);
   background: var(--panel);
+}
+
+.footer-brand-title {
+  font-size: 15px;
+  color: var(--ink);
+  letter-spacing: -0.2px;
+}
+
+.footer-brand-desc {
+  margin-top: 6px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--muted);
+  max-width: 580px;
+}
+
+.footer-developed-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.regnons-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.regnons-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  background: var(--sub);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  font-size: 11px;
+  color: var(--muted);
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.regnons-link-btn:hover {
+  color: var(--teal);
+  border-color: var(--teal);
+  background: var(--panel);
+}
+
+.regnons-link-btn svg {
+  color: inherit;
 }
 
 /* Admin Portal Specifics */

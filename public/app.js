@@ -37,10 +37,13 @@ const I18N = {
     catRobbery: 'ডাকাতি (Robbery)',
     catSnatching: 'ছিনতাই (Snatching)',
     catDrug: 'মাদকসংক্রান্ত (Drug-related)',
+    catDrug_related: 'মাদকসংক্রান্ত (Drug-related)',
     catHarassment: 'হয়রানি (Harassment)',
     catAssault: 'হামলা (Assault)',
+    catRape: 'ধর্ষণ (Rape)',
     catFraud: 'প্রতারণা (Fraud)',
     catOther: 'অন্যান্য (Other)',
+    footerBrandDesc: 'WatchDog BD বাংলাদেশে প্রথম কমিউনিটি-ভিত্তিক অপরাধ রিপোর্টিং প্ল্যাটফর্ম। অপরাধমুক্ত বাংলাদেশ গড়তে আমরা দৃঢ় অঙ্গীকারবদ্ধ।',
     rangeAll: 'সব সময় (All Time)',
     range7d: 'গত ৭ দিন (Last 7 Days)',
     range30d: 'গত ৩০ দিন (Last 30 Days)',
@@ -137,10 +140,13 @@ const I18N = {
     catRobbery: 'Robbery',
     catSnatching: 'Snatching',
     catDrug: 'Drug-related',
+    catDrug_related: 'Drug-related',
     catHarassment: 'Harassment',
     catAssault: 'Assault',
+    catRape: 'Rape',
     catFraud: 'Fraud',
     catOther: 'Other',
+    footerBrandDesc: 'WatchDog BD is the first community-based crime reporting platform in Bangladesh. We are committed to building a crime-free Bangladesh.',
     rangeAll: 'All Time',
     range7d: 'Last 7 Days',
     range30d: 'Last 30 Days',
@@ -229,7 +235,7 @@ const BN_DISTRICTS = {
   'Meherpur':'মেহেরপুর','Magura':'মাগুরা','Narail':'নড়াইল','Jhenaidah':'ঝিনাইদহ'
 };
 
-const CATEGORIES = ['extortion', 'theft', 'robbery', 'snatching', 'drug_related', 'harassment', 'assault', 'fraud', 'other'];
+const CATEGORIES = ['extortion', 'theft', 'robbery', 'snatching', 'drug_related', 'harassment', 'assault', 'rape', 'fraud', 'other'];
 
 let lang = localStorage.getItem('watchdog_lang') || 'bn';
 let selectedDistrictCode = '';

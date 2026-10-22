@@ -15,7 +15,7 @@ Built with **100% Full-Stack JavaScript** (Node.js + Express.js + Vanilla JS + L
 ### 1. Map-First Geospatial Experience
 - **Authentic 64-District Vector Map**: Pure GeoJSON vector boundaries with no external tile trackers, streets, or rivers.
 - **Deep Linking**: Dynamic URL hash support (e.g. `#district=BD3026`) for direct district bookmarking and sharing.
-- **Multi-Attribute Filtering**: Filter incidents by crime category (Extortion, Theft, Robbery, Snatching, Drug-related, Harassment, Fraud, Other), date range (7 days, 30 days, 6 months, all), division pills, and search in both Bengali and English.
+- **Multi-Attribute Filtering**: Filter incidents by crime category (Extortion, Theft, Robbery, Snatching, Drug-related, Harassment, Assault, Rape, Fraud, Other), date range (7 days, 30 days, 6 months, all), division pills, and search in both Bengali and English.
 - **Desktop Side Drawer & Mobile Bottom Sheet**: Slide-out drawer with district KPIs, category distribution charts, 6-month trends, verified incident feeds, and sharing actions.
 
 ### 2. Guided 3-Step Incident Reporting

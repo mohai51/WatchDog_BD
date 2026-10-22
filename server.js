@@ -33,7 +33,7 @@ for (const f of districtsData.features) {
 }
 
 // Configured crime categories
-const TYPES = ['snatching', 'theft', 'robbery', 'extortion', 'harassment', 'assault', 'fraud', 'drug_related', 'other'];
+const TYPES = ['snatching', 'theft', 'robbery', 'extortion', 'harassment', 'assault', 'fraud', 'drug_related', 'rape', 'other'];
 
 // Production Security Configuration
 let SECRET = (process.env.SAFEMAP_SECRET || '').trim();
