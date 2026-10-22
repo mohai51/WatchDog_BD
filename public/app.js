@@ -812,18 +812,34 @@ $('nextToStep3Btn').onclick = () => {
     return;
   }
 
-  // Populate Step 3 Review Card
+  // Populate Step 3 Review Card safely
   const rev = $('step3ReviewCard');
+  rev.replaceChildren();
+
   const dObj = geoFeatures.find(f => f.properties.code === form.district_code.value);
   const dNameStr = dObj ? districtName(dObj) : form.district_code.value;
+  const catLabel = I18N[lang]['cat' + form.type.value.charAt(0).toUpperCase() + form.type.value.slice(1)] || form.type.value;
 
-  rev.innerHTML = `
-    <div><strong>জেলা:</strong> ${dNameStr}</div>
-    <div><strong>অপরাধের ধরন:</strong> ${I18N[lang]['cat' + form.type.value.charAt(0).toUpperCase() + form.type.value.slice(1)] || form.type.value}</div>
-    <div><strong>তারিখ ও সময়:</strong> ${form.incident_date.value} (${form.incident_time.value})</div>
-    <div><strong>স্থান:</strong> ${form.location.value}</div>
-    <div style="margin-top:6px;border-top:1px solid var(--line);padding-top:6px"><strong>বিবরণ:</strong> ${form.description.value}</div>
-  `;
+  const createRow = (label, val, isBordered = false) => {
+    const row = document.createElement('div');
+    if (isBordered) {
+      row.style.marginTop = '6px';
+      row.style.borderTop = '1px solid var(--line)';
+      row.style.paddingTop = '6px';
+    }
+    const strong = document.createElement('strong');
+    strong.textContent = label + ': ';
+    row.append(strong, document.createTextNode(val));
+    return row;
+  };
+
+  rev.append(
+    createRow(lang === 'bn' ? 'জেলা' : 'District', dNameStr),
+    createRow(lang === 'bn' ? 'অপরাধের ধরন' : 'Category', catLabel),
+    createRow(lang === 'bn' ? 'তারিখ ও সময়' : 'Date & Time', `${form.incident_date.value} (${form.incident_time.value})`),
+    createRow(lang === 'bn' ? 'স্থান' : 'Location', form.location.value),
+    createRow(lang === 'bn' ? 'বিবরণ' : 'Narrative', form.description.value, true)
+  );
 
   showStep(3);
 };
@@ -883,33 +899,35 @@ $('trackForm').onsubmit = async (e) => {
   const code = $('trackInputCode').value.trim();
   const box = $('trackResultBox');
   box.hidden = false;
-  box.innerHTML = '<span style="color:var(--muted)">অনুসন্ধান চলছে...</span>';
+  box.innerHTML = `<span style="color:var(--muted)">${lang === 'bn' ? 'অনুসন্ধান চলছে...' : 'Searching...'}</span>`;
 
   try {
     const res = await api('/api/reports/track/' + encodeURIComponent(code));
     let statusColor = '#ed9155';
-    let statusText = 'Pending Moderation (পর্যালোচনাধীন)';
+    let statusText = lang === 'bn' ? 'পর্যালোচনাধীন (Pending Moderation)' : 'Pending Moderation';
     if (res.status === 'approved') {
       statusColor = '#2aa579';
-      statusText = 'Approved & Published (অনুমোদিত)';
+      statusText = lang === 'bn' ? 'অনুমোদিত ও প্রকাশিত (Approved & Published)' : 'Approved & Published';
     } else if (res.status === 'rejected') {
       statusColor = '#df5a65';
-      statusText = 'Rejected / Not Verified (বাতিল)';
+      statusText = lang === 'bn' ? 'বাতিলকৃত / অপ্রমাণিত (Rejected)' : 'Rejected / Unverified';
     }
 
     const dObj = geoFeatures.find(f => f.properties.code === res.district_code);
     const dNameStr = dObj ? districtName(dObj) : res.district_code;
+    const catTypeKey = 'cat' + res.type.charAt(0).toUpperCase() + res.type.slice(1);
+    const catTypeLabel = I18N[lang][catTypeKey] || res.type;
 
     box.innerHTML = `
       <div style="background:var(--sub);border:1px solid var(--line);border-radius:12px;padding:14px;font-size:13px;line-height:1.7">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <strong>রেফারেন্স: ${res.tracking_code}</strong>
+          <strong>${lang === 'bn' ? 'রেফারেন্স কোড:' : 'Reference:'} ${res.tracking_code}</strong>
           <span style="font-size:11px;padding:3px 8px;border-radius:6px;background:${statusColor}22;color:${statusColor};font-weight:700">${statusText}</span>
         </div>
-        <div><strong>জেলা:</strong> ${dNameStr}</div>
-        <div><strong>অপরাধের ধরন:</strong> ${res.type}</div>
-        <div><strong>জমা দেওয়ার তারিখ:</strong> ${new Date(res.submitted_at).toLocaleDateString()}</div>
-        ${res.reviewed_at ? `<div><strong>পর্যালোচনার তারিখ:</strong> ${new Date(res.reviewed_at).toLocaleDateString()}</div>` : ''}
+        <div><strong>${lang === 'bn' ? 'জেলা:' : 'District:'}</strong> ${dNameStr}</div>
+        <div><strong>${lang === 'bn' ? 'অপরাধের ধরন:' : 'Crime Type:'}</strong> ${catTypeLabel}</div>
+        <div><strong>${lang === 'bn' ? 'জমা দেওয়ার তারিখ:' : 'Submission Date:'}</strong> ${new Date(res.submitted_at).toLocaleDateString()}</div>
+        ${res.reviewed_at ? `<div><strong>${lang === 'bn' ? 'পর্যালোচনার তারিখ:' : 'Review Date:'}</strong> ${new Date(res.reviewed_at).toLocaleDateString()}</div>` : ''}
       </div>
     `;
   } catch (err) {
@@ -932,19 +950,25 @@ $('runCompareBtn').onclick = async () => {
   const d1 = $('compareSelect1').value;
   const d2 = $('compareSelect2').value;
   const container = $('compareResultContainer');
-  container.innerHTML = '<span style="color:var(--muted)">তুলনা লোড হচ্ছে...</span>';
+  container.innerHTML = `<span style="color:var(--muted)">${lang === 'bn' ? 'তুলনা লোড হচ্ছে...' : 'Loading comparison...'}</span>`;
 
   try {
     const res = await api(`/api/districts/compare?d1=${encodeURIComponent(d1)}&d2=${encodeURIComponent(d2)}`);
+    const d1Name = lang === 'bn' ? (BN_DISTRICTS[res.district1.name] || res.district1.name) : res.district1.name;
+    const d2Name = lang === 'bn' ? (BN_DISTRICTS[res.district2.name] || res.district2.name) : res.district2.name;
+    const d1Div = lang === 'bn' ? (res.district1.division + ' বিভাগ') : (res.district1.division + ' Division');
+    const d2Div = lang === 'bn' ? (res.district2.division + ' বিভাগ') : (res.district2.division + ' Division');
+    const reportsUnit = lang === 'bn' ? 'মোট রিপোর্ট' : 'total reports';
+
     container.innerHTML = `
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
         <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
-          <h4 style="margin:0 0 6px;font-size:16px">${res.district1.name} (${res.district1.division})</h4>
-          <div style="font-size:22px;font-weight:800;color:var(--teal)">${res.district1.total_reports} <small style="font-size:11px;font-weight:500;color:var(--muted)">মোট রিপোর্ট</small></div>
+          <h4 style="margin:0 0 6px;font-size:16px">${d1Name} (${d1Div})</h4>
+          <div style="font-size:22px;font-weight:800;color:var(--teal)">${res.district1.total_reports} <small style="font-size:11px;font-weight:500;color:var(--muted)">${reportsUnit}</small></div>
         </div>
         <div style="background:var(--sub);border:1px solid var(--line);border-radius:10px;padding:12px">
-          <h4 style="margin:0 0 6px;font-size:16px">${res.district2.name} (${res.district2.division})</h4>
-          <div style="font-size:22px;font-weight:800;color:var(--teal)">${res.district2.total_reports} <small style="font-size:11px;font-weight:500;color:var(--muted)">মোট রিপোর্ট</small></div>
+          <h4 style="margin:0 0 6px;font-size:16px">${d2Name} (${d2Div})</h4>
+          <div style="font-size:22px;font-weight:800;color:var(--teal)">${res.district2.total_reports} <small style="font-size:11px;font-weight:500;color:var(--muted)">${reportsUnit}</small></div>
         </div>
       </div>
       <div style="font-size:11px;color:var(--muted);background:var(--panel);border:1px solid var(--line);padding:8px 12px;border-radius:8px">

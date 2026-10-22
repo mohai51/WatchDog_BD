@@ -13,6 +13,9 @@ const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
 
 const app = express();
+// Enable trust proxy for accurate client IP behind Vercel, Cloudflare, or reverse proxies
+app.set('trust proxy', 1);
+
 const PORT = parseInt(process.env.PORT || '8000', 10);
 const PUBLIC_DIR = path.join(__dirname, 'public');
 const DATA_DIR = path.join(__dirname, 'data');
@@ -50,18 +53,101 @@ if (!process.env.SAFEMAP_ADMIN_PASSWORD) {
   console.log('[AUTH] Admin password configured from environment variable.');
 }
 
-
-// Rate Limiting (In-memory fallback + Mongo TTL supported)
-const rateMap = new Map();
-function isRateLimited(key, maxRequests = 20, windowSec = 3600) {
-  const now = Date.now();
-  const timestamps = (rateMap.get(key) || []).filter(t => now - t < windowSec * 1000);
-  if (timestamps.length >= maxRequests) {
-    return true;
+// Reliable Client IP extraction (supports Vercel, Cloudflare, proxies)
+function getClientIp(req) {
+  const forwarded = req.headers['x-forwarded-for'];
+  if (forwarded) {
+    return forwarded.split(',')[0].trim();
   }
-  timestamps.push(now);
-  rateMap.set(key, timestamps);
-  return false;
+  return req.headers['x-real-ip'] || req.ip || req.socket?.remoteAddress || '127.0.0.1';
+}
+
+// Memory-managed sliding window IP Rate Limiter
+class RateLimiter {
+  constructor({ windowMs, max, message }) {
+    this.windowMs = windowMs;
+    this.max = max;
+    this.message = message;
+    this.records = new Map();
+
+    const cleanup = () => {
+      const now = Date.now();
+      for (const [key, timestamps] of this.records.entries()) {
+        const valid = timestamps.filter(t => now - t < this.windowMs);
+        if (valid.length === 0) {
+          this.records.delete(key);
+        } else {
+          this.records.set(key, valid);
+        }
+      }
+    };
+    const timer = setInterval(cleanup, 2 * 60 * 1000);
+    if (timer.unref) timer.unref();
+  }
+
+  middleware() {
+    return (req, res, next) => {
+      const ip = getClientIp(req);
+      const now = Date.now();
+      const timestamps = (this.records.get(ip) || []).filter(t => now - t < this.windowMs);
+
+      if (timestamps.length >= this.max) {
+        const oldest = timestamps[0];
+        const retryAfterSec = Math.max(1, Math.ceil((oldest + this.windowMs - now) / 1000));
+        res.setHeader('Retry-After', retryAfterSec);
+        res.setHeader('X-RateLimit-Limit', this.max);
+        res.setHeader('X-RateLimit-Remaining', 0);
+        return res.status(429).json({
+          error: this.message || 'অনেক বেশি অনুরোধ করা হয়েছে। অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করে আবার চেষ্টা করুন। (Too many requests from this IP, please try again later.)',
+          retry_after_seconds: retryAfterSec
+        });
+      }
+
+      timestamps.push(now);
+      this.records.set(ip, timestamps);
+
+      res.setHeader('X-RateLimit-Limit', this.max);
+      res.setHeader('X-RateLimit-Remaining', Math.max(0, this.max - timestamps.length));
+      next();
+    };
+  }
+}
+
+// Tiered rate limiters:
+const generalApiLimiter = new RateLimiter({
+  windowMs: 60 * 1000,
+  max: 150,
+  message: 'API অনুরোধের সীমা অতিক্রম হয়েছে। অনুগ্রহ করে ১ মিনিট পর আবার চেষ্টা করুন। (API rate limit exceeded. Please wait 1 minute.)'
+});
+
+const reportSubmitLimiter = new RateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: 'প্রতি ১৫ মিনিটে সর্বোচ্চ ৫টি রিপোর্ট জমা দেওয়া সম্ভব। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন। (Submission limit reached: maximum 5 reports per 15 minutes per IP).'
+});
+
+const adminLoginLimiter = new RateLimiter({
+  windowMs: 15 * 60 * 1000,
+  max: 5,
+  message: 'অনেকবার ভুল পাসওয়ার্ড দিয়ে চেষ্টা করা হয়েছে। নিরাপত্তার স্বার্থে ১৫ মিনিট অপেক্ষা করুন। (Too many login attempts. Please wait 15 minutes before trying again.)'
+});
+
+const reportTrackLimiter = new RateLimiter({
+  windowMs: 5 * 60 * 1000,
+  max: 20,
+  message: 'ট্র্যাকিং অনুসন্ধানের সীমা অতিক্রম হয়েছে। অনুগ্রহ করে ৫ মিনিট অপেক্ষা করুন। (Tracking query limit reached. Please wait 5 minutes.)'
+});
+
+const visitAnalyticsLimiter = new RateLimiter({
+  windowMs: 60 * 60 * 1000,
+  max: 30,
+  message: 'ভিজিটর রেকর্ডিংয়ের সীমা অতিক্রম হয়েছে। (Visit recording rate limit reached.)'
+});
+
+// XSS Sanitizer Helper
+function sanitizeText(str) {
+  if (typeof str !== 'string') return '';
+  return str.replace(/[<>]/g, '').trim();
 }
 
 // Auth helpers
@@ -438,6 +524,9 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'admin.html'));
 });
 
+// Global API Rate Limiter
+app.use('/api', generalApiLimiter.middleware());
+
 // 1. Metadata endpoint
 app.get('/api/meta', (req, res) => {
   res.json({
@@ -669,8 +758,8 @@ app.get('/api/categories', async (req, res) => {
   });
 });
 
-// 6. Report Status Tracking (Private Submitter Lookup)
-app.get('/api/reports/track/:code', async (req, res) => {
+// 6. Report Status Tracking (Private Submitter Lookup - Rate Limited)
+app.get('/api/reports/track/:code', reportTrackLimiter.middleware(), async (req, res) => {
   const trackingCode = String(req.params.code || '').trim().toUpperCase();
   if (trackingCode.length < 6 || trackingCode.length > 20) {
     return res.status(400).json({ error: 'Invalid tracking reference code' });
@@ -692,32 +781,26 @@ app.get('/api/reports/track/:code', async (req, res) => {
   });
 });
 
-// 7. Record Visitor Hit (Privacy Preserving)
-
-app.post('/api/analytics/visit', async (req, res) => {
-  const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+// 7. Record Visitor Hit (Privacy Preserving - Rate Limited)
+app.post('/api/analytics/visit', visitAnalyticsLimiter.middleware(), async (req, res) => {
+  const clientIp = getClientIp(req);
   const result = await dbService.recordVisit({ ip: clientIp });
   res.json(result);
 });
 
-// 7. Submit Incident Report (3-Step Guided Backend with Tracking Reference)
-app.post('/api/reports', async (req, res) => {
-  const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
-  if (isRateLimited(`report:${clientIp}`, 10, 3600)) {
-    return res.status(429).json({ error: 'Submission rate limit reached (maximum 10 per hour). Please try later.' });
-  }
-
+// 8. Submit Incident Report (3-Step Guided Backend with Tracking Reference - Strict Rate Limited & Sanitized)
+app.post('/api/reports', reportSubmitLimiter.middleware(), async (req, res) => {
   const body = req.body || {};
   const code = String(body.district_code || '').trim().toUpperCase();
   const kind = String(body.type || '').trim().toLowerCase();
-  const location = String(body.location || body.approximate_area || '').trim();
-  const description = String(body.description || '').trim();
+  const location = sanitizeText(String(body.location || body.approximate_area || ''));
+  const description = sanitizeText(String(body.description || ''));
   const day = String(body.incident_date || '').trim();
   const clock = String(body.incident_time || '12:00').trim();
   const witnessStatus = String(body.witness_status || (body.is_victim ? 'victim' : 'witness')).trim();
-  const reporterName = String(body.reporter_name || '').trim();
-  const reporterContact = String(body.reporter_contact || '').trim();
-  const referenceUrl = String(body.reference_url || '').trim();
+  const reporterName = sanitizeText(String(body.reporter_name || ''));
+  const reporterContact = sanitizeText(String(body.reporter_contact || ''));
+  const referenceUrl = sanitizeText(String(body.reference_url || ''));
 
   // Strict Validation
   if (!DISTRICT_MAP[code] || !TYPES.includes(kind)) {
@@ -782,13 +865,8 @@ app.post('/api/reports', async (req, res) => {
   }
 });
 
-// 8. Admin Login (Hardened & Rate-Limited)
-app.post('/api/admin/login', (req, res) => {
-  const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
-  if (isRateLimited(`login:${clientIp}`, 10, 3600)) {
-    return res.status(429).json({ error: 'Too many login attempts. Please try again in 1 hour.' });
-  }
-
+// 9. Admin Login (Hardened & Rate-Limited)
+app.post('/api/admin/login', adminLoginLimiter.middleware(), (req, res) => {
   if (IS_PROD && !ADMIN_PASS) {
     return res.status(403).json({ error: 'Administrator access is disabled in production because SAFEMAP_ADMIN_PASSWORD is not configured.' });
   }
