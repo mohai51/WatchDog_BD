@@ -1166,17 +1166,9 @@ footer {
   opacity: 1;
 }
 
+/* Mobile Drawer Backdrop — Strictly mobile only (< 900px) */
 .drawer-backdrop {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(7, 15, 30, 0.65);
-  backdrop-filter: blur(2px);
-  z-index: 1040;
-}
-
-.drawer-backdrop.open {
-  display: block;
+  display: none !important;
 }
 
 /* Responsive Breakpoints — 100% Mobile Optimized */
@@ -1193,6 +1185,17 @@ footer {
 }
 
 @media (max-width: 900px) {
+  .drawer-backdrop {
+    display: none !important;
+    position: fixed;
+    inset: 0;
+    background: rgba(7, 15, 30, 0.65);
+    backdrop-filter: blur(2px);
+    z-index: 1040;
+  }
+  .drawer-backdrop.open {
+    display: block !important;
+  }
   .hero {
     flex-direction: column;
     align-items: flex-start;

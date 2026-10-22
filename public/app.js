@@ -374,7 +374,9 @@ function selectDistrict(code, fitBounds = true) {
 
 function openDrawer() {
   $('districtDrawer').classList.add('open');
-  if ($('drawerBackdrop')) $('drawerBackdrop').classList.add('open');
+  if ($('drawerBackdrop') && window.innerWidth <= 900) {
+    $('drawerBackdrop').classList.add('open');
+  }
 }
 
 function closeDrawer() {
