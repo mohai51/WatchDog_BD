@@ -77,112 +77,112 @@
   </div>
 
   <main class="container">
-    <!-- Hero Section -->
-    <section class="hero">
-      <div class="hero-content">
-        <div class="hero-eyebrow" data-i="heroEyebrow">COMMUNITY-POWERED CRIME REPORTING & SAFETY INTELLIGENCE</div>
-        <h1 data-i="heroHeading">আপনার এলাকার অপরাধ পরিস্থিতি সম্পর্কে জানুন</h1>
-        <p data-i="heroSub">বাংলাদেশের ৬৪ জেলার অপরাধসংক্রান্ত রিপোর্ট, নিরাপত্তা তথ্য ও বিশ্লেষণ এক প্ল্যাটফর্মে। নাগরিক সতর্কতা ও সঠিক তথ্যের জন্য উন্মুক্ত উদ্যোগ।</p>
+    <!-- Unified Hero & Live Intelligence Workspace (Saves Vertical Space Above Map) -->
+    <section class="hero-unified-wrapper" id="heroUnified">
+      <!-- Left Column: Mission, Atmospheric Civic-Tech Visual & Compact Quick Stats -->
+      <div class="hero-overview-card">
+        <div class="hero-overview-bg" style="background-image: url('/hero-intelligence.jpg');"></div>
+        <div class="hero-overview-overlay"></div>
         
-        <div class="hero-actions">
-          <a href="#mapWorkspace" class="button primary" id="heroExploreBtn" data-i="ctaExplore">ম্যাপ অনুসন্ধান করুন</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- Meaningful Statistics Bar -->
-    <section class="stats" aria-label="National Incident Statistics">
-      <div class="stat-card">
-        <div class="stat-card-top">
-          <small data-i="statTotalReports">প্রকাশিত মোট রিপোর্ট</small>
-        </div>
-        <strong id="totalReports">0</strong>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-card-top">
-          <small data-i="statDistricts">আওতাভুক্ত জেলা</small>
-        </div>
-        <strong id="districtTotal">64</strong>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-card-top">
-          <small data-i="statDrugReports">মাদকসংক্রান্ত রেকর্ড</small>
-        </div>
-        <strong id="drugReportsCount" class="teal-val">0</strong>
-      </div>
-
-      <div class="stat-card">
-        <div class="stat-card-top">
-          <small data-i="statLastUpdate">সর্বশেষ আপডেট</small>
-        </div>
-        <strong id="lastDataUpdate" style="font-size:16px;line-height:1.6">—</strong>
-      </div>
-    </section>
-
-    <!-- Dynamic District Crime Intelligence Card (Rotates Every 5 Seconds) -->
-    <section class="crime-insight-card" id="crimeInsightCard" aria-label="District Crime Intelligence">
-      <div class="insight-header">
-        <div class="insight-badge">
-          <span class="live-pulse-dot"></span>
-          <span id="insightHeaderTitle">লাইভ জেলা অপরাধ বিশ্লেষণ (District Crime Intelligence)</span>
-        </div>
-        <div class="insight-nav-controls">
-          <button class="insight-nav-btn" id="insightPrevBtn" aria-label="Previous District" title="Previous">
-            <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
-          </button>
-          <span class="insight-counter" id="insightCounter">1 / 1</span>
-          <button class="insight-nav-btn" id="insightNextBtn" aria-label="Next District" title="Next">
-            <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="insight-content" id="insightContentWrap">
-        <div class="insight-main-row">
-          <div class="insight-district-info">
-            <div class="insight-district-name" id="insightDistrictName">—</div>
-            <div class="insight-district-sub" id="insightDistrictSub">লোড হচ্ছে...</div>
+        <div class="hero-overview-content">
+          <div class="hero-badge-tag">
+            <span class="live-pulse-dot"></span>
+            <span data-i="heroEyebrow">COMMUNITY-POWERED CRIME REPORTING & SAFETY INTELLIGENCE</span>
           </div>
-          <button class="button primary" id="insightViewMapBtn">
-            <span id="insightViewMapText">ম্যাপে এই জেলা দেখুন</span>
-            <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 16 16 12 12 8"></polyline><line x1="8" y1="12" x2="16" y2="12"></line></svg>
-          </button>
-        </div>
 
-        <div class="insight-stats-grid">
-          <!-- Highest Crime Card (কি বেশি) -->
-          <div class="insight-stat-box box-highest">
-            <div class="insight-box-top">
-              <span class="trend-icon-tag up">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
-                <span id="insightHighLabel">সবচেয়ে বেশি সংঘটিত অপরাধ</span>
-              </span>
-              <span class="insight-percent-pill" id="insightHighPercent">0%</span>
+          <h1 data-i="heroHeading">আপনার এলাকার অপরাধ পরিস্থিতি সম্পর্কে জানুন</h1>
+          <p data-i="heroSub">বাংলাদেশের ৬৪ জেলার নাগরিক অপরাধ রিপোর্ট, নিরাপত্তা তথ্য ও রিয়েল-টাইম জেলাভিত্তিক অপরাধ বিশ্লেষণ।</p>
+
+          <!-- Compact Inline Metric Chips Strip -->
+          <div class="hero-metrics-strip" aria-label="National Incident Statistics">
+            <div class="metric-chip">
+              <small data-i="statTotalReports">মোট রিপোর্ট</small>
+              <strong id="totalReports">0</strong>
             </div>
-            <strong class="insight-crime-name" id="insightHighCrime">—</strong>
-            <small class="insight-crime-count" id="insightHighCount">—</small>
+            <div class="metric-chip">
+              <small data-i="statDistricts">আওতাভুক্ত জেলা</small>
+              <strong id="districtTotal">64</strong>
+            </div>
+            <div class="metric-chip">
+              <small data-i="statDrugReports">মাদক রেকর্ড</small>
+              <strong id="drugReportsCount" class="teal-val">0</strong>
+            </div>
+            <div class="metric-chip">
+              <small data-i="statLastUpdate">সর্বশেষ আপডেট</small>
+              <strong id="lastDataUpdate" class="metric-date">—</strong>
+            </div>
           </div>
 
-          <!-- Lowest Crime Card (কি কম) -->
-          <div class="insight-stat-box box-lowest">
-            <div class="insight-box-top">
-              <span class="trend-icon-tag down">
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
-                <span id="insightLowLabel">তুলনামূলক কম সংঘটিত অপরাধ</span>
-              </span>
-              <span class="insight-percent-pill low" id="insightLowPercent">0%</span>
-            </div>
-            <strong class="insight-crime-name" id="insightLowCrime">—</strong>
-            <small class="insight-crime-count" id="insightLowCount">—</small>
+          <div class="hero-actions-row">
+            <a href="#mapWorkspace" class="button primary" id="heroExploreBtn" data-i="ctaExplore">ম্যাপ অনুসন্ধান করুন</a>
+            <button class="button ghost" id="heroReportBtn" data-i="ctaReportSecondary">+ একটি ঘটনা রিপোর্ট করুন</button>
           </div>
         </div>
       </div>
 
-      <!-- 5-Second Animated Progress Bar -->
-      <div class="insight-progress-bar">
-        <div class="insight-progress-fill" id="insightProgressBar"></div>
+      <!-- Right Column: Dynamic District Crime Intelligence Card (Rotates Every 5 Seconds) -->
+      <div class="crime-insight-card" id="crimeInsightCard" aria-label="District Crime Intelligence">
+        <div class="insight-header">
+          <div class="insight-badge">
+            <span class="live-pulse-dot"></span>
+            <span id="insightHeaderTitle">লাইভ জেলা অপরাধ বিশ্লেষণ</span>
+          </div>
+          <div class="insight-nav-controls">
+            <button class="insight-nav-btn" id="insightPrevBtn" aria-label="Previous District" title="Previous">
+              <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </button>
+            <span class="insight-counter" id="insightCounter">1 / 1</span>
+            <button class="insight-nav-btn" id="insightNextBtn" aria-label="Next District" title="Next">
+              <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="insight-content" id="insightContentWrap">
+          <div class="insight-main-row">
+            <div class="insight-district-info">
+              <div class="insight-district-name" id="insightDistrictName">—</div>
+              <div class="insight-district-sub" id="insightDistrictSub">লোড হচ্ছে...</div>
+            </div>
+            <button class="button primary" id="insightViewMapBtn">
+              <span id="insightViewMapText">ম্যাপে এই জেলা দেখুন</span>
+              <svg class="ui-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 16 16 12 12 8"></polyline><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+            </button>
+          </div>
+
+          <div class="insight-stats-grid">
+            <!-- Highest Crime Card (কি বেশি) -->
+            <div class="insight-stat-box box-highest">
+              <div class="insight-box-top">
+                <span class="trend-icon-tag up">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                  <span id="insightHighLabel">সবচেয়ে বেশি সংঘটিত অপরাধ</span>
+                </span>
+                <span class="insight-percent-pill" id="insightHighPercent">0%</span>
+              </div>
+              <strong class="insight-crime-name" id="insightHighCrime">—</strong>
+              <small class="insight-crime-count" id="insightHighCount">—</small>
+            </div>
+
+            <!-- Lowest Crime Card (কি কম) -->
+            <div class="insight-stat-box box-lowest">
+              <div class="insight-box-top">
+                <span class="trend-icon-tag down">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>
+                  <span id="insightLowLabel">তুলনামূলক কম সংঘটিত অপরাধ</span>
+                </span>
+                <span class="insight-percent-pill low" id="insightLowPercent">0%</span>
+              </div>
+              <strong class="insight-crime-name" id="insightLowCrime">—</strong>
+              <small class="insight-crime-count" id="insightLowCount">—</small>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5-Second Animated Progress Bar -->
+        <div class="insight-progress-bar">
+          <div class="insight-progress-fill" id="insightProgressBar"></div>
+        </div>
       </div>
     </section>
 
