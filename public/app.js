@@ -104,7 +104,9 @@ const I18N = {
     insightHeaderTitle: 'লাইভ জেলা অপরাধ বিশ্লেষণ',
     insightViewMap: 'ম্যাপে এই জেলা দেখুন',
     insightHighLabel: 'সবচেয়ে বেশি সংঘটিত অপরাধ',
-    insightLowLabel: 'তুলনামূলক কম সংঘটিত অপরাধ'
+    insightLowLabel: 'তুলনামূলক কম সংঘটিত অপরাধ',
+    insightNoOtherCrime: 'অন্য কোনো অপরাধের রেকর্ড নেই',
+    insightAllOtherZero: 'বাকি সব ক্যাটাগরিতে ০টি রিপোর্ট'
   },
   en: {
     brandTag: 'Community Public Safety Intelligence',
@@ -202,7 +204,9 @@ const I18N = {
     insightHeaderTitle: 'Live District Crime Intelligence',
     insightViewMap: 'Explore on Map',
     insightHighLabel: 'Highest Reported Crime',
-    insightLowLabel: 'Lowest Reported Crime'
+    insightLowLabel: 'Lowest Reported Crime',
+    insightNoOtherCrime: 'No other crimes recorded',
+    insightAllOtherZero: 'All other categories 0 reports'
   }
 };
 
@@ -510,8 +514,8 @@ function renderDistrictInsight(index) {
     $text('insightHighPercent', '0%');
   }
 
-  // Lowest Crime (কি কম)
-  if (d.lowest_crime) {
+  // Lowest Crime (কি কম) - Must be distinct from highest crime
+  if (d.lowest_crime && d.lowest_crime.type && d.lowest_crime.type !== d.highest_crime?.type) {
     const lowTypeKey = 'cat' + d.lowest_crime.type.charAt(0).toUpperCase() + d.lowest_crime.type.slice(1);
     const lowTypeName = I18N[lang][lowTypeKey] || d.lowest_crime.type;
     $text('insightLowCrime', lowTypeName);
@@ -519,9 +523,10 @@ function renderDistrictInsight(index) {
     $text('insightLowCount', `${d.lowest_crime.count} ${countUnit} (${d.lowest_crime.percent}%)`);
     $text('insightLowPercent', `${d.lowest_crime.percent}%`);
   } else {
-    $text('insightLowCrime', '—');
-    $text('insightLowCount', '—');
-    $text('insightLowPercent', '0%');
+    // When only 1 crime category is reported in this district, all other categories have 0 reports!
+    $text('insightLowCrime', I18N[lang].insightNoOtherCrime || 'অন্য কোনো অপরাধের রেকর্ড নেই');
+    $text('insightLowCount', I18N[lang].insightAllOtherZero || 'বাকি সব ক্যাটাগরিতে ০টি রিপোর্ট');
+    $text('insightLowPercent', '০%');
   }
 
   // Map inspection button

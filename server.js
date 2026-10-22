@@ -526,9 +526,19 @@ app.get('/api/stats', async (req, res) => {
   const district_insights = Object.entries(districtCrimeBreakdown).map(([code, typeCounts]) => {
     const dInfo = DISTRICT_MAP[code];
     const sortedTypes = Object.entries(typeCounts).sort((a, b) => b[1] - a[1]);
-    const highest = sortedTypes[0];
-    const lowest = sortedTypes.length > 1 ? sortedTypes[sortedTypes.length - 1] : sortedTypes[0];
     const totalInDistrict = counts[code] || 0;
+
+    const highest = sortedTypes.length > 0 ? sortedTypes[0] : null;
+
+    // Lowest crime must be a distinct category from highest AND have strictly fewer reports
+    let lowest = null;
+    if (sortedTypes.length > 1) {
+      const candidateLowest = sortedTypes[sortedTypes.length - 1];
+      if (candidateLowest[0] !== highest[0] && candidateLowest[1] < highest[1]) {
+        lowest = candidateLowest;
+      }
+    }
+
     return {
       code,
       name: dInfo ? dInfo.name : code,
