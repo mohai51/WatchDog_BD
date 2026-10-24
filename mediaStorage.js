@@ -277,6 +277,10 @@ class ObjectStorageService {
     }
   }
 
+  setDatabaseService(dbService) {
+    this.dbService = dbService;
+  }
+
   isObjectStorageConfigured() {
     return Boolean(this.bucket && this.accessKey && this.secretKey);
   }
@@ -303,10 +307,33 @@ class ObjectStorageService {
       };
     }
 
+    // Persistent Database Storage Fallback (stores binary in dedicated media_files collection, never in incident document)
+    if (this.dbService && this.dbService.mode === 'mongodb' && this.dbService.db) {
+      const mongoStorageKey = `mongodb://${mediaId}.${extension}`;
+      await this.dbService.db.collection('media_files').insertOne({
+        _id: mediaId,
+        storage_key: mongoStorageKey,
+        mime_type: mimeType,
+        filename: originalFilename,
+        size_bytes: buffer.length,
+        buffer: buffer,
+        uploaded_at: new Date()
+      });
+      return {
+        media_id: mediaId,
+        storage_key: mongoStorageKey,
+        storage_provider: 'mongodb',
+        filename: originalFilename,
+        mime_type: mimeType,
+        size_bytes: buffer.length,
+        status: 'pending',
+        uploaded_at: new Date().toISOString()
+      };
+    }
+
     if (this.isProd) {
-      // Requirement: "If an object storage provider is not configured, implement the integration with environment variables and documentation. Do not invent credentials or pretend uploads are functional."
       throw new Error(
-        'OBJECT_STORAGE_UNCONFIGURED: Persistent object storage (S3/Cloudflare R2) is required in production. Please configure S3_BUCKET, S3_ACCESS_KEY_ID, and S3_SECRET_ACCESS_KEY.'
+        'OBJECT_STORAGE_UNCONFIGURED: Persistent object storage (S3/Cloudflare R2 or MongoDB) is required in production. Please configure S3_BUCKET, S3_ACCESS_KEY_ID, and S3_SECRET_ACCESS_KEY.'
       );
     }
 
@@ -334,6 +361,18 @@ class ObjectStorageService {
    * Fetch media buffer from storage
    */
   async getMedia(storageKey) {
+    if (!storageKey) return null;
+
+    if (storageKey.startsWith('mongodb://')) {
+      if (this.dbService && this.dbService.db) {
+        const doc = await this.dbService.db.collection('media_files').findOne({ storage_key: storageKey });
+        if (doc && doc.buffer) {
+          return Buffer.isBuffer(doc.buffer) ? doc.buffer : Buffer.from(doc.buffer.buffer || doc.buffer);
+        }
+      }
+      return null;
+    }
+
     if (this.isObjectStorageConfigured()) {
       return await this._getS3Object(storageKey);
     }
@@ -352,6 +391,18 @@ class ObjectStorageService {
    */
   async deleteMedia(storageKey) {
     if (!storageKey) return false;
+
+    if (storageKey.startsWith('mongodb://')) {
+      if (this.dbService && this.dbService.db) {
+        try {
+          await this.dbService.db.collection('media_files').deleteOne({ storage_key: storageKey });
+          return true;
+        } catch {
+          return false;
+        }
+      }
+      return false;
+    }
 
     if (this.isObjectStorageConfigured()) {
       try {
