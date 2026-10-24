@@ -380,68 +380,6 @@ class DatabaseService {
       .slice()
       .reverse();
   }
-  async getPublicFeed(filters = {}) {
-    if (this.mode === 'mongodb') {
-      const query = { status: { $ne: 'rejected' } };
-      if (filters.district) query.district_code = filters.district;
-      if (filters.type) query.type = filters.type;
-      if (filters.search) {
-        const s = String(filters.search).trim();
-        query.$or = [
-          { description: { $regex: s, $options: 'i' } },
-          { location: { $regex: s, $options: 'i' } },
-          { approximate_area: { $regex: s, $options: 'i' } }
-        ];
-      }
-
-      const docs = await this.db.collection('reports')
-        .find(query)
-        .sort({ _id: -1, submission_timestamp: -1, incident_date: -1 })
-        .limit(100)
-        .toArray();
-      return docs.map(doc => ({ ...doc, id: doc._id ? doc._id.toString() : '' }));
-    }
-
-    if (this.mode === 'disconnected') {
-      return [];
-    }
-
-    let list = this.localReports.filter(r => r.status !== 'rejected');
-    if (filters.district) list = list.filter(r => r.district_code === filters.district);
-    if (filters.type) list = list.filter(r => r.type === filters.type);
-    if (filters.search) {
-      const s = String(filters.search).toLowerCase();
-      list = list.filter(r => (r.description && r.description.toLowerCase().includes(s)) || (r.location && r.location.toLowerCase().includes(s)));
-    }
-    return list.slice().reverse().slice(0, 100);
-  }
-
-  async addLike(rid) {
-    if (!rid) return 0;
-    if (this.mode === 'mongodb') {
-      let query;
-      try {
-        query = { $or: [{ _id: new ObjectId(rid) }, { id: rid }, { _id: rid }] };
-      } catch {
-        query = { $or: [{ id: rid }, { _id: rid }] };
-      }
-      const res = await this.db.collection('reports').findOneAndUpdate(
-        query,
-        { $inc: { likes: 1 } },
-        { returnDocument: 'after' }
-      );
-      return res?.likes || 1;
-    }
-
-    const item = this.localReports.find(r => r.id === rid || r._id === rid);
-    if (item) {
-      item.likes = (item.likes || 0) + 1;
-      this.saveLocal();
-      return item.likes;
-    }
-    return 1;
-  }
-
   async getAdminReports(status, verificationStatus) {
     if (this.mode === 'mongodb') {
       const query = {};
@@ -921,11 +859,6 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'admin.html'));
 });
 
-// Dedicated District Crime Feed Page
-app.get('/feed', (req, res) => {
-  res.sendFile(path.join(PUBLIC_DIR, 'feed.html'));
-});
-
 // Global API Rate Limiter
 app.use('/api', generalApiLimiter.middleware());
 
@@ -1173,59 +1106,6 @@ app.get('/api/categories', async (req, res) => {
     total_approved: approved.length
   });
 });
-
-// 5.1 District-Wise Public Crime Feed & Live Search Endpoint
-app.get('/api/feed', async (req, res) => {
-  const district = String(req.query.district || req.query.district_code || '').trim().toUpperCase();
-  const category = String(req.query.category || req.query.type || '').trim().toLowerCase();
-  const search = String(req.query.search || '').trim();
-
-  const filters = {};
-  if (district && DISTRICT_MAP[district]) filters.district = district;
-  if (category && TYPES.includes(category)) filters.type = category;
-  if (search) filters.search = search.slice(0, 80);
-
-  const reports = await dbService.getPublicFeed(filters);
-  const incidents = reports.map(r => ({
-    id: r.id || (r._id ? r._id.toString() : ''),
-    district_code: r.district_code,
-    district_name: DISTRICT_MAP[r.district_code]?.name || r.district_code,
-    division: DISTRICT_MAP[r.district_code]?.division || r.division || '',
-    type: r.type,
-    incident_date: r.incident_date,
-    incident_time: r.incident_time,
-    submission_timestamp: r.submission_timestamp,
-    submission_time_dhaka: r.submission_time_dhaka || '',
-    date_is_submission_time: Boolean(r.date_is_submission_time),
-    location: r.approximate_area || r.location,
-    description: r.description,
-    image: r.image && r.image.media_id ? {
-      media_id: r.image.media_id,
-      url: `/api/media/${r.image.media_id}`,
-      filename: r.image.filename
-    } : null,
-    image_url: r.image && r.image.media_id ? `/api/media/${r.image.media_id}` : null,
-    likes: r.likes || 0,
-    status: r.status || 'pending',
-    verification_status: r.verification_status || 'moderated',
-    news_source: r.news_source || null
-  }));
-
-  res.json({
-    success: true,
-    total: incidents.length,
-    incidents
-  });
-});
-
-// 5.2 Like Reaction on Public Crime Report (Rate-limited, atomic increment)
-app.post('/api/feed/:id/like', reportSubmitLimiter.middleware(), async (req, res) => {
-  const rid = String(req.params.id || '').trim();
-  if (!rid) return res.status(400).json({ error: 'Invalid incident ID.' });
-  const likes = await dbService.addLike(rid);
-  res.json({ success: true, id: rid, likes });
-});
-
 // 6. Report Status Tracking (Private Submitter Lookup - Rate Limited)
 app.get('/api/reports/track/:code', reportTrackLimiter.middleware(), async (req, res) => {
   const trackingCode = String(req.params.code || '').trim().toUpperCase();

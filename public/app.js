@@ -547,14 +547,7 @@ function renderDistrictIncidents(list) {
     if (item.verification_status === 'published_news_report') verifLabel = lang === 'bn' ? 'সংবাদে প্রকাশিত' : 'Published News Report';
     else if (item.verification_status === 'independently_verified') verifLabel = lang === 'bn' ? 'নিরপেক্ষভাবে প্রমাণিত' : 'Independently Verified';
     verif.textContent = verifLabel;
-
-    // Action Row with Like Reaction & Verification
-    const actionRow = document.createElement('div');
-    actionRow.className = 'feed-card-footer';
-    actionRow.style.marginTop = '8px';
-    const likeBtn = createLikeButton(item);
-    actionRow.append(likeBtn, verif);
-    card.append(actionRow);
+    card.append(verif);
 
     if (item.news_source && item.news_source.url) {
       let isSafeNewsUrl = false;
@@ -1264,46 +1257,6 @@ document.querySelectorAll('.modal-backdrop').forEach(m => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop').forEach(m => closeModal(m.id));
 });
-
-// Like Reaction Button Helper (Works on both Feed & Drawer cards)
-function createLikeButton(item) {
-  const btn = document.createElement('button');
-  btn.type = 'button';
-  btn.className = 'crime-like-btn';
-  const isLiked = Boolean(localStorage.getItem('liked_incident_' + item.id));
-  if (isLiked) btn.classList.add('liked');
-
-  const heartSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
-  const likeLabel = isLiked ? (I18N[lang].feedLiked || 'সচেতন') : (I18N[lang].feedLike || 'সচেতনতা');
-  const count = item.likes || 0;
-
-  btn.innerHTML = `${heartSvg} <span class="like-label">${likeLabel}</span> <strong class="like-count">${count}</strong>`;
-
-  btn.onclick = async (e) => {
-    e.stopPropagation();
-    if (localStorage.getItem('liked_incident_' + item.id)) {
-      return; // Already reacted
-    }
-    btn.classList.add('liked');
-    const countEl = btn.querySelector('.like-count');
-    const labelEl = btn.querySelector('.like-label');
-    const currentCount = parseInt(countEl.textContent, 10) || 0;
-    countEl.textContent = currentCount + 1;
-    if (labelEl) labelEl.textContent = I18N[lang].feedLiked || 'সচেতন';
-    localStorage.setItem('liked_incident_' + item.id, 'true');
-
-    try {
-      const res = await api(`/api/feed/${encodeURIComponent(item.id)}/like`, { method: 'POST' });
-      if (res.likes !== undefined) countEl.textContent = res.likes;
-    } catch (err) {
-      console.warn('Like request failed:', err.message);
-    }
-  };
-
-  return btn;
-}
-
-// District Crime Feed is powered by dedicated page at /feed
 
 // Triggers
 $('openReportBtn').onclick = () => { resetComposer(); openModal('reportModal'); };
