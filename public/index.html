@@ -37,6 +37,7 @@
 
     <!-- Desktop Navigation -->
     <nav class="nav-links" aria-label="Main Navigation">
+      <button type="button" class="nav-link nav-highlight-btn" id="navDistrictFeedBtn" data-i="navDistrictFeed">জেলাভিত্তিক অপরাধ</button>
       <a href="#mapWorkspace" class="nav-link active" data-i="navMap">Explore Map</a>
       <a href="#howItWorks" class="nav-link" id="navHowBtn" data-i="navHow">How It Works</a>
       <a href="#safetyResources" class="nav-link" id="navSafetyBtn" data-i="navSafety">Safety Resources</a>
@@ -68,6 +69,7 @@
 
   <!-- Mobile Dropdown Navigation -->
   <div class="mobile-nav-drawer" id="mobileNavDrawer">
+    <button type="button" class="nav-link nav-highlight-btn" id="mNavDistrictFeed" style="width:100%;text-align:left;margin-bottom:6px" data-i="navDistrictFeed">জেলাভিত্তিক অপরাধ</button>
     <a href="#mapWorkspace" class="nav-link" data-i="navMap">Explore Map</a>
     <a href="#howItWorks" class="nav-link" id="mNavHow" data-i="navHow">How It Works</a>
     <a href="#safetyResources" class="nav-link" id="mNavSafety" data-i="navSafety">Safety Resources</a>
@@ -502,6 +504,93 @@
         </div>
 
         <button type="button" class="button primary" style="width:100%;margin-top:14px" data-close="reportModal" data-i="btnClose">সম্পন্ন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DISTRICT CRIME LIVE FEED MODAL (জেলাভিত্তিক অপরাধ ফিড ও অনুসন্ধান) -->
+  <div class="modal-backdrop" id="districtFeedModal" role="dialog" aria-modal="true" aria-labelledby="districtFeedTitle">
+    <div class="modal district-feed-modal-card">
+      <!-- Modal Header -->
+      <div class="modal-head district-feed-header">
+        <div class="district-feed-title-wrap">
+          <div class="district-feed-badge-icon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#00BFA6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+              <polyline points="2 17 12 22 22 17"></polyline>
+              <polyline points="2 12 12 17 22 12"></polyline>
+            </svg>
+          </div>
+          <div>
+            <h2 id="districtFeedTitle" data-i="feedTitle">জেলাভিত্তিক অপরাধ ডিরেক্টরি</h2>
+            <p data-i="feedSub">সারাদেশের সাম্প্রতিক অপরাধের লাইভ ফিড, প্রমাণ চিত্র ও জেলাওয়ারি অনুসন্ধান</p>
+          </div>
+        </div>
+        <button class="drawer-close" data-close="districtFeedModal" aria-label="Close">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Quick CTA Banner: "আপনার এলাকার অপরাধ রিপোর্ট করুন" -->
+      <div class="district-feed-cta-banner">
+        <div class="district-feed-cta-text">
+          <strong data-i="feedCtaHeading">আপনার এলাকায় কোনো অপরাধের ঘটনা ঘটেছে?</strong>
+          <span data-i="feedCtaSub">নিরাপদ বাংলাদেশ গড়তে অপরাধের তথ্য ও ছবি দিয়ে সবার সচেতনতা বৃদ্ধি করুন।</span>
+        </div>
+        <button type="button" class="feed-cta-report-btn" id="feedReportCtaBtn">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span data-i="feedCtaBtnText">অপরাধ রিপোর্ট করুন</span>
+        </button>
+      </div>
+
+      <!-- Search & Filters Toolbar -->
+      <div class="district-feed-filters-bar">
+        <!-- District Dropdown -->
+        <div class="feed-filter-select-wrap">
+          <label for="feedDistrictFilter" class="sr-only">জেলা নির্বাচন</label>
+          <select id="feedDistrictFilter" aria-label="জেলা অনুযায়ী ফিল্টার">
+            <option value="">সকল জেলা (All Districts)</option>
+          </select>
+        </div>
+
+        <!-- Crime Category Dropdown -->
+        <div class="feed-filter-select-wrap">
+          <label for="feedCategoryFilter" class="sr-only">অপরাধের ধরন</label>
+          <select id="feedCategoryFilter" aria-label="অপরাধের ধরন অনুযায়ী ফিল্টার">
+            <option value="">সকল অপরাধ (All Categories)</option>
+          </select>
+        </div>
+
+        <!-- Live Search Input -->
+        <div class="feed-search-input-wrap">
+          <svg class="feed-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="feedSearchInput" placeholder="অপরাধের ধরন, এলাকা বা বিবরণ খুঁজুন..." autocomplete="off">
+          <button type="button" id="feedClearSearchBtn" class="feed-clear-search-btn" title="মুছে ফেলুন" hidden>&times;</button>
+        </div>
+      </div>
+
+      <!-- Active Counter / Stats Header -->
+      <div class="district-feed-status-row">
+        <span class="feed-counter-badge" id="feedCounterBadge">মোট অপরাধ: ০ টি</span>
+        <span class="feed-sort-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          <span>সর্বশেষ ঘটনা প্রথমে (Newest First)</span>
+        </span>
+      </div>
+
+      <!-- Live Feed Stream Container -->
+      <div class="district-feed-scroll-wrap" id="districtFeedContainer">
+        <div class="feed-loading-spinner" id="feedLoadingSpinner">
+          <div class="btn-spinner" style="width:24px;height:24px;border-width:3px"></div>
+          <span>ফিড লোড হচ্ছে...</span>
+        </div>
+        <div id="districtFeedList" class="district-feed-cards-grid"></div>
       </div>
     </div>
   </div>

@@ -131,7 +131,17 @@ const I18N = {
     errCategory: 'অনুগ্রহ করে অপরাধের ধরন নির্বাচন করুন।',
     errDesc: 'ঘটনার বিবরণ কমপক্ষে ১৫ অক্ষরের হতে হবে (সর্বোচ্চ ২,০০০ অক্ষর)।',
     errImageSize: 'ছবি ফাইলের আকার সর্বোচ্চ ৫ মেগাবাইট হতে পারবে।',
-    errImageType: 'শুধুমাত্র JPG, JPEG, PNG অথবা WebP ছবি গ্রহণযোগ্য।'
+    errImageType: 'শুধুমাত্র JPG, JPEG, PNG অথবা WebP ছবি গ্রহণযোগ্য।',
+    navDistrictFeed: 'জেলাভিত্তিক অপরাধ',
+    feedTitle: 'জেলাভিত্তিক অপরাধ ডিরেক্টরি',
+    feedSub: 'সারাদেশের সাম্প্রতিক অপরাধের লাইভ ফিড, প্রমাণ চিত্র ও জেলাওয়ারি অনুসন্ধান',
+    feedCtaHeading: 'আপনার এলাকায় কোনো অপরাধের ঘটনা ঘটেছে?',
+    feedCtaSub: 'নিরাপদ বাংলাদেশ গড়তে অপরাধের তথ্য ও ছবি দিয়ে সবার সচেতনতা বৃদ্ধি করুন।',
+    feedCtaBtnText: 'অপরাধ রিপোর্ট করুন',
+    feedTotal: 'মোট অপরাধ: ',
+    feedLike: 'সচেতন',
+    feedLiked: 'সচেতনতা প্রকাশ করেছেন',
+    feedNoResults: 'এই ফিল্টারে কোনো অপরাধের রেকর্ড পাওয়া যায়নি।'
   },
   en: {
     brandTag: 'Community Public Safety Intelligence',
@@ -256,7 +266,17 @@ const I18N = {
     errCategory: 'Please select a crime category.',
     errDesc: 'Narrative must be between 15 and 2,000 characters.',
     errImageSize: 'Image file size cannot exceed 5 MB.',
-    errImageType: 'Only JPG, JPEG, PNG, or WebP images are allowed.'
+    errImageType: 'Only JPG, JPEG, PNG, or WebP images are allowed.',
+    navDistrictFeed: 'District Crime Feed',
+    feedTitle: 'District Crime Directory',
+    feedSub: 'Live incident feed, photo evidence and district-wise search',
+    feedCtaHeading: 'Witnessed a crime in your neighborhood?',
+    feedCtaSub: 'Help keep Bangladesh safe by reporting crime incidents with photos.',
+    feedCtaBtnText: 'Report Incident',
+    feedTotal: 'Total Crimes: ',
+    feedLike: 'Aware',
+    feedLiked: 'Reacted',
+    feedNoResults: 'No crime records found matching this filter.'
   }
 };
 
@@ -505,17 +525,17 @@ function renderDistrictIncidents(list) {
 
     card.append(top, loc, narrative);
 
-    // If report has an approved image attachment
-    if (item.image && item.image.media_id) {
+    // If report has an attached image (ImgBB URL or stored media)
+    const imgUrl = item.image_url || item.image?.url || item.image?.display_url || (item.image?.media_id ? `/api/media/${encodeURIComponent(item.image.media_id)}` : null);
+    if (imgUrl) {
       const imgBox = document.createElement('div');
-      imgBox.style.cssText = 'margin:8px 0;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--sub)';
+      imgBox.className = 'feed-card-photo-wrap';
       const imgEl = document.createElement('img');
-      imgEl.src = `/api/media/${encodeURIComponent(item.image.media_id)}`;
+      imgEl.src = imgUrl;
       imgEl.alt = 'Incident Photo Evidence';
       imgEl.loading = 'lazy';
-      imgEl.style.cssText = 'width:100%;max-height:200px;object-fit:cover;display:block;cursor:pointer';
-      imgEl.title = lang === 'bn' ? 'বড় করে দেখতে ক্লিক করুন' : 'Click to view full size';
-      imgEl.onclick = () => window.open(imgEl.src, '_blank');
+      imgEl.title = lang === 'bn' ? 'পূর্ণ আকারে ছবি দেখুন ↗' : 'Click to view full size ↗';
+      imgEl.onclick = () => window.open(imgUrl, '_blank');
       imgBox.append(imgEl);
       card.append(imgBox);
     }
@@ -528,7 +548,13 @@ function renderDistrictIncidents(list) {
     else if (item.verification_status === 'independently_verified') verifLabel = lang === 'bn' ? 'নিরপেক্ষভাবে প্রমাণিত' : 'Independently Verified';
     verif.textContent = verifLabel;
 
-    card.append(verif);
+    // Action Row with Like Reaction & Verification
+    const actionRow = document.createElement('div');
+    actionRow.className = 'feed-card-footer';
+    actionRow.style.marginTop = '8px';
+    const likeBtn = createLikeButton(item);
+    actionRow.append(likeBtn, verif);
+    card.append(actionRow);
 
     if (item.news_source && item.news_source.url) {
       let isSafeNewsUrl = false;
@@ -1238,6 +1264,277 @@ document.querySelectorAll('.modal-backdrop').forEach(m => {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') document.querySelectorAll('.modal-backdrop').forEach(m => closeModal(m.id));
 });
+
+// Like Reaction Button Helper (Works on both Feed & Drawer cards)
+function createLikeButton(item) {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'crime-like-btn';
+  const isLiked = Boolean(localStorage.getItem('liked_incident_' + item.id));
+  if (isLiked) btn.classList.add('liked');
+
+  const heartSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>`;
+  const likeLabel = isLiked ? (I18N[lang].feedLiked || 'সচেতন') : (I18N[lang].feedLike || 'সচেতনতা');
+  const count = item.likes || 0;
+
+  btn.innerHTML = `${heartSvg} <span class="like-label">${likeLabel}</span> <strong class="like-count">${count}</strong>`;
+
+  btn.onclick = async (e) => {
+    e.stopPropagation();
+    if (localStorage.getItem('liked_incident_' + item.id)) {
+      return; // Already reacted
+    }
+    btn.classList.add('liked');
+    const countEl = btn.querySelector('.like-count');
+    const labelEl = btn.querySelector('.like-label');
+    const currentCount = parseInt(countEl.textContent, 10) || 0;
+    countEl.textContent = currentCount + 1;
+    if (labelEl) labelEl.textContent = I18N[lang].feedLiked || 'সচেতন';
+    localStorage.setItem('liked_incident_' + item.id, 'true');
+
+    try {
+      const res = await api(`/api/feed/${encodeURIComponent(item.id)}/like`, { method: 'POST' });
+      if (res.likes !== undefined) countEl.textContent = res.likes;
+    } catch (err) {
+      console.warn('Like request failed:', err.message);
+    }
+  };
+
+  return btn;
+}
+
+// ========================================================
+// DISTRICT CRIME DIRECTORY & LIVE FEED FEATURE
+// ========================================================
+let allFeedIncidents = [];
+let feedLoaded = false;
+
+async function openDistrictFeed(preselectedDistrict = '') {
+  openModal('districtFeedModal');
+  populateFeedFilterSelects(preselectedDistrict);
+  await loadDistrictFeed(preselectedDistrict);
+}
+
+function populateFeedFilterSelects(preselectedDistrict = '') {
+  const distSelect = $('feedDistrictFilter');
+  if (distSelect && geoFeatures.length) {
+    const sorted = [...geoFeatures].sort((a, b) => districtName(a).localeCompare(districtName(b)));
+    distSelect.innerHTML = `<option value="">${lang === 'bn' ? 'সকল জেলা (All Districts)' : 'All Districts (সকল জেলা)'}</option>` +
+      sorted.map(f => `<option value="${f.properties.code}" ${f.properties.code === preselectedDistrict ? 'selected' : ''}>${districtName(f)}</option>`).join('');
+  }
+
+  const catSelect = $('feedCategoryFilter');
+  if (catSelect) {
+    catSelect.innerHTML = `<option value="">${lang === 'bn' ? 'সকল অপরাধের ধরন (All Categories)' : 'All Crime Categories'}</option>` +
+      CATEGORIES.map(c => `<option value="${c}">${I18N[lang]['cat' + c.charAt(0).toUpperCase() + c.slice(1)] || c}</option>`).join('');
+  }
+}
+
+async function loadDistrictFeed(districtFilter = '') {
+  const container = $('districtFeedList');
+  const spinner = $('feedLoadingSpinner');
+  if (spinner) spinner.hidden = false;
+  if (container) container.replaceChildren();
+
+  try {
+    let url = '/api/feed';
+    const params = new URLSearchParams();
+    if (districtFilter) params.set('district', districtFilter);
+    const searchVal = $('feedSearchInput')?.value.trim();
+    if (searchVal) params.set('search', searchVal);
+    const catVal = $('feedCategoryFilter')?.value;
+    if (catVal) params.set('category', catVal);
+
+    if ([...params.keys()].length) url += '?' + params.toString();
+
+    const res = await api(url);
+    allFeedIncidents = res.incidents || [];
+    feedLoaded = true;
+    renderFeedList(allFeedIncidents);
+  } catch (err) {
+    console.error('Feed load error:', err);
+    if (container) {
+      container.innerHTML = `<div class="feed-empty-state"><h4>${lang === 'bn' ? 'ফিড লোড করা যায়নি' : 'Unable to load feed'}</h4><p>${err.message}</p></div>`;
+    }
+  } finally {
+    if (spinner) spinner.hidden = true;
+  }
+}
+
+function renderFeedList(incidents) {
+  const container = $('districtFeedList');
+  const countBadge = $('feedCounterBadge');
+  if (!container) return;
+  container.replaceChildren();
+
+  if (countBadge) {
+    const total = incidents.length;
+    countBadge.textContent = (lang === 'bn' ? 'মোট অপরাধ: ' : 'Total Crimes: ') + total + (lang === 'bn' ? ' টি' : '');
+  }
+
+  if (!incidents.length) {
+    const empty = document.createElement('div');
+    empty.className = 'feed-empty-state';
+    empty.innerHTML = `
+      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+      <h4>${I18N[lang].feedNoResults || 'এই ফিল্টারে কোনো অপরাধের রেকর্ড পাওয়া যায়নি।'}</h4>
+      <p>${lang === 'bn' ? 'অন্য কোনো জেলা নির্বাচন করুন অথবা অনুসন্ধান শব্দ পরিবর্তন করুন।' : 'Try selecting another district or modifying your search terms.'}</p>
+    `;
+    container.append(empty);
+    return;
+  }
+
+  for (const item of incidents) {
+    const card = document.createElement('div');
+    card.className = 'feed-card';
+
+    // 1. Header Row
+    const header = document.createElement('div');
+    header.className = 'feed-card-header';
+
+    const badgesWrap = document.createElement('div');
+    badgesWrap.className = 'feed-card-badges';
+
+    // Crime category badge
+    const catBadge = document.createElement('span');
+    catBadge.className = 'badge-tag badge-' + item.type;
+    catBadge.textContent = I18N[lang]['cat' + item.type.charAt(0).toUpperCase() + item.type.slice(1)] || item.type;
+
+    // District badge
+    const distBadge = document.createElement('span');
+    distBadge.className = 'feed-card-district-tag';
+    const dName = (lang === 'bn' ? (BN_DISTRICTS[item.district_name] || item.district_name) : item.district_name) || item.district_code;
+    distBadge.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${dName}`;
+
+    badgesWrap.append(catBadge, distBadge);
+
+    // Time badge (Always shown at the top)
+    const timeSpan = document.createElement('span');
+    timeSpan.className = 'feed-card-time';
+    const timeStr = item.submission_time_dhaka || `${item.incident_date} ${item.incident_time}`;
+    timeSpan.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${timeStr}`;
+
+    header.append(badgesWrap, timeSpan);
+
+    // 2. Location
+    const loc = document.createElement('div');
+    loc.className = 'feed-card-location';
+    loc.textContent = item.location;
+
+    // 3. Narrative
+    const narrative = document.createElement('p');
+    narrative.className = 'feed-card-narrative';
+    narrative.textContent = item.description;
+
+    card.append(header, loc, narrative);
+
+    // 4. Attached Photo Evidence (Large, responsive, clickable)
+    const imgUrl = item.image_url || item.image?.url || item.image?.display_url || (item.image?.media_id ? `/api/media/${encodeURIComponent(item.image.media_id)}` : null);
+    if (imgUrl) {
+      const imgWrap = document.createElement('div');
+      imgWrap.className = 'feed-card-photo-wrap';
+      const imgEl = document.createElement('img');
+      imgEl.src = imgUrl;
+      imgEl.alt = 'Evidence photo';
+      imgEl.loading = 'lazy';
+      imgWrap.onclick = () => window.open(imgUrl, '_blank');
+
+      const expandTag = document.createElement('span');
+      expandTag.className = 'feed-photo-expand-tag';
+      expandTag.textContent = lang === 'bn' ? 'বড় করে দেখুন ↗' : 'View Full ↗';
+
+      imgWrap.append(imgEl, expandTag);
+      card.append(imgWrap);
+    }
+
+    // 5. Footer Actions
+    const footer = document.createElement('div');
+    footer.className = 'feed-card-footer';
+
+    const leftActions = document.createElement('div');
+    leftActions.className = 'feed-card-left-actions';
+
+    // Like Reaction button
+    const likeBtn = createLikeButton(item);
+    leftActions.append(likeBtn);
+
+    // Verification Badge
+    const verif = document.createElement('div');
+    verif.className = 'verification-badge verif-' + (item.verification_status || 'moderated');
+    let verifLabel = lang === 'bn' ? 'নাগরিক রিপোর্ট' : 'Community Report';
+    if (item.verification_status === 'published_news_report') verifLabel = lang === 'bn' ? 'সংবাদে প্রকাশিত' : 'News Verified';
+    else if (item.verification_status === 'independently_verified') verifLabel = lang === 'bn' ? 'প্রমাণিত রিপোর্ট' : 'Verified';
+    verif.textContent = verifLabel;
+    leftActions.append(verif);
+
+    // Right Actions: Quick Report button
+    const rightActions = document.createElement('div');
+    rightActions.className = 'feed-card-right-actions';
+    const reportBtn = document.createElement('button');
+    reportBtn.type = 'button';
+    reportBtn.className = 'feed-quick-report-btn';
+    reportBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> ${lang === 'bn' ? 'রিপোর্ট করুন' : 'Report'}`;
+    reportBtn.onclick = () => {
+      $('districtFeedModal').classList.remove('open');
+      resetComposer();
+      if ($('composerDistrict') && item.district_code) $('composerDistrict').value = item.district_code;
+      openModal('reportModal');
+    };
+    rightActions.append(reportBtn);
+
+    footer.append(leftActions, rightActions);
+    card.append(footer);
+
+    container.append(card);
+  }
+}
+
+// Triggers
+if ($('navDistrictFeedBtn')) {
+  $('navDistrictFeedBtn').onclick = () => openDistrictFeed();
+}
+if ($('mNavDistrictFeed')) {
+  $('mNavDistrictFeed').onclick = () => {
+    $('mobileNavDrawer').classList.remove('open');
+    openDistrictFeed();
+  };
+}
+if ($('feedReportCtaBtn')) {
+  $('feedReportCtaBtn').onclick = () => {
+    $('districtFeedModal').classList.remove('open');
+    const selectedDist = $('feedDistrictFilter')?.value;
+    resetComposer();
+    if (selectedDist && $('composerDistrict')) $('composerDistrict').value = selectedDist;
+    openModal('reportModal');
+  };
+}
+if ($('feedDistrictFilter')) {
+  $('feedDistrictFilter').onchange = () => loadDistrictFeed($('feedDistrictFilter').value);
+}
+if ($('feedCategoryFilter')) {
+  $('feedCategoryFilter').onchange = () => loadDistrictFeed($('feedDistrictFilter')?.value || '');
+}
+if ($('feedSearchInput')) {
+  let searchTimeout;
+  $('feedSearchInput').oninput = (e) => {
+    clearTimeout(searchTimeout);
+    const val = e.target.value.trim();
+    if ($('feedClearSearchBtn')) $('feedClearSearchBtn').hidden = !val;
+    searchTimeout = setTimeout(() => {
+      loadDistrictFeed($('feedDistrictFilter')?.value || '');
+    }, 250);
+  };
+}
+if ($('feedClearSearchBtn')) {
+  $('feedClearSearchBtn').onclick = () => {
+    if ($('feedSearchInput')) $('feedSearchInput').value = '';
+    $('feedClearSearchBtn').hidden = true;
+    loadDistrictFeed($('feedDistrictFilter')?.value || '');
+  };
+}
 
 // Triggers
 $('openReportBtn').onclick = () => { resetComposer(); openModal('reportModal'); };
