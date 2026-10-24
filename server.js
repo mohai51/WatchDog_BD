@@ -29,7 +29,7 @@ if (!fs.existsSync(DATA_DIR) && !IS_PROD) {
 // Load district GeoJSON (safe for Vercel serverless bundling)
 let districtsData;
 try {
-  districtsData = require('./public/districts.geojson');
+  districtsData = require('./public/districts.json');
 } catch {
   try {
     districtsData = JSON.parse(fs.readFileSync(path.join(PUBLIC_DIR, 'districts.geojson'), 'utf8'));
@@ -59,7 +59,7 @@ if (IS_PROD) {
   ];
   if (!SECRET || SECRET.length < 32 || invalidSecrets.includes(SECRET)) {
     console.error('[SECURITY CRITICAL] SAFEMAP_SECRET must be set to a cryptographically secure random string of at least 32 characters in production. Deterministic fallbacks are strictly prohibited.');
-    if (process.env.VERCEL === '1' && !SECRET) {
+    if (process.env.VERCEL === '1') {
       SECRET = crypto.randomBytes(32).toString('hex');
       console.warn('[VERCEL NOTICE] Generated ephemeral SAFEMAP_SECRET. Please add SAFEMAP_SECRET to Vercel Environment Variables for multi-instance token consistency.');
     } else if (process.env.NODE_ENV === 'production') {
@@ -86,9 +86,9 @@ if (IS_PROD) {
   ];
   if (!ADMIN_PASS || ADMIN_PASS.length < 16 || weakPasswords.includes(ADMIN_PASS.toLowerCase())) {
     console.error('[AUTH CRITICAL] SAFEMAP_ADMIN_PASSWORD in production must be a strong, unique secret of at least 16 characters. Weak or default passwords are strictly prohibited.');
-    if (process.env.VERCEL === '1' && !ADMIN_PASS) {
-      ADMIN_PASS = null; // Lock admin portal without crashing the public frontend
-      console.warn('[VERCEL NOTICE] SAFEMAP_ADMIN_PASSWORD is not set. Admin login is locked until configured in Vercel Environment Variables.');
+    if (process.env.VERCEL === '1') {
+      ADMIN_PASS = null; // Lock admin portal without crashing the public frontend on Vercel
+      console.warn('[VERCEL NOTICE] SAFEMAP_ADMIN_PASSWORD is weak, default, or missing. Admin login is disabled until configured in Vercel Environment Variables.');
     } else if (process.env.NODE_ENV === 'production') {
       throw new Error('FATAL CONFIGURATION ERROR: SAFEMAP_ADMIN_PASSWORD is missing, weak, or under 16 characters in production.');
     }
