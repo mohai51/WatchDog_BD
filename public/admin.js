@@ -41,7 +41,13 @@ async function api(url, opts = {}) {
     ...(opts.headers || {})
   };
   const res = await fetch(url, { ...opts, headers });
-  const data = await res.json();
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) {
+    sessionStorage.removeItem('watchdog_admin_token');
+    adminToken = null;
+    showAuth();
+    throw new Error(lang === 'bn' ? 'অ্যাডমিন সেশনের মেয়াদ শেষ হয়েছে বা অনুমোদন বাতিল হয়েছে। অনুগ্রহ করে পুনরায় লগইন করুন।' : 'Admin session expired or unauthorized. Please log in again.');
+  }
   if (!res.ok) throw new Error(data.error || 'HTTP ' + res.status);
   return data;
 }

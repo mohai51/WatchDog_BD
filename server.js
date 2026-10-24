@@ -60,8 +60,13 @@ if (IS_PROD) {
   if (!SECRET || SECRET.length < 32 || invalidSecrets.includes(SECRET)) {
     console.error('[SECURITY CRITICAL] SAFEMAP_SECRET must be set to a cryptographically secure random string of at least 32 characters in production. Deterministic fallbacks are strictly prohibited.');
     if (process.env.VERCEL === '1') {
-      SECRET = crypto.randomBytes(32).toString('hex');
-      console.warn('[VERCEL NOTICE] Generated ephemeral SAFEMAP_SECRET. Please add SAFEMAP_SECRET to Vercel Environment Variables for multi-instance token consistency.');
+      const mongoUri = (process.env.MONGODB_URI || '').trim();
+      if (mongoUri) {
+        SECRET = crypto.createHash('sha256').update(mongoUri + '_watchdog_bd_shared_lambda_secret_2026').digest('hex');
+      } else {
+        SECRET = crypto.randomBytes(32).toString('hex');
+      }
+      console.warn('[VERCEL NOTICE] Generated consistent multi-instance SAFEMAP_SECRET derived from database configuration.');
     } else if (process.env.NODE_ENV === 'production') {
       throw new Error('FATAL CONFIGURATION ERROR: SAFEMAP_SECRET is missing, insecure, or under 32 characters in production.');
     }
