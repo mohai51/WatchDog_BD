@@ -921,6 +921,11 @@ app.get('/admin', (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'admin.html'));
 });
 
+// Dedicated District Crime Feed Page
+app.get('/feed', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'feed.html'));
+});
+
 // Global API Rate Limiter
 app.use('/api', generalApiLimiter.middleware());
 
@@ -992,13 +997,12 @@ app.get('/api/stats', async (req, res) => {
     incident_time: r.incident_time,
     location: r.approximate_area || r.location, // Approximate neighborhood only
     description: r.description,
-    image: r.image ? {
+    image: r.image && r.image.media_id ? {
       media_id: r.image.media_id,
-      url: r.image.display_url || r.image.url || `/api/media/${r.image.media_id}`,
-      thumb_url: r.image.thumb_url || r.image.display_url || r.image.url,
+      url: `/api/media/${r.image.media_id}`,
       filename: r.image.filename
     } : null,
-    image_url: r.image ? (r.image.display_url || r.image.url || `/api/media/${r.image.media_id}`) : null,
+    image_url: r.image && r.image.media_id ? `/api/media/${r.image.media_id}` : null,
     likes: r.likes || 0,
     verification_status: r.verification_status || 'moderated',
     news_source: r.news_source || null,
@@ -1131,13 +1135,12 @@ app.get('/api/districts/:code', async (req, res) => {
     incident_time: r.incident_time,
     location: r.approximate_area || r.location,
     description: r.description,
-    image: r.image ? {
+    image: r.image && r.image.media_id ? {
       media_id: r.image.media_id,
-      url: r.image.display_url || r.image.url || `/api/media/${r.image.media_id}`,
-      thumb_url: r.image.thumb_url || r.image.display_url || r.image.url,
+      url: `/api/media/${r.image.media_id}`,
       filename: r.image.filename
     } : null,
-    image_url: r.image ? (r.image.display_url || r.image.url || `/api/media/${r.image.media_id}`) : null,
+    image_url: r.image && r.image.media_id ? `/api/media/${r.image.media_id}` : null,
     likes: r.likes || 0,
     verification_status: r.verification_status || 'moderated',
     news_source: r.news_source || null,
@@ -1196,13 +1199,12 @@ app.get('/api/feed', async (req, res) => {
     date_is_submission_time: Boolean(r.date_is_submission_time),
     location: r.approximate_area || r.location,
     description: r.description,
-    image: r.image ? {
+    image: r.image && r.image.media_id ? {
       media_id: r.image.media_id,
-      url: r.image.display_url || r.image.url || `/api/media/${r.image.media_id}`,
-      thumb_url: r.image.thumb_url || r.image.display_url || r.image.url,
+      url: `/api/media/${r.image.media_id}`,
       filename: r.image.filename
     } : null,
-    image_url: r.image ? (r.image.display_url || r.image.url || `/api/media/${r.image.media_id}`) : null,
+    image_url: r.image && r.image.media_id ? `/api/media/${r.image.media_id}` : null,
     likes: r.likes || 0,
     status: r.status || 'pending',
     verification_status: r.verification_status || 'moderated',
@@ -1465,9 +1467,7 @@ app.post('/api/reports', reportSubmitLimiter.middleware(), async (req, res) => {
       has_image: !!imageDoc,
       image: imageDoc ? {
         media_id: imageDoc.media_id,
-        url: imageDoc.url || undefined,
-        display_url: imageDoc.display_url || undefined,
-        thumb_url: imageDoc.thumb_url || undefined,
+        url: `/api/media/${imageDoc.media_id}`,
         filename: imageDoc.filename,
         mime_type: imageDoc.mime_type,
         status: 'pending'

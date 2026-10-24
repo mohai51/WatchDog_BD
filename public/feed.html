@@ -1,0 +1,1534 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>জেলাভিত্তিক অপরাধ ফিড — WatchDog BD</title>
+  <meta name="description" content="বাংলাদেশের প্রতিটি জেলার বাস্তব অপরাধ সংক্রান্ত বিবরণ, প্রমাণ এবং সর্বশেষ হালনাগাদ তথ্য।">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0B1930;
+      --surface: #112240;
+      --surface-hover: #192f55;
+      --surface-card: #0F213E;
+      --primary: #00BFA6;
+      --primary-hover: #00A892;
+      --primary-subtle: rgba(0, 191, 166, 0.12);
+      --text: #F8FAFC;
+      --text-muted: #94A3B8;
+      --border: rgba(148, 163, 184, 0.16);
+      --border-focus: rgba(0, 191, 166, 0.45);
+      --like-active: #EF4444;
+      --like-bg: rgba(239, 68, 68, 0.12);
+      --badge-bg: rgba(255, 255, 255, 0.06);
+      --badge-text: #CBD5E1;
+      --shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+    }
+
+    body.light {
+      --bg: #F8FAFC;
+      --surface: #FFFFFF;
+      --surface-hover: #F1F5F9;
+      --surface-card: #FFFFFF;
+      --primary: #00897B;
+      --primary-hover: #00796B;
+      --primary-subtle: rgba(0, 137, 123, 0.1);
+      --text: #0F172A;
+      --text-muted: #64748B;
+      --border: rgba(15, 23, 42, 0.1);
+      --border-focus: rgba(0, 137, 123, 0.35);
+      --like-active: #DC2626;
+      --like-bg: rgba(220, 38, 38, 0.08);
+      --badge-bg: rgba(15, 23, 42, 0.05);
+      --badge-text: #334155;
+      --shadow: 0 2px 14px rgba(15, 23, 42, 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Hind Siliguri', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Top Sticky Navigation */
+    .feed-navbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(11, 25, 48, 0.88);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--border);
+      transition: background 0.2s ease;
+    }
+    body.light .feed-navbar {
+      background: rgba(255, 255, 255, 0.92);
+    }
+
+    .nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .brand-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .brand-logo {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #00BFA6, #00897B);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      box-shadow: 0 2px 8px rgba(0, 191, 166, 0.35);
+    }
+
+    .brand-title {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .brand-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      background: var(--primary-subtle);
+      color: var(--primary);
+      border: 1px solid rgba(0, 191, 166, 0.25);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.15s ease;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .nav-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--border-focus);
+    }
+
+    .nav-btn-primary {
+      background: var(--primary);
+      color: #FFFFFF !important;
+      border-color: var(--primary);
+      box-shadow: 0 2px 10px rgba(0, 191, 166, 0.3);
+    }
+    .nav-btn-primary:hover {
+      background: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    /* Page Container */
+    .page-main {
+      flex: 1;
+      max-width: 760px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 24px 16px 60px;
+    }
+
+    /* Hero / Header */
+    .page-header {
+      margin-bottom: 22px;
+      text-align: left;
+    }
+
+    .page-title {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .page-subtitle {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+
+    /* Ultra-Clean Filter Toolbar */
+    .filter-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 24px;
+      box-shadow: var(--shadow);
+    }
+
+    .filter-row-top {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 580px) {
+      .filter-row-top {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .filter-control {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .filter-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .clean-select,
+    .clean-input {
+      width: 100%;
+      padding: 9px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-card);
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .clean-select:focus,
+    .clean-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-subtle);
+    }
+
+    .search-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .search-icon {
+      position: absolute;
+      left: 12px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .clean-input.has-icon {
+      padding-left: 36px;
+      padding-right: 32px;
+    }
+
+    .clear-btn {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    .clear-btn:hover {
+      color: var(--text);
+    }
+
+    .filter-status-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .count-indicator {
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    /* Crime Cards Feed */
+    .feed-stream {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .crime-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      transition: transform 0.12s ease, border-color 0.12s ease;
+    }
+
+    .crime-card:hover {
+      border-color: var(--border-focus);
+    }
+
+    /* Card Top Header */
+    .card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .card-meta-left {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .type-pill {
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 6px;
+      text-transform: capitalize;
+    }
+    .type-snatching, .type-theft { background: rgba(234, 88, 12, 0.14); color: #FB923C; }
+    .type-robbery, .type-assault { background: rgba(220, 38, 38, 0.14); color: #F87171; }
+    .type-extortion, .type-fraud { background: rgba(202, 138, 4, 0.14); color: #FACC15; }
+    .type-harassment, .type-rape { background: rgba(168, 85, 247, 0.14); color: #C084FC; }
+    .type-drug_related { background: rgba(6, 182, 212, 0.14); color: #38BDF8; }
+    .type-other { background: rgba(148, 163, 184, 0.14); color: #94A3B8; }
+
+    .district-pill {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .card-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    /* Location */
+    .card-location {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .card-location svg {
+      color: var(--primary);
+      flex-shrink: 0;
+    }
+
+    /* Narrative / Story */
+    .card-narrative {
+      font-size: 14px;
+      color: var(--text);
+      line-height: 1.7;
+      margin-bottom: 14px;
+      word-break: break-word;
+    }
+
+    /* Inline Clean Photo Preview (No "make big" button, no imagebb leak) */
+    .card-photo-box {
+      margin-bottom: 14px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: var(--surface-card);
+      max-height: 380px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-photo-img {
+      width: 100%;
+      height: 100%;
+      max-height: 380px;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Card Footer Actions */
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .like-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-card);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .like-btn svg {
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .like-btn:hover {
+      background: var(--surface-hover);
+      border-color: var(--like-active);
+      color: var(--like-active);
+    }
+
+    .like-btn:hover svg {
+      transform: scale(1.15);
+    }
+
+    .like-btn.liked {
+      background: var(--like-bg);
+      border-color: var(--like-active);
+      color: var(--like-active);
+    }
+    .like-btn.liked svg {
+      fill: var(--like-active);
+      stroke: var(--like-active);
+    }
+
+    .verif-tag {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: var(--badge-bg);
+      color: var(--text-muted);
+    }
+
+    .footer-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-report-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--primary);
+      background: var(--primary-subtle);
+      border: 1px solid rgba(0, 191, 166, 0.25);
+      border-radius: 6px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s ease;
+    }
+    .card-report-btn:hover {
+      background: rgba(0, 191, 166, 0.22);
+    }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: 14px;
+      color: var(--text-muted);
+    }
+    .empty-state svg {
+      margin-bottom: 12px;
+      opacity: 0.6;
+    }
+    .empty-state h3 {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .empty-state p {
+      font-size: 13px;
+    }
+
+    /* Modal Backdrop & Composer */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+    }
+
+    .modal-overlay.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .composer-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      width: 100%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.45);
+      padding: 20px;
+      transform: scale(0.96);
+      transition: transform 0.2s ease;
+    }
+
+    .modal-overlay.open .composer-card {
+      transform: scale(1);
+    }
+
+    .composer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .composer-header-title {
+      font-size: 16px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .close-modal-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+    }
+    .close-modal-btn:hover {
+      color: var(--text);
+      background: var(--surface-hover);
+    }
+
+    .composer-form {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-textarea {
+      width: 100%;
+      min-height: 90px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-card);
+      color: var(--text);
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      resize: vertical;
+    }
+    .form-textarea:focus {
+      border-color: var(--primary);
+    }
+
+    .upload-zone {
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      text-align: center;
+      background: var(--surface-card);
+      cursor: pointer;
+      transition: border-color 0.15s ease;
+    }
+    .upload-zone:hover {
+      border-color: var(--primary);
+    }
+
+    .upload-zone-text {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .upload-preview-box {
+      margin-top: 8px;
+      position: relative;
+      border-radius: 8px;
+      overflow: hidden;
+      max-height: 180px;
+      border: 1px solid var(--border);
+    }
+    .upload-preview-box img {
+      width: 100%;
+      height: 100%;
+      max-height: 180px;
+      object-fit: cover;
+      display: block;
+    }
+    .remove-photo-btn {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: rgba(0, 0, 0, 0.7);
+      color: #FFFFFF;
+      border: none;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .submit-btn {
+      margin-top: 6px;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--primary);
+      color: #FFFFFF;
+      font-weight: 700;
+      font-size: 14px;
+      font-family: inherit;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.15s ease;
+    }
+    .submit-btn:hover {
+      background: var(--primary-hover);
+    }
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .status-msg {
+      font-size: 13px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      margin-top: 8px;
+      display: none;
+    }
+    .status-msg.success {
+      display: block;
+      background: rgba(0, 191, 166, 0.15);
+      color: var(--primary);
+      border: 1px solid rgba(0, 191, 166, 0.3);
+    }
+    .status-msg.error {
+      display: block;
+      background: rgba(239, 68, 68, 0.15);
+      color: #F87171;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Skeleton Loading */
+    .skeleton-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .skeleton-line {
+      height: 14px;
+      background: var(--surface-card);
+      border-radius: 4px;
+      animation: pulse 1.2s infinite ease-in-out;
+    }
+    @keyframes pulse {
+      0% { opacity: 0.5; }
+      50% { opacity: 0.9; }
+      100% { opacity: 0.5; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="feed-navbar">
+    <div class="nav-inner">
+      <a href="/" class="brand-link" title="হোমপেজ ও ম্যাপে ফিরে যান">
+        <div class="brand-logo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">WatchDog BD</div>
+        </div>
+        <span class="brand-tag" id="navTag">জেলাভিত্তিক অপরাধ ফিড</span>
+      </a>
+
+      <div class="nav-actions">
+        <a href="/" class="nav-btn" id="mapViewBtn" title="ম্যাপ ভিউ">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon>
+            <line x1="8" y1="2" x2="8" y2="18"></line>
+            <line x1="16" y1="6" x2="16" y2="22"></line>
+          </svg>
+          <span id="mapViewText">ম্যাপ ভিউ</span>
+        </a>
+
+        <button type="button" class="nav-btn" id="themeBtn" aria-label="Toggle theme">
+          <svg id="themeIcon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"></circle>
+            <line x1="12" y1="1" x2="12" y2="3"></line>
+            <line x1="12" y1="21" x2="12" y2="23"></line>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+            <line x1="1" y1="12" x2="3" y2="12"></line>
+            <line x1="21" y1="12" x2="23" y2="12"></line>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+          </svg>
+        </button>
+
+        <button type="button" class="nav-btn" id="langBtn" aria-label="Toggle language">
+          <span id="langText">EN</span>
+        </button>
+
+        <button type="button" class="nav-btn nav-btn-primary" id="openReportBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          <span id="reportBtnText">রিপোর্ট করুন</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="page-main">
+    <div class="page-header">
+      <h1 class="page-title" id="feedHeading">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" y1="13" x2="8" y2="13"></line>
+          <line x1="16" y1="17" x2="8" y2="17"></line>
+          <polyline points="10 9 9 9 8 9"></polyline>
+        </svg>
+        <span id="feedHeadingText">জেলাভিত্তিক অপরাধ পর্যবেক্ষণ</span>
+      </h1>
+      <p class="page-subtitle" id="feedSubText">বাংলাদেশব্যাপী প্রতিটি জেলার বাস্তব অপরাধের বিবরণ, প্রামাণিক ছবি ও সর্বশেষ সময়ভিত্তিক আপডেট।</p>
+    </div>
+
+    <!-- Filter Card -->
+    <section class="filter-card" aria-label="Filters">
+      <div class="filter-row-top">
+        <div class="filter-control">
+          <label class="filter-label" for="districtFilter" id="districtLabel">জেলা নির্বাচন করুন</label>
+          <select id="districtFilter" class="clean-select">
+            <option value="">সকল জেলা (৬৪টি জেলা)</option>
+          </select>
+        </div>
+
+        <div class="filter-control">
+          <label class="filter-label" for="categoryFilter" id="categoryLabel">অপরাধের ধরন</label>
+          <select id="categoryFilter" class="clean-select">
+            <option value="">সকল অপরাধের ধরন</option>
+            <option value="snatching">ছিনতাই</option>
+            <option value="theft">চুরি</option>
+            <option value="robbery">ডাকাতি</option>
+            <option value="extortion">চাঁদাবাজি</option>
+            <option value="harassment">হয়রানি</option>
+            <option value="assault">শারীরিক আক্রমণ</option>
+            <option value="fraud">প্রতারণা</option>
+            <option value="drug_related">মাদক সংক্রান্ত</option>
+            <option value="rape">ধর্ষণ</option>
+            <option value="other">অন্যান্য</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="filter-control" style="margin-bottom:12px">
+        <label class="filter-label" for="searchInput" id="searchLabel">নির্দিষ্ট এলাকা বা ঘটনা অনুসন্ধান</label>
+        <div class="search-wrapper">
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="searchInput" class="clean-input has-icon" placeholder="থানা, এলাকা বা ঘটনার শব্দ লিখুন..." autocomplete="off">
+          <button type="button" id="clearSearchBtn" class="clear-btn" aria-label="Clear search" hidden>✕</button>
+        </div>
+      </div>
+
+      <div class="filter-status-bar">
+        <div id="resultCount" class="count-indicator">লোড হচ্ছে...</div>
+        <div id="sortLabel">সর্বশেষ ঘটনা প্রথমে সাজানো</div>
+      </div>
+    </section>
+
+    <!-- Crime Cards Feed -->
+    <section id="feedContainer" class="feed-stream" aria-live="polite">
+      <!-- Skeletons while loading -->
+      <div class="skeleton-card">
+        <div class="skeleton-line" style="width:35%"></div>
+        <div class="skeleton-line" style="width:65%"></div>
+        <div class="skeleton-line" style="height:140px"></div>
+      </div>
+      <div class="skeleton-card">
+        <div class="skeleton-line" style="width:40%"></div>
+        <div class="skeleton-line" style="width:80%"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Minimal Facebook-Style Composer Modal -->
+  <div id="reportModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="composer-card">
+      <div class="composer-header">
+        <div class="composer-header-title" id="modalTitle">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--primary)">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+          </svg>
+          <span id="composerModalHeading">অপরাধের তথ্য রিপোর্ট করুন</span>
+        </div>
+        <button type="button" class="close-modal-btn" id="closeModalBtn" aria-label="Close modal">✕</button>
+      </div>
+
+      <form id="composerForm" class="composer-form">
+        <div class="form-group">
+          <label class="form-label" for="modalDistrict" id="lblModalDist">জেলা *</label>
+          <select id="modalDistrict" class="clean-select" required>
+            <option value="" disabled selected>জেলা নির্বাচন করুন</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="modalType" id="lblModalType">অপরাধের ধরন *</label>
+          <select id="modalType" class="clean-select" required>
+            <option value="" disabled selected>অপরাধের ধরন নির্বাচন করুন</option>
+            <option value="snatching">ছিনতাই</option>
+            <option value="theft">চুরি</option>
+            <option value="robbery">ডাকাতি</option>
+            <option value="extortion">চাঁদাবাজি</option>
+            <option value="harassment">হয়রানি</option>
+            <option value="assault">শারীরিক আক্রমণ</option>
+            <option value="fraud">প্রতারণা</option>
+            <option value="drug_related">মাদক সংক্রান্ত</option>
+            <option value="rape">ধর্ষণ</option>
+            <option value="other">অন্যান্য</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="modalArea" id="lblModalArea">সুনির্দিষ্ট এলাকা / থানা *</label>
+          <input type="text" id="modalArea" class="clean-input" placeholder="যেমন: সদর রোড, ধানমন্ডি ২৭" required maxlength="120">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="modalDesc" id="lblModalDesc">ঘটনার সংক্ষিপ্ত বিবরণ *</label>
+          <textarea id="modalDesc" class="form-textarea" placeholder="ঘটনাটি কীভাবে ঘটেছে সংক্ষেপে লিখুন..." required maxlength="2000"></textarea>
+        </div>
+
+        <!-- Optional Single Image Upload -->
+        <div class="form-group">
+          <label class="form-label" id="lblModalPhoto">প্রামাণিক ছবি (ঐচ্ছিক, সর্বোচ্চ ৫ মেগাবাইট)</label>
+          <div class="upload-zone" id="uploadZone">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);margin-bottom:4px">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
+            <div class="upload-zone-text" id="uploadZoneText">ছবি আপলোড করতে ক্লিক করুন (JPEG/PNG)</div>
+            <input type="file" id="modalPhotoInput" accept="image/jpeg,image/png" hidden>
+          </div>
+          <div id="previewContainer" class="upload-preview-box" hidden>
+            <img id="previewImg" src="" alt="Selected preview">
+            <button type="button" class="remove-photo-btn" id="removePhotoBtn">ছবি মুছুন ✕</button>
+          </div>
+        </div>
+
+        <div id="composerStatus" class="status-msg"></div>
+
+        <button type="submit" class="submit-btn" id="submitReportBtn">
+          <span id="submitBtnText">রিপোর্ট জমা দিন</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Internationalization dictionary
+    const I18N = {
+      bn: {
+        navTag: 'জেলাভিত্তিক অপরাধ ফিড',
+        mapViewText: 'ম্যাপ ভিউ',
+        reportBtnText: 'রিপোর্ট করুন',
+        feedHeadingText: 'জেলাভিত্তিক অপরাধ পর্যবেক্ষণ',
+        feedSubText: 'বাংলাদেশব্যাপী প্রতিটি জেলার বাস্তব অপরাধের বিবরণ, প্রামাণিক ছবি ও সর্বশেষ সময়ভিত্তিক আপডেট।',
+        districtLabel: 'জেলা নির্বাচন করুন',
+        allDistricts: 'সকল জেলা (৬৪টি জেলা)',
+        categoryLabel: 'অপরাধের ধরন',
+        allCategories: 'সকল অপরাধের ধরন',
+        searchLabel: 'নির্দিষ্ট এলাকা বা ঘটনা অনুসন্ধান',
+        searchPlaceholder: 'থানা, এলাকা বা ঘটনার শব্দ লিখুন...',
+        sortLabel: 'সর্বশেষ ঘটনা প্রথমে সাজানো',
+        loading: 'লোড হচ্ছে...',
+        totalCrimes: 'মোট অপরাধ:',
+        items: 'টি',
+        noResults: 'এই ফিল্টারে কোনো অপরাধের রেকর্ড পাওয়া যায়নি।',
+        noResultsSub: 'অন্য কোনো জেলা নির্বাচন করুন অথবা অনুসন্ধান শব্দ পরিবর্তন করুন।',
+        likeText: 'সচেতন',
+        quickReport: 'রিপোর্ট করুন',
+        communityReport: 'নাগরিক রিপোর্ট',
+        newsVerified: 'সংবাদে প্রকাশিত',
+        verified: 'প্রমাণিত',
+        composerModalHeading: 'অপরাধের তথ্য রিপোর্ট করুন',
+        lblModalDist: 'জেলা *',
+        selectDistrict: 'জেলা নির্বাচন করুন',
+        lblModalType: 'অপরাধের ধরন *',
+        selectCategory: 'অপরাধের ধরন নির্বাচন করুন',
+        lblModalArea: 'সুনির্দিষ্ট এলাকা / থানা *',
+        lblModalDesc: 'ঘটনার সংক্ষিপ্ত বিবরণ *',
+        lblModalPhoto: 'প্রামাণিক ছবি (ঐচ্ছিক, সর্বোচ্চ ৫ মেগাবাইট)',
+        uploadZoneText: 'ছবি আপলোড করতে ক্লিক করুন (JPEG/PNG)',
+        removePhoto: 'ছবি মুছুন ✕',
+        submitReport: 'রিপোর্ট জমা দিন',
+        submitting: 'জমা হচ্ছে...',
+        submitSuccess: 'আপনার রিপোর্ট সফলভাবে জমা হয়েছে। ধন্যবাদ!',
+        catSnatching: 'ছিনতাই',
+        catTheft: 'চুরি',
+        catRobbery: 'ডাকাতি',
+        catExtortion: 'চাঁদাবাজি',
+        catHarassment: 'হয়রানি',
+        catAssault: 'শারীরিক আক্রমণ',
+        catFraud: 'প্রতারণা',
+        catDrug_related: 'মাদক সংক্রান্ত',
+        catRape: 'ধর্ষণ',
+        catOther: 'অন্যান্য'
+      },
+      en: {
+        navTag: 'District Crime Feed',
+        mapViewText: 'Map View',
+        reportBtnText: 'Report Crime',
+        feedHeadingText: 'District-Wise Crime Feed',
+        feedSubText: 'Live eyewitness reports, photographic evidence, and verified incidents across all 64 districts.',
+        districtLabel: 'Select District',
+        allDistricts: 'All Districts (64 Districts)',
+        categoryLabel: 'Crime Category',
+        allCategories: 'All Categories',
+        searchLabel: 'Search Area or Incident',
+        searchPlaceholder: 'Search by police station, area, or description...',
+        sortLabel: 'Sorted by newest first',
+        loading: 'Loading...',
+        totalCrimes: 'Total Crimes:',
+        items: '',
+        noResults: 'No incidents match your selected filters.',
+        noResultsSub: 'Try selecting another district or modifying your search terms.',
+        likeText: 'Aware',
+        quickReport: 'Report',
+        communityReport: 'Community Report',
+        newsVerified: 'News Verified',
+        verified: 'Verified',
+        composerModalHeading: 'Report Incident',
+        lblModalDist: 'District *',
+        selectDistrict: 'Select District',
+        lblModalType: 'Crime Category *',
+        selectCategory: 'Select Category',
+        lblModalArea: 'Specific Area / Police Station *',
+        lblModalDesc: 'Brief Description *',
+        lblModalPhoto: 'Photographic Evidence (Optional, max 5MB)',
+        uploadZoneText: 'Click to upload image (JPEG/PNG)',
+        removePhoto: 'Remove photo ✕',
+        submitReport: 'Submit Report',
+        submitting: 'Submitting...',
+        submitSuccess: 'Your report has been submitted successfully. Thank you!',
+        catSnatching: 'Snatching',
+        catTheft: 'Theft',
+        catRobbery: 'Robbery',
+        catExtortion: 'Extortion',
+        catHarassment: 'Harassment',
+        catAssault: 'Assault',
+        catFraud: 'Fraud',
+        catDrug_related: 'Drug Related',
+        catRape: 'Rape',
+        catOther: 'Other'
+      }
+    };
+
+    const BN_DISTRICTS = {
+      'Bagerhat': 'বাগেরহাট', 'Bandarban': 'বান্দরবান', 'Barguna': 'বরগুনা', 'Barisal': 'বরিশাল',
+      'Bhola': 'ভোলা', 'Bogra': 'বগুড়া', 'Brahmanbaria': 'ব্রাহ্মণবাড়িয়া', 'Chandpur': 'চাঁদপুর',
+      'Chittagong': 'চট্টগ্রাম', 'Chuadanga': 'চুয়াডাঙ্গা', 'Comilla': 'কুমিল্লা', "Cox's Bazar": 'কক্সবাজার',
+      'Dhaka': 'ঢাকা', 'Dinajpur': 'দিনাজপুর', 'Faridpur': 'ফরিদপুর', 'Feni': 'ফেনী',
+      'Gaibandha': 'গাইবান্ধা', 'Gazipur': 'গাজীপুর', 'Gopalganj': 'গোপালগঞ্জ', 'Habiganj': 'হবিগঞ্জ',
+      'Jamalpur': 'জামালপুর', 'Jessore': 'যশোর', 'Jhalokati': 'ঝালকাঠি', 'Jhenaidah': 'ঝিনাইদহ',
+      'Joypurhat': 'জয়পুরহাট', 'Khagrachhari': 'খাগড়াছড়ি', 'Khulna': 'খুলনা', 'Kishoreganj': 'কিশোরগঞ্জ',
+      'Kurigram': 'কুড়িগ্রাম', 'Kushtia': 'কুষ্টিয়া', 'Lakshmipur': 'লক্ষ্মীপুর', 'Lalmonirhat': 'লালমনিরহাট',
+      'Madaripur': 'মাদারীপুর', 'Magura': 'মাগুরা', 'Manikganj': 'মানিকগঞ্জ', 'Meherpur': 'মেহেরপুর',
+      'Moulvibazar': 'মৌলভীবাজার', 'Munshiganj': 'মুন্সীগঞ্জ', 'Mymensingh': 'ময়মনসিংহ', 'Naogaon': 'নওগাঁ',
+      'Narail': 'নড়াইল', 'Narayanganj': 'নারায়ণগঞ্জ', 'Narsingdi': 'নরসিংদী', 'Natore': 'নাটোর',
+      'Nawabganj': 'চাঁপাইনবাবগঞ্জ', 'Netrakona': 'নেত্রকোণা', 'Nilphamari': 'নীলফামারী', 'Noakhali': 'নোয়াখালী',
+      'Pabna': 'পাবনা', 'Panchagarh': 'পঞ্চগড়', 'Patuakhali': 'পটুয়াখালী', 'Pirojpur': 'পিরোজপুর',
+      'Rajbari': 'রাজবাড়ী', 'Rajshahi': 'রাজশাহী', 'Rangamati': 'রাঙ্গামাটি', 'Rangpur': 'রংপুর',
+      'Satkhira': 'সাতক্ষীরা', 'Shariatpur': 'শরীয়তপুর', 'Sherpur': 'শেরপুর', 'Sirajganj': 'সিরাজগঞ্জ',
+      'Sunamganj': 'সুনামগঞ্জ', 'Sylhet': 'সিলেট', 'Tangail': 'টাঙ্গাইল', 'Thakurgaon': 'ঠাকুরগাঁও'
+    };
+
+    let lang = localStorage.getItem('watchdog_lang') || 'bn';
+    let districtsList = [];
+    let activeImageData = null;
+    let activeImageName = null;
+
+    // Theme initialization
+    function initTheme() {
+      const savedTheme = localStorage.getItem('watchdog_theme');
+      if (savedTheme === 'light') {
+        document.body.classList.add('light');
+      } else {
+        document.body.classList.remove('light');
+      }
+      updateThemeIcon();
+    }
+
+    function updateThemeIcon() {
+      const isLight = document.body.classList.contains('light');
+      const icon = document.getElementById('themeIcon');
+      if (isLight) {
+        icon.innerHTML = `<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>`;
+      } else {
+        icon.innerHTML = `<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>`;
+      }
+    }
+
+    document.getElementById('themeBtn').onclick = () => {
+      document.body.classList.toggle('light');
+      const isLight = document.body.classList.contains('light');
+      localStorage.setItem('watchdog_theme', isLight ? 'light' : 'dark');
+      updateThemeIcon();
+    };
+
+    // Language Toggle
+    function updateLanguage() {
+      document.documentElement.lang = lang;
+      document.getElementById('langText').textContent = lang === 'bn' ? 'EN' : 'বাং';
+      const t = I18N[lang];
+
+      document.getElementById('navTag').textContent = t.navTag;
+      document.getElementById('mapViewText').textContent = t.mapViewText;
+      document.getElementById('reportBtnText').textContent = t.reportBtnText;
+      document.getElementById('feedHeadingText').textContent = t.feedHeadingText;
+      document.getElementById('feedSubText').textContent = t.feedSubText;
+      document.getElementById('districtLabel').textContent = t.districtLabel;
+      document.getElementById('categoryLabel').textContent = t.categoryLabel;
+      document.getElementById('searchLabel').textContent = t.searchLabel;
+      document.getElementById('searchInput').placeholder = t.searchPlaceholder;
+      document.getElementById('sortLabel').textContent = t.sortLabel;
+
+      document.getElementById('composerModalHeading').textContent = t.composerModalHeading;
+      document.getElementById('lblModalDist').textContent = t.lblModalDist;
+      document.getElementById('lblModalType').textContent = t.lblModalType;
+      document.getElementById('lblModalArea').textContent = t.lblModalArea;
+      document.getElementById('lblModalDesc').textContent = t.lblModalDesc;
+      document.getElementById('lblModalPhoto').textContent = t.lblModalPhoto;
+      document.getElementById('uploadZoneText').textContent = t.uploadZoneText;
+      document.getElementById('removePhotoBtn').textContent = t.removePhoto;
+      document.getElementById('submitBtnText').textContent = t.submitReport;
+
+      populateDistrictSelects();
+      loadFeed();
+    }
+
+    document.getElementById('langBtn').onclick = () => {
+      lang = lang === 'bn' ? 'en' : 'bn';
+      localStorage.setItem('watchdog_lang', lang);
+      updateLanguage();
+    };
+
+    // Load Districts
+    async function loadDistrictsMeta() {
+      try {
+        const res = await fetch('/api/meta');
+        if (res.ok) {
+          const data = await res.json();
+          districtsList = data.districts || [];
+          populateDistrictSelects();
+        }
+      } catch (err) {
+        console.error('Failed to load districts meta:', err);
+      }
+    }
+
+    function populateDistrictSelects() {
+      const dSelect = document.getElementById('districtFilter');
+      const mSelect = document.getElementById('modalDistrict');
+      const currentDVal = dSelect.value;
+      const currentMVal = mSelect.value;
+
+      const t = I18N[lang];
+      dSelect.innerHTML = `<option value="">${t.allDistricts}</option>`;
+      mSelect.innerHTML = `<option value="" disabled selected>${t.selectDistrict}</option>`;
+
+      const sorted = [...districtsList].sort((a, b) => a.name.localeCompare(b.name));
+      for (const d of sorted) {
+        const dName = lang === 'bn' ? (BN_DISTRICTS[d.name] || d.name) : d.name;
+        const opt1 = document.createElement('option');
+        opt1.value = d.code;
+        opt1.textContent = `${dName} (${d.division})`;
+        dSelect.appendChild(opt1);
+
+        const opt2 = document.createElement('option');
+        opt2.value = d.code;
+        opt2.textContent = `${dName} (${d.division})`;
+        mSelect.appendChild(opt2);
+      }
+
+      if (currentDVal) dSelect.value = currentDVal;
+      if (currentMVal) mSelect.value = currentMVal;
+    }
+
+    // Load Feed
+    async function loadFeed() {
+      const container = document.getElementById('feedContainer');
+      const resultCount = document.getElementById('resultCount');
+      const district = document.getElementById('districtFilter').value;
+      const category = document.getElementById('categoryFilter').value;
+      const search = document.getElementById('searchInput').value.trim();
+
+      const params = new URLSearchParams();
+      if (district) params.set('district', district);
+      if (category) params.set('category', category);
+      if (search) params.set('search', search);
+
+      try {
+        const res = await fetch('/api/feed?' + params.toString());
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        const incidents = data.incidents || [];
+        renderFeed(incidents);
+      } catch (err) {
+        console.error('Feed fetch error:', err);
+        container.innerHTML = `
+          <div class="empty-state">
+            <h3>সার্ভার থেকে তথ্য পাওয়া যায়নি</h3>
+            <p>অনুগ্রহ করে কিছুক্ষণ পর আবার চেষ্টা করুন। (${err.message})</p>
+          </div>
+        `;
+      }
+    }
+
+    // Render Feed Stream
+    function renderFeed(incidents) {
+      const container = document.getElementById('feedContainer');
+      const resultCount = document.getElementById('resultCount');
+      const t = I18N[lang];
+
+      resultCount.textContent = `${t.totalCrimes} ${incidents.length} ${t.items}`;
+      container.replaceChildren();
+
+      if (!incidents.length) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <h3>${t.noResults}</h3>
+            <p>${t.noResultsSub}</p>
+          </div>
+        `;
+        return;
+      }
+
+      for (const item of incidents) {
+        const card = document.createElement('article');
+        card.className = 'crime-card';
+
+        // 1. Header Row
+        const topRow = document.createElement('div');
+        topRow.className = 'card-top';
+
+        const metaLeft = document.createElement('div');
+        metaLeft.className = 'card-meta-left';
+
+        // Type Pill
+        const typePill = document.createElement('span');
+        typePill.className = `type-pill type-${item.type}`;
+        typePill.textContent = t['cat' + item.type.charAt(0).toUpperCase() + item.type.slice(1)] || item.type;
+
+        // District Pill
+        const distPill = document.createElement('span');
+        distPill.className = 'district-pill';
+        const dName = lang === 'bn' ? (BN_DISTRICTS[item.district_name] || item.district_name) : item.district_name;
+        distPill.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${dName}`;
+
+        metaLeft.append(typePill, distPill);
+
+        // Time
+        const timeSpan = document.createElement('span');
+        timeSpan.className = 'card-time';
+        const timeDisplay = item.submission_time_dhaka || `${item.incident_date} ${item.incident_time}`;
+        timeSpan.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ${timeDisplay}`;
+
+        topRow.append(metaLeft, timeSpan);
+
+        // 2. Location
+        const loc = document.createElement('div');
+        loc.className = 'card-location';
+        loc.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg> ${item.location}`;
+
+        // 3. Narrative
+        const narrative = document.createElement('p');
+        narrative.className = 'card-narrative';
+        narrative.textContent = item.description;
+
+        card.append(topRow, loc, narrative);
+
+        // 4. Inline Evidence Photo (Directly shown, no "enlarge" button, zero imagebb exposure)
+        const mediaSrc = item.image_url || (item.image && item.image.media_id ? `/api/media/${item.image.media_id}` : null);
+        if (mediaSrc) {
+          const photoBox = document.createElement('div');
+          photoBox.className = 'card-photo-box';
+          const imgEl = document.createElement('img');
+          imgEl.src = mediaSrc;
+          imgEl.className = 'card-photo-img';
+          imgEl.alt = 'Evidence photo';
+          imgEl.loading = 'lazy';
+          photoBox.appendChild(imgEl);
+          card.appendChild(photoBox);
+        }
+
+        // 5. Card Footer
+        const footer = document.createElement('div');
+        footer.className = 'card-footer';
+
+        const fLeft = document.createElement('div');
+        fLeft.className = 'footer-left';
+
+        // Like Button
+        const likeBtn = document.createElement('button');
+        likeBtn.type = 'button';
+        likeBtn.className = 'like-btn';
+        const likedKey = 'liked_incident_' + item.id;
+        let isLiked = Boolean(localStorage.getItem(likedKey));
+        let count = item.likes || 0;
+        if (isLiked) likeBtn.classList.add('liked');
+
+        function renderLikeContent() {
+          likeBtn.innerHTML = `
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="${isLiked ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+            </svg>
+            <span>${t.likeText} (${count})</span>
+          `;
+        }
+        renderLikeContent();
+
+        likeBtn.onclick = async () => {
+          if (isLiked) return;
+          isLiked = true;
+          count += 1;
+          likeBtn.classList.add('liked');
+          localStorage.setItem(likedKey, '1');
+          renderLikeContent();
+
+          try {
+            await fetch(`/api/feed/${encodeURIComponent(item.id)}/like`, { method: 'POST' });
+          } catch (e) {
+            console.error('Like error:', e);
+          }
+        };
+
+        // Verification Tag
+        const verifTag = document.createElement('span');
+        verifTag.className = 'verif-tag';
+        let verifText = t.communityReport;
+        if (item.verification_status === 'published_news_report') verifText = t.newsVerified;
+        else if (item.verification_status === 'independently_verified') verifText = t.verified;
+        verifTag.textContent = verifText;
+
+        fLeft.append(likeBtn, verifTag);
+
+        // Footer Right: Quick Report
+        const fRight = document.createElement('div');
+        fRight.className = 'footer-right';
+
+        const quickReportBtn = document.createElement('button');
+        quickReportBtn.type = 'button';
+        quickReportBtn.className = 'card-report-btn';
+        quickReportBtn.innerHTML = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg> ${t.quickReport}`;
+        quickReportBtn.onclick = () => {
+          openComposer(item.district_code);
+        };
+
+        fRight.appendChild(quickReportBtn);
+
+        footer.append(fLeft, fRight);
+        card.appendChild(footer);
+
+        container.appendChild(card);
+      }
+    }
+
+    // Event Listeners for Filters
+    document.getElementById('districtFilter').onchange = () => loadFeed();
+    document.getElementById('categoryFilter').onchange = () => loadFeed();
+
+    const searchInput = document.getElementById('searchInput');
+    const clearSearchBtn = document.getElementById('clearSearchBtn');
+    let searchDebounce;
+
+    searchInput.oninput = () => {
+      const val = searchInput.value.trim();
+      clearSearchBtn.hidden = !val;
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(() => {
+        loadFeed();
+      }, 250);
+    };
+
+    clearSearchBtn.onclick = () => {
+      searchInput.value = '';
+      clearSearchBtn.hidden = true;
+      loadFeed();
+    };
+
+    // Composer Modal Logic
+    const reportModal = document.getElementById('reportModal');
+    const openReportBtn = document.getElementById('openReportBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const composerForm = document.getElementById('composerForm');
+    const uploadZone = document.getElementById('uploadZone');
+    const photoInput = document.getElementById('modalPhotoInput');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewImg = document.getElementById('previewImg');
+    const removePhotoBtn = document.getElementById('removePhotoBtn');
+    const composerStatus = document.getElementById('composerStatus');
+    const submitBtn = document.getElementById('submitReportBtn');
+
+    function openComposer(preselectDistrict = '') {
+      reportModal.classList.add('open');
+      composerStatus.className = 'status-msg';
+      composerStatus.textContent = '';
+      if (preselectDistrict) {
+        document.getElementById('modalDistrict').value = preselectDistrict;
+      }
+    }
+
+    function closeComposer() {
+      reportModal.classList.remove('open');
+    }
+
+    openReportBtn.onclick = () => openComposer();
+    closeModalBtn.onclick = () => closeComposer();
+    reportModal.onclick = (e) => {
+      if (e.target === reportModal) closeComposer();
+    };
+
+    // Image Upload Handling in Composer
+    uploadZone.onclick = () => photoInput.click();
+
+    photoInput.onchange = (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      if (!['image/jpeg', 'image/png'].includes(file.type)) {
+        alert(lang === 'bn' ? 'শুধুমাত্র JPEG বা PNG ছবি অনুমোদিত।' : 'Only JPEG or PNG images are allowed.');
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert(lang === 'bn' ? 'ছবির সাইজ সর্বোচ্চ ৫ মেগাবাইট হতে পারবে।' : 'Image size cannot exceed 5MB.');
+        return;
+      }
+
+      activeImageName = file.name;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        activeImageData = ev.target.result;
+        previewImg.src = activeImageData;
+        previewContainer.hidden = false;
+        uploadZone.hidden = true;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    removePhotoBtn.onclick = (e) => {
+      e.stopPropagation();
+      activeImageData = null;
+      activeImageName = null;
+      photoInput.value = '';
+      previewContainer.hidden = true;
+      uploadZone.hidden = false;
+    };
+
+    // Submit Report
+    composerForm.onsubmit = async (e) => {
+      e.preventDefault();
+      const t = I18N[lang];
+
+      const district_code = document.getElementById('modalDistrict').value;
+      const type = document.getElementById('modalType').value;
+      const location = document.getElementById('modalArea').value.trim();
+      const description = document.getElementById('modalDesc').value.trim();
+
+      if (!district_code || !type || !location || !description) {
+        alert(lang === 'bn' ? 'অনুগ্রহ করে সকল আবশ্যক তথ্য পূরণ করুন।' : 'Please fill all required fields.');
+        return;
+      }
+
+      submitBtn.disabled = true;
+      submitBtn.textContent = t.submitting;
+      composerStatus.className = 'status-msg';
+      composerStatus.textContent = '';
+
+      try {
+        const payload = {
+          district_code,
+          type,
+          location,
+          description,
+          is_anonymous: true
+        };
+
+        if (activeImageData) {
+          payload.image_data = activeImageData;
+          payload.image_name = activeImageName;
+        }
+
+        const res = await fetch('/api/reports', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to submit report');
+
+        composerStatus.className = 'status-msg success';
+        composerStatus.textContent = t.submitSuccess;
+        composerForm.reset();
+        activeImageData = null;
+        activeImageName = null;
+        previewContainer.hidden = true;
+        uploadZone.hidden = false;
+
+        setTimeout(() => {
+          closeComposer();
+          loadFeed();
+        }, 1600);
+      } catch (err) {
+        composerStatus.className = 'status-msg error';
+        composerStatus.textContent = err.message;
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = t.submitReport;
+      }
+    };
+
+    // App Init
+    initTheme();
+    updateLanguage();
+    loadDistrictsMeta();
+  </script>
+</body>
+</html>
