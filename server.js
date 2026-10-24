@@ -429,7 +429,7 @@ class DatabaseService {
     return id;
   }
 
-  async updateReportStatus(rid, newStatus, verificationStatus, moderatorNote, reviewedAt) {
+    async updateReportStatus(rid, newStatus, verificationStatus, moderatorNote, reviewedAt) {
     const updateFields = {
       status: newStatus,
       reviewed_at: reviewedAt
@@ -441,11 +441,6 @@ class DatabaseService {
       updateFields['moderation.moderator_note'] = moderatorNote;
       updateFields['moderation.reviewed_at'] = reviewedAt;
     }
-    if (newStatus === 'approved') {
-      updateFields['image.status'] = 'approved';
-    } else if (newStatus === 'rejected') {
-      updateFields['image.status'] = 'rejected';
-    }
 
     if (this.mode === 'mongodb') {
       let query;
@@ -454,16 +449,27 @@ class DatabaseService {
       } catch {
         query = { _id: rid };
       }
+
+      // Check if report has an attached image before attempting dot-notation on image
+      const existing = await this.db.collection('reports').findOne(query, { projection: { image: 1 } });
+      if (existing && existing.image && typeof existing.image === 'object') {
+        if (newStatus === 'approved') {
+          updateFields['image.status'] = 'approved';
+        } else if (newStatus === 'rejected') {
+          updateFields['image.status'] = 'rejected';
+        }
+      }
+
       const res = await this.db.collection('reports').updateOne(query, { $set: updateFields });
       return res.matchedCount === 1;
     }
 
     if (this.mode === 'disconnected') return false;
 
-    const item = this.localReports.find(r => r.id === rid);
+    const item = this.localReports.find(r => r.id === rid || r._id === rid);
     if (!item) return false;
     Object.assign(item, updateFields);
-    if (item.image) {
+    if (item.image && typeof item.image === 'object') {
       if (newStatus === 'approved') item.image.status = 'approved';
       else if (newStatus === 'rejected') item.image.status = 'rejected';
     }

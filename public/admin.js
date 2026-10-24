@@ -173,11 +173,11 @@ async function loadDistrictsMap() {
 }
 
 // 5. Moderation Queue Loading
-async function loadQueue() {
+async function loadQueue(clearMsg = true) {
   if (!adminToken) return showAuth();
-  const status = $('moderationStatus').value;
-  const verifFilter = $('filterVerification').value;
-  $('adminMessage').textContent = '';
+  const status = $('moderationStatus')?.value || 'pending';
+  const verifFilter = $('filterVerification')?.value || '';
+  if (clearMsg) $('adminMessage').textContent = '';
 
   try {
     let url = `/api/admin/reports?status=${encodeURIComponent(status)}`;
@@ -350,13 +350,13 @@ async function loadQueue() {
         const btnApprove = document.createElement('button');
         btnApprove.className = 'button primary';
         btnApprove.textContent = 'অনুমোদন ও প্রকাশ (Approve)';
-        btnApprove.onclick = () => updateStatus(item.id, 'approved', verifSelect.value, noteInput.value);
+        btnApprove.onclick = () => updateStatus(item.id, 'approved', verifSelect.value, noteInput.value, btnApprove);
 
         const btnReject = document.createElement('button');
         btnReject.className = 'button ghost';
         btnReject.style.color = 'var(--red)';
         btnReject.textContent = 'বাতিল (Reject)';
-        btnReject.onclick = () => updateStatus(item.id, 'rejected', null, noteInput.value);
+        btnReject.onclick = () => updateStatus(item.id, 'rejected', null, noteInput.value, btnReject);
 
         const btnDelete = document.createElement('button');
         btnDelete.className = 'button ghost';
@@ -390,7 +390,7 @@ async function loadQueue() {
         btnWithdraw.style.fontSize = '11px';
         btnWithdraw.style.color = 'var(--ink)';
         btnWithdraw.textContent = 'প্রত্যাহার (Takedown)';
-        btnWithdraw.onclick = () => updateStatus(item.id, 'rejected', 'withdrawn', 'Takedown requested');
+        btnWithdraw.onclick = () => updateStatus(item.id, 'rejected', 'withdrawn', 'Takedown requested', btnWithdraw);
 
         const btnDelete = document.createElement('button');
         btnDelete.className = 'button ghost';
@@ -460,9 +460,15 @@ async function deleteReport(id) {
   }
 }
 
-async function updateStatus(id, state, verificationStatus, note) {
-  const confirmMsg = state === 'approved' ? 'এই রিপোর্টটি অনুমোদন ও প্রকাশ করতে চান?' : 'এই রিপোর্টটি বাতিল বা প্রত্যাহার করতে চান?';
-  if (!confirm(confirmMsg)) return;
+async function updateStatus(id, state, verificationStatus, note, btnEl = null) {
+  if (btnEl) {
+    btnEl.disabled = true;
+    btnEl.dataset.originalText = btnEl.textContent;
+    btnEl.textContent = state === 'approved' ? 'অনুমোদন হচ্ছে...' : 'বাতিল হচ্ছে...';
+  }
+
+  $('adminMessage').textContent = state === 'approved' ? 'রিপোর্ট অনুমোদন প্রক্রিয়াধীন...' : 'রিপোর্ট বাতিল প্রক্রিয়াধীন...';
+  $('adminMessage').style.color = 'var(--text)';
 
   try {
     await api(`/api/admin/reports/${id}/status`, {
@@ -474,8 +480,19 @@ async function updateStatus(id, state, verificationStatus, note) {
         moderator_note: note
       })
     });
-    await loadQueue();
+    const successMsg = state === 'approved' 
+      ? `রিপোর্ট #${id} সফলভাবে অনুমোদিত হয়েছে এবং লাইভ ম্যাপে প্রকাশিত হয়েছে!` 
+      : `রিপোর্ট #${id} সফলভাবে বাতিল করা হয়েছে।`;
+    $('adminMessage').textContent = successMsg;
+    $('adminMessage').style.color = state === 'approved' ? 'var(--teal)' : 'var(--amber)';
+    await loadQueue(false);
   } catch (err) {
+    if (btnEl) {
+      btnEl.disabled = false;
+      btnEl.textContent = btnEl.dataset.originalText || 'অনুমোদন ও প্রকাশ (Approve)';
+    }
+    $('adminMessage').textContent = `ত্রুটি: ${err.message}`;
+    $('adminMessage').style.color = 'var(--red)';
     alert(err.message);
   }
 }
