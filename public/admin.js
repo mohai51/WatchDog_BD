@@ -105,7 +105,15 @@ $('loginForm').onsubmit = async (e) => {
   }
 };
 
-$('logoutBtn').onclick = () => {
+$('logoutBtn').onclick = async () => {
+  if (adminToken) {
+    try {
+      await api('/api/admin/logout', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${adminToken}` }
+      });
+    } catch {}
+  }
   adminToken = null;
   sessionStorage.removeItem('watchdog_admin_token');
   showAuth();
@@ -225,20 +233,77 @@ async function loadQueue() {
       narrative.textContent = item.description;
       card.append(narrative);
 
-      // Confidential submitter details for admin inspection
+      // Confidential submitter details for admin inspection (Safe DOM rendering, XSS protected)
       const privateBox = document.createElement('div');
       privateBox.style.background = 'var(--sub)';
       privateBox.style.padding = '8px 12px';
       privateBox.style.borderRadius = '8px';
       privateBox.style.fontSize = '11px';
+
       const reporterInfo = item.reporter || {};
-      privateBox.innerHTML = `
-        <strong>গোপনীয় তথ্য (Admin Only):</strong> রিপোর্টার: ${reporterInfo.name || item.reporter_name || 'Anonymous'} | 
-        যোগাযোগ: ${reporterInfo.contact || 'None'} | 
-        সংশ্লিষ্টতা: ${item.witness_status || (item.is_victim ? 'victim' : 'witness')}
-        ${item.reference_url ? ` | রেফারেন্স: <a href="${item.reference_url}" target="_blank" rel="noopener">লিংক ↗</a>` : ''}
-      `;
+      const repName = reporterInfo.name || item.reporter_name || 'Anonymous';
+      const repContact = reporterInfo.contact || 'None';
+      const repStatus = item.witness_status || (item.is_victim ? 'victim' : 'witness');
+
+      const titleStrong = document.createElement('strong');
+      titleStrong.textContent = 'গোপনীয় তথ্য (Admin Only): ';
+      privateBox.append(titleStrong);
+
+      const infoSpan = document.createElement('span');
+      infoSpan.textContent = `রিপোর্টার: ${repName} | যোগাযোগ: ${repContact} | সংশ্লিষ্টতা: ${repStatus}`;
+      privateBox.append(infoSpan);
+
+      if (item.reference_url) {
+        let isSafeUrl = false;
+        try {
+          const parsedUrl = new URL(item.reference_url);
+          isSafeUrl = parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+        } catch {}
+
+        if (isSafeUrl) {
+          const refSep = document.createElement('span');
+          refSep.textContent = ' | রেফারেন্স: ';
+          const refLink = document.createElement('a');
+          refLink.href = item.reference_url;
+          refLink.target = '_blank';
+          refLink.rel = 'noopener noreferrer';
+          refLink.textContent = 'লিংক ↗';
+          privateBox.append(refSep, refLink);
+        }
+      }
       card.append(privateBox);
+
+      // Attached Evidence Image Inspection (Private, Safe Admin Preview)
+      if (item.image && item.image.media_id) {
+        const mediaCard = document.createElement('div');
+        mediaCard.style.cssText = 'margin-top:10px;padding:10px;background:var(--sub);border:1px solid var(--line);border-radius:8px;display:flex;gap:12px;align-items:center';
+
+        const thumb = document.createElement('img');
+        thumb.src = `/api/admin/media/${encodeURIComponent(item.image.media_id)}?token=${encodeURIComponent(adminToken)}`;
+        thumb.alt = 'Evidence Thumbnail';
+        thumb.style.cssText = 'width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--line);cursor:pointer';
+        thumb.onclick = () => window.open(thumb.src, '_blank');
+
+        const mediaDetails = document.createElement('div');
+        mediaDetails.style.cssText = 'font-size:12px;line-height:1.6';
+
+        const mediaTitle = document.createElement('strong');
+        mediaTitle.textContent = 'সংযুক্ত প্রমাণ চিত্র (Image Attachment): ';
+        const mediaFileSpan = document.createElement('span');
+        const sizeKb = (item.image.file_size ? (item.image.file_size / 1024).toFixed(1) + ' KB' : 'Unknown size');
+        mediaFileSpan.textContent = `${item.image.file_name || 'photo'} (${sizeKb}) · EXIF/GPS অপসারিত`;
+
+        const viewLink = document.createElement('a');
+        viewLink.href = thumb.src;
+        viewLink.target = '_blank';
+        viewLink.rel = 'noopener noreferrer';
+        viewLink.style.cssText = 'display:inline-block;color:var(--accent);font-weight:600;margin-top:2px';
+        viewLink.textContent = 'পূর্ণ আকারে ছবি দেখুন ↗';
+
+        mediaDetails.append(mediaTitle, document.createElement('br'), mediaFileSpan, document.createElement('br'), viewLink);
+        mediaCard.append(thumb, mediaDetails);
+        card.append(mediaCard);
+      }
 
       // Moderation Action Controls
       if (item.status === 'pending') {

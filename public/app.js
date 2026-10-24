@@ -109,7 +109,29 @@ const I18N = {
     insightHighLabel: 'সবচেয়ে বেশি সংঘটিত অপরাধ',
     insightLowLabel: 'তুলনামূলক কম সংঘটিত অপরাধ',
     insightNoOtherCrime: 'অন্য কোনো অপরাধের রেকর্ড নেই',
-    insightAllOtherZero: 'বাকি সব ক্যাটাগরিতে ০টি রিপোর্ট'
+    insightAllOtherZero: 'বাকি সব ক্যাটাগরিতে ০টি রিপোর্ট',
+    composerTitle: 'ঘটনা রিপোর্ট করুন',
+    composerNamePlaceholder: 'আপনার নাম (ঐচ্ছিক)',
+    composerAnon: 'গোপন রাখুন',
+    composerAnonActive: 'গোপন রাখা হয়েছে',
+    composerDistrictLabel: 'জেলা নির্বাচন',
+    selectDistrict: 'জেলা নির্বাচন করুন',
+    composerCategoryLabel: 'অপরাধের ধরন',
+    selectType: 'অপরাধের ধরন নির্বাচন',
+    composerDescPlaceholder: 'কী ঘটেছে? বিস্তারিত লিখুন...',
+    composerAddPhoto: 'ছবি যোগ করুন',
+    composerAutoTime: 'Auto Date & Time',
+    composerSubmit: 'রিপোর্ট জমা দিন',
+    composerSubmitting: 'রিপোর্ট জমা হচ্ছে...',
+    composerSuccessMessage: 'আপনার রিপোর্ট জমা হয়েছে। যাচাইয়ের পর প্রকাশ করা হবে।',
+    composerTrackingLabel: 'আপনার গোপন ট্র্যাকিং আইডি:',
+    composerCopy: 'কপি করুন',
+    composerCopied: 'কপি হয়েছে!',
+    errDistrict: 'অনুগ্রহ করে জেলা নির্বাচন করুন।',
+    errCategory: 'অনুগ্রহ করে অপরাধের ধরন নির্বাচন করুন।',
+    errDesc: 'ঘটনার বিবরণ কমপক্ষে ১৫ অক্ষরের হতে হবে (সর্বোচ্চ ২,০০০ অক্ষর)।',
+    errImageSize: 'ছবি ফাইলের আকার সর্বোচ্চ ৫ মেগাবাইট হতে পারবে।',
+    errImageType: 'শুধুমাত্র JPG, JPEG, PNG অথবা WebP ছবি গ্রহণযোগ্য।'
   },
   en: {
     brandTag: 'Community Public Safety Intelligence',
@@ -212,7 +234,29 @@ const I18N = {
     insightHighLabel: 'Highest Reported Crime',
     insightLowLabel: 'Lowest Reported Crime',
     insightNoOtherCrime: 'No other crimes recorded',
-    insightAllOtherZero: 'All other categories 0 reports'
+    insightAllOtherZero: 'All other categories 0 reports',
+    composerTitle: 'Report an Incident',
+    composerNamePlaceholder: 'Your Name (Optional)',
+    composerAnon: 'Anonymous',
+    composerAnonActive: 'Anonymous Active',
+    composerDistrictLabel: 'Select District',
+    selectDistrict: 'Select District',
+    composerCategoryLabel: 'Crime Category',
+    selectType: 'Select Category',
+    composerDescPlaceholder: 'What happened? Write details...',
+    composerAddPhoto: 'Add Photo',
+    composerAutoTime: 'Auto Date & Time',
+    composerSubmit: 'Submit Report',
+    composerSubmitting: 'Submitting Report...',
+    composerSuccessMessage: 'Your report has been submitted. It will be published after verification.',
+    composerTrackingLabel: 'Your Secret Tracking ID:',
+    composerCopy: 'Copy',
+    composerCopied: 'Copied!',
+    errDistrict: 'Please select a district.',
+    errCategory: 'Please select a crime category.',
+    errDesc: 'Narrative must be between 15 and 2,000 characters.',
+    errImageSize: 'Image file size cannot exceed 5 MB.',
+    errImageType: 'Only JPG, JPEG, PNG, or WebP images are allowed.'
   }
 };
 
@@ -446,7 +490,8 @@ function renderDistrictIncidents(list) {
     const timeSpan = document.createElement('span');
     timeSpan.style.fontSize = '11px';
     timeSpan.style.color = 'var(--muted)';
-    timeSpan.textContent = `${item.incident_date} · ${item.incident_time}`;
+    const datePrefix = item.date_is_submission_time ? (lang === 'bn' ? 'দাখিলের সময়: ' : 'Submitted: ') : '';
+    timeSpan.textContent = `${datePrefix}${item.incident_date} · ${item.incident_time}`;
 
     top.append(catBadge, timeSpan);
 
@@ -458,6 +503,23 @@ function renderDistrictIncidents(list) {
     narrative.className = 'incident-narrative';
     narrative.textContent = item.description;
 
+    card.append(top, loc, narrative);
+
+    // If report has an approved image attachment
+    if (item.image && item.image.media_id) {
+      const imgBox = document.createElement('div');
+      imgBox.style.cssText = 'margin:8px 0;border-radius:8px;overflow:hidden;border:1px solid var(--line);background:var(--sub)';
+      const imgEl = document.createElement('img');
+      imgEl.src = `/api/media/${encodeURIComponent(item.image.media_id)}`;
+      imgEl.alt = 'Incident Photo Evidence';
+      imgEl.loading = 'lazy';
+      imgEl.style.cssText = 'width:100%;max-height:200px;object-fit:cover;display:block;cursor:pointer';
+      imgEl.title = lang === 'bn' ? 'বড় করে দেখতে ক্লিক করুন' : 'Click to view full size';
+      imgEl.onclick = () => window.open(imgEl.src, '_blank');
+      imgBox.append(imgEl);
+      card.append(imgBox);
+    }
+
     // Verification Badge
     const verif = document.createElement('div');
     verif.className = 'verification-badge verif-' + (item.verification_status || 'moderated');
@@ -466,13 +528,28 @@ function renderDistrictIncidents(list) {
     else if (item.verification_status === 'independently_verified') verifLabel = lang === 'bn' ? 'নিরপেক্ষভাবে প্রমাণিত' : 'Independently Verified';
     verif.textContent = verifLabel;
 
-    card.append(top, loc, narrative, verif);
+    card.append(verif);
 
     if (item.news_source && item.news_source.url) {
-      const newsBox = document.createElement('div');
-      newsBox.className = 'news-attribution-box';
-      newsBox.innerHTML = `<strong>উৎস:</strong> <a href="${item.news_source.url}" target="_blank" rel="noopener noreferrer">${item.news_source.source_name || 'সংবাদ লিংক'} ↗</a>`;
-      card.append(newsBox);
+      let isSafeNewsUrl = false;
+      try {
+        const parsed = new URL(item.news_source.url);
+        isSafeNewsUrl = parsed.protocol === 'http:' || parsed.protocol === 'https:';
+      } catch {}
+
+      if (isSafeNewsUrl) {
+        const newsBox = document.createElement('div');
+        newsBox.className = 'news-attribution-box';
+        const srcTitle = document.createElement('strong');
+        srcTitle.textContent = 'উৎস: ';
+        const srcLink = document.createElement('a');
+        srcLink.href = item.news_source.url;
+        srcLink.target = '_blank';
+        srcLink.rel = 'noopener noreferrer';
+        srcLink.textContent = (item.news_source.source_name || 'সংবাদ লিংক') + ' ↗';
+        newsBox.append(srcTitle, srcLink);
+        card.append(newsBox);
+      }
     }
 
     container.append(card);
@@ -779,125 +856,257 @@ $('drawerShareBtn').onclick = () => {
   });
 };
 
-// 10. Guided 3-Step Reporting Experience
-let currentStep = 1;
+// 10. Minimal Facebook-Style Report Composer Logic
+let isAnonymous = false;
+let selectedImageBase64 = null;
+let selectedImageFile = null;
 
-function showStep(s) {
-  currentStep = s;
-  ['step1', 'step2', 'step3', 'stepSuccess'].forEach(id => {
-    if ($(id)) $(id).classList.remove('active');
-  });
-  ['bubble1', 'bubble2', 'bubble3'].forEach((id, idx) => {
-    const el = $(id);
-    if (!el) return;
-    el.classList.remove('active', 'completed');
-    if (idx + 1 === s) el.classList.add('active');
-    else if (idx + 1 < s) el.classList.add('completed');
-  });
+function resetComposer() {
+  const form = $('composerReportForm');
+  if (form) form.reset();
 
-  const pane = $('step' + s);
-  if (pane) pane.classList.add('active');
+  isAnonymous = false;
+  const anonBtn = $('anonymousToggleBtn');
+  if (anonBtn) {
+    anonBtn.classList.remove('active');
+    anonBtn.setAttribute('aria-checked', 'false');
+  }
+  const anonLabel = $('anonToggleLabel');
+  if (anonLabel) anonLabel.textContent = I18N[lang].composerAnon || 'গোপন রাখুন';
+
+  const nameInput = $('composerReporterName');
+  if (nameInput) {
+    nameInput.disabled = false;
+    nameInput.value = '';
+    nameInput.placeholder = I18N[lang].composerNamePlaceholder || 'আপনার নাম (ঐচ্ছিক)';
+  }
+
+  const descEl = $('composerDesc');
+  if (descEl) {
+    descEl.value = '';
+    descEl.style.height = '90px';
+  }
+  updateComposerCharCount();
+
+  selectedImageBase64 = null;
+  selectedImageFile = null;
+  if ($('composerImageInput')) $('composerImageInput').value = '';
+  if ($('composerImagePreview')) $('composerImagePreview').hidden = true;
+
+  const errBox = $('composerErrorMessage');
+  if (errBox) {
+    errBox.textContent = '';
+    errBox.hidden = true;
+  }
+
+  const submitBtn = $('composerSubmitBtn');
+  if (submitBtn) submitBtn.disabled = false;
+  if ($('composerSpinner')) $('composerSpinner').hidden = true;
+  if ($('composerSubmitText')) $('composerSubmitText').textContent = I18N[lang].composerSubmit || 'রিপোর্ট জমা দিন';
+
+  if ($('composerFormWrap')) $('composerFormWrap').hidden = false;
+  if ($('composerSuccessWrap')) $('composerSuccessWrap').hidden = true;
 }
 
-$('nextToStep2Btn').onclick = () => {
-  const form = $('multiStepReportForm');
-  if (!form.type.value || !form.district_code.value || !form.incident_date.value || !form.location.value.trim()) {
-    alert(lang === 'bn' ? 'অনুগ্রহ করে ১ম ধাপের সব আবশ্যক তথ্য পূরণ করুন।' : 'Please complete all required fields in Step 1.');
-    return;
+function updateComposerCharCount() {
+  const descEl = $('composerDesc');
+  const countEl = $('composerCharCount');
+  if (!descEl || !countEl) return;
+  const count = descEl.value.length;
+  if (lang === 'bn') {
+    const bnNums = ['০','১','২','৩','৪','৫','৬','৭','৮','৯'];
+    const bnCount = String(count).split('').map(d => bnNums[d] || d).join('');
+    countEl.textContent = `${bnCount} / ২,০০০`;
+  } else {
+    countEl.textContent = `${count} / 2,000`;
   }
-  showStep(2);
-};
+}
 
-$('backToStep1Btn').onclick = () => showStep(1);
+// Anonymous Toggle
+if ($('anonymousToggleBtn')) {
+  $('anonymousToggleBtn').onclick = () => {
+    isAnonymous = !isAnonymous;
+    const btn = $('anonymousToggleBtn');
+    const nameInput = $('composerReporterName');
+    const label = $('anonToggleLabel');
 
-$('nextToStep3Btn').onclick = () => {
-  const form = $('multiStepReportForm');
-  const desc = form.description.value.trim();
-  if (desc.length < 15) {
-    alert(lang === 'bn' ? 'ঘটনার বিবরণ কমপক্ষে ১৫ অক্ষরের হতে হবে।' : 'Narrative must be at least 15 characters.');
-    return;
-  }
+    btn.classList.toggle('active', isAnonymous);
+    btn.setAttribute('aria-checked', String(isAnonymous));
 
-  // Populate Step 3 Review Card safely
-  const rev = $('step3ReviewCard');
-  rev.replaceChildren();
-
-  const dObj = geoFeatures.find(f => f.properties.code === form.district_code.value);
-  const dNameStr = dObj ? districtName(dObj) : form.district_code.value;
-  const catLabel = I18N[lang]['cat' + form.type.value.charAt(0).toUpperCase() + form.type.value.slice(1)] || form.type.value;
-
-  const createRow = (label, val, isBordered = false) => {
-    const row = document.createElement('div');
-    if (isBordered) {
-      row.style.marginTop = '6px';
-      row.style.borderTop = '1px solid var(--line)';
-      row.style.paddingTop = '6px';
+    if (isAnonymous) {
+      nameInput.value = '';
+      nameInput.disabled = true;
+      nameInput.placeholder = I18N[lang].composerAnonActive || 'বেনামী রিপোর্টার';
+      if (label) label.textContent = I18N[lang].composerAnonActive || 'গোপন রাখা হয়েছে';
+    } else {
+      nameInput.disabled = false;
+      nameInput.placeholder = I18N[lang].composerNamePlaceholder || 'আপনার নাম (ঐচ্ছিক)';
+      if (label) label.textContent = I18N[lang].composerAnon || 'গোপন রাখুন';
     }
-    const strong = document.createElement('strong');
-    strong.textContent = label + ': ';
-    row.append(strong, document.createTextNode(val));
-    return row;
   };
+}
 
-  rev.append(
-    createRow(lang === 'bn' ? 'জেলা' : 'District', dNameStr),
-    createRow(lang === 'bn' ? 'অপরাধের ধরন' : 'Category', catLabel),
-    createRow(lang === 'bn' ? 'তারিখ ও সময়' : 'Date & Time', `${form.incident_date.value} (${form.incident_time.value})`),
-    createRow(lang === 'bn' ? 'স্থান' : 'Location', form.location.value),
-    createRow(lang === 'bn' ? 'বিবরণ' : 'Narrative', form.description.value, true)
-  );
-
-  showStep(3);
-};
-
-$('backToStep2Btn').onclick = () => showStep(2);
-
-// Form Submission
-$('multiStepReportForm').onsubmit = async (e) => {
-  e.preventDefault();
-  const form = e.target;
-  const submitBtn = $('submitReportFinalBtn');
-  const errBox = $('submissionError');
-  errBox.textContent = '';
-  submitBtn.disabled = true;
-
-  const payload = {
-    district_code: form.district_code.value,
-    type: form.type.value,
-    incident_date: form.incident_date.value,
-    incident_time: form.incident_time.value,
-    location: form.location.value.trim(),
-    description: form.description.value.trim(),
-    witness_status: form.witness_status.value,
-    reference_url: form.reference_url.value.trim(),
-    reporter_name: form.reporter_name.value.trim(),
-    reporter_contact: form.reporter_contact.value.trim()
-  };
-
-  try {
-    const res = await api('/api/reports', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-
-    // Show success view with private tracking code
-    $text('generatedTrackingCode', res.tracking_code);
-    $('step3').classList.remove('active');
-    $('stepSuccess').classList.add('active');
-    form.reset();
-  } catch (err) {
-    errBox.textContent = err.message;
-  } finally {
-    submitBtn.disabled = false;
-  }
-};
-
-$('copyTrackingCodeBtn').onclick = () => {
-  const code = $('generatedTrackingCode').textContent;
-  navigator.clipboard.writeText(code).then(() => {
-    alert(lang === 'bn' ? 'ট্র্যাকিং কোড কপি করা হয়েছে!' : 'Tracking code copied!');
+// Auto-expanding textarea & character counter
+if ($('composerDesc')) {
+  $('composerDesc').addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.max(90, this.scrollHeight) + 'px';
+    updateComposerCharCount();
   });
-};
+}
+
+// Single Image Selection, Validation, and Immediate Thumbnail Preview
+if ($('composerImageInput')) {
+  $('composerImageInput').onchange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    const extension = (file.name.split('.').pop() || '').toLowerCase();
+    const allowedExts = ['jpg', 'jpeg', 'png', 'webp'];
+
+    if (!allowedTypes.includes(file.type) && !allowedExts.includes(extension)) {
+      alert(I18N[lang].errImageType || 'শুধুমাত্র JPG, JPEG, PNG অথবা WebP ছবি গ্রহণযোগ্য।');
+      $('composerImageInput').value = '';
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert(I18N[lang].errImageSize || 'ছবি ফাইলের আকার সর্বোচ্চ ৫ মেগাবাইট হতে পারবে।');
+      $('composerImageInput').value = '';
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (loadEvt) => {
+      selectedImageBase64 = loadEvt.target.result;
+      selectedImageFile = file;
+
+      if ($('composerImgTag')) $('composerImgTag').src = selectedImageBase64;
+      if ($('composerImgName')) $('composerImgName').textContent = file.name;
+      if ($('composerImgSize')) {
+        const sizeKb = (file.size / 1024).toFixed(1);
+        const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
+        $('composerImgSize').textContent = file.size > 1024 * 1024 ? `${sizeMb} MB` : `${sizeKb} KB`;
+      }
+      if ($('composerImagePreview')) $('composerImagePreview').hidden = false;
+    };
+    reader.onerror = () => {
+      alert('Error reading selected image file.');
+      $('composerImageInput').value = '';
+    };
+    reader.readAsDataURL(file);
+  };
+}
+
+// Remove Image Preview
+if ($('composerRemoveImgBtn')) {
+  $('composerRemoveImgBtn').onclick = () => {
+    selectedImageBase64 = null;
+    selectedImageFile = null;
+    if ($('composerImageInput')) $('composerImageInput').value = '';
+    if ($('composerImagePreview')) $('composerImagePreview').hidden = true;
+    if ($('composerImgTag')) $('composerImgTag').src = '';
+  };
+}
+
+// Form Submission with Loading & Duplicate Click Prevention
+if ($('composerReportForm')) {
+  $('composerReportForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const form = e.target;
+    const submitBtn = $('composerSubmitBtn');
+    const spinner = $('composerSpinner');
+    const submitText = $('composerSubmitText');
+    const errBox = $('composerErrorMessage');
+
+    errBox.textContent = '';
+    errBox.hidden = true;
+
+    const districtCode = $('composerDistrict') ? $('composerDistrict').value : '';
+    const crimeType = $('composerType') ? $('composerType').value : '';
+    const description = $('composerDesc') ? $('composerDesc').value.trim() : '';
+
+    if (!districtCode) {
+      errBox.textContent = I18N[lang].errDistrict || 'অনুগ্রহ করে জেলা নির্বাচন করুন।';
+      errBox.hidden = false;
+      if ($('composerDistrict')) $('composerDistrict').focus();
+      return;
+    }
+
+    if (!crimeType) {
+      errBox.textContent = I18N[lang].errCategory || 'অনুগ্রহ করে অপরাধের ধরন নির্বাচন করুন।';
+      errBox.hidden = false;
+      if ($('composerType')) $('composerType').focus();
+      return;
+    }
+
+    if (!description || description.length < 15 || description.length > 2000) {
+      errBox.textContent = I18N[lang].errDesc || 'ঘটনার বিবরণ কমপক্ষে ১৫ অক্ষরের হতে হবে (সর্বোচ্চ ২,০০০ অক্ষর)।';
+      errBox.hidden = false;
+      if ($('composerDesc')) $('composerDesc').focus();
+      return;
+    }
+
+    // Disable button to prevent duplicate submissions & show spinner
+    submitBtn.disabled = true;
+    if (spinner) spinner.hidden = false;
+    if (submitText) submitText.textContent = I18N[lang].composerSubmitting || 'রিপোর্ট জমা হচ্ছে...';
+
+    const payload = {
+      district_code: districtCode,
+      type: crimeType,
+      description: description,
+      is_anonymous: isAnonymous,
+      reporter_name: isAnonymous ? 'Anonymous' : ($('composerReporterName').value.trim() || undefined),
+      image_data: selectedImageBase64 || undefined,
+      image_name: selectedImageFile ? selectedImageFile.name : undefined
+    };
+
+    try {
+      const res = await api('/api/reports', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      // Show minimal success state
+      if ($('composerTrackingId')) $('composerTrackingId').textContent = res.tracking_code;
+      if ($('composerSuccessTimestamp')) {
+        const timeStr = res.submission_time_dhaka || new Date().toLocaleString('en-US', { timeZone: 'Asia/Dhaka' });
+        $('composerSuccessTimestamp').textContent = (lang === 'bn' ? 'দাখিলের সময় (ঢাকা): ' : 'Submission Time (Dhaka): ') + timeStr;
+      }
+
+      if ($('composerFormWrap')) $('composerFormWrap').hidden = true;
+      if ($('composerSuccessWrap')) $('composerSuccessWrap').hidden = false;
+      form.reset();
+    } catch (err) {
+      errBox.textContent = err.message || 'Submission error. Please try again.';
+      errBox.hidden = false;
+    } finally {
+      submitBtn.disabled = false;
+      if (spinner) spinner.hidden = true;
+      if (submitText) submitText.textContent = I18N[lang].composerSubmit || 'রিপোর্ট জমা দিন';
+    }
+  };
+}
+
+// Copy Tracking Code Button
+if ($('composerCopyBtn')) {
+  $('composerCopyBtn').onclick = () => {
+    const codeEl = $('composerTrackingId');
+    if (!codeEl) return;
+    const code = codeEl.textContent.trim();
+    navigator.clipboard.writeText(code).then(() => {
+      const copyBtnText = $('composerCopyBtnText');
+      if (copyBtnText) copyBtnText.textContent = I18N[lang].composerCopied || 'কপি হয়েছে!';
+      setTimeout(() => {
+        if (copyBtnText) copyBtnText.textContent = I18N[lang].composerCopy || 'কপি করুন';
+      }, 2500);
+    }).catch(() => {
+      prompt(lang === 'bn' ? 'ট্র্যাকিং কোডটি কপি করুন:' : 'Copy this tracking code:', code);
+    });
+  };
+}
 
 // 11. Report Status Tracking Modal
 $('trackForm').onsubmit = async (e) => {
@@ -937,7 +1146,10 @@ $('trackForm').onsubmit = async (e) => {
       </div>
     `;
   } catch (err) {
-    box.innerHTML = `<div style="color:var(--red);font-size:13px;padding:10px;background:var(--red-subtle);border-radius:8px">${err.message}</div>`;
+    const errBox = document.createElement('div');
+    errBox.style.cssText = 'color:var(--red);font-size:13px;padding:10px;background:var(--red-subtle);border-radius:8px';
+    errBox.textContent = err.message;
+    box.replaceChildren(errBox);
   }
 };
 
@@ -982,7 +1194,10 @@ $('runCompareBtn').onclick = async () => {
       </div>
     `;
   } catch (err) {
-    container.innerHTML = `<div style="color:var(--red)">${err.message}</div>`;
+    const errBox = document.createElement('div');
+    errBox.style.color = 'var(--red)';
+    errBox.textContent = err.message;
+    container.replaceChildren(errBox);
   }
 };
 
@@ -1001,12 +1216,12 @@ document.addEventListener('keydown', e => {
 });
 
 // Triggers
-$('openReportBtn').onclick = () => { showStep(1); openModal('reportModal'); };
-$('mOpenReportBtn').onclick = () => { $('mobileNavDrawer').classList.remove('open'); showStep(1); openModal('reportModal'); };
-if ($('heroReportBtn')) $('heroReportBtn').onclick = () => { showStep(1); openModal('reportModal'); };
+$('openReportBtn').onclick = () => { resetComposer(); openModal('reportModal'); };
+$('mOpenReportBtn').onclick = () => { $('mobileNavDrawer').classList.remove('open'); resetComposer(); openModal('reportModal'); };
+if ($('heroReportBtn')) $('heroReportBtn').onclick = () => { resetComposer(); openModal('reportModal'); };
 $('drawerSubmitBtn').onclick = () => {
-  showStep(1);
-  if (selectedDistrictCode) $('formDistrict').value = selectedDistrictCode;
+  resetComposer();
+  if (selectedDistrictCode && $('composerDistrict')) $('composerDistrict').value = selectedDistrictCode;
   openModal('reportModal');
 };
 
@@ -1094,10 +1309,22 @@ function renderLanguage() {
   // Populate form selects in active language
   if (geoFeatures.length) {
     const sorted = [...geoFeatures].sort((a, b) => a.properties.name.localeCompare(b.properties.name));
-    $('formDistrict').innerHTML = sorted.map(f => `<option value="${f.properties.code}">${districtName(f)}</option>`).join('');
+    if ($('formDistrict')) $('formDistrict').innerHTML = sorted.map(f => `<option value="${f.properties.code}">${districtName(f)}</option>`).join('');
+    if ($('composerDistrict')) {
+      const currentVal = $('composerDistrict').value;
+      const placeholder = I18N[lang].selectDistrict || (lang === 'bn' ? 'জেলা নির্বাচন করুন' : 'Select District');
+      $('composerDistrict').innerHTML = `<option value="" disabled selected>${placeholder}</option>` + sorted.map(f => `<option value="${f.properties.code}">${districtName(f)}</option>`).join('');
+      if (currentVal) $('composerDistrict').value = currentVal;
+    }
   }
 
-  $('formType').innerHTML = CATEGORIES.map(c => `<option value="${c}">${I18N[lang]['cat' + c.charAt(0).toUpperCase() + c.slice(1)] || c}</option>`).join('');
+  if ($('formType')) $('formType').innerHTML = CATEGORIES.map(c => `<option value="${c}">${I18N[lang]['cat' + c.charAt(0).toUpperCase() + c.slice(1)] || c}</option>`).join('');
+  if ($('composerType')) {
+    const currentVal = $('composerType').value;
+    const placeholder = I18N[lang].selectType || (lang === 'bn' ? 'অপরাধের ধরন নির্বাচন' : 'Select Category');
+    $('composerType').innerHTML = `<option value="" disabled selected>${placeholder}</option>` + CATEGORIES.map(c => `<option value="${c}">${I18N[lang]['cat' + c.charAt(0).toUpperCase() + c.slice(1)] || c}</option>`).join('');
+    if (currentVal) $('composerType').value = currentVal;
+  }
 
   if (geoLayer) {
     geoLayer.eachLayer(l => l.setTooltipContent(districtName(l.feature)));
@@ -1128,9 +1355,10 @@ async function recordPageHit() {
 // 16. App Bootstrap
 async function init() {
   try {
-    // Set max report date to today
-    $('formDate').max = new Date().toISOString().slice(0, 10);
-    $('formDate').value = new Date().toISOString().slice(0, 10);
+    if ($('formDate')) {
+      $('formDate').max = new Date().toISOString().slice(0, 10);
+      $('formDate').value = new Date().toISOString().slice(0, 10);
+    }
 
     setupInsightListeners();
 

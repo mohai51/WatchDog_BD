@@ -11,6 +11,7 @@ const path = require('path');
 const crypto = require('crypto');
 const express = require('express');
 const { MongoClient, ObjectId } = require('mongodb');
+const { validateAndSanitizeImage, storageService, parseMultipartBuffer } = require('./mediaStorage');
 
 const app = express();
 // Enable trust proxy for accurate client IP behind Vercel, Cloudflare, or reverse proxies
@@ -36,21 +37,50 @@ for (const f of districtsData.features) {
 const TYPES = ['snatching', 'theft', 'robbery', 'extortion', 'harassment', 'assault', 'fraud', 'drug_related', 'rape', 'other'];
 
 // Production Security Configuration
+
+// 1. Secret Key Configuration (HMAC Token Signature)
 let SECRET = (process.env.SAFEMAP_SECRET || '').trim();
-if (!SECRET) {
-  if (IS_PROD) {
-    SECRET = crypto.createHash('sha256').update(process.env.MONGODB_URI || 'watchdog_bd_fallback_salt_2026').digest('hex');
-    console.warn('[SECURITY WARNING] SAFEMAP_SECRET missing in production. Using cluster-derived deterministic signature.');
-  } else {
+if (IS_PROD) {
+  const invalidSecrets = [
+    '',
+    'generate_a_random_64_char_hex_secret_here',
+    'watchdog_bd_dev_secret_key_8492049104810284'
+  ];
+  if (!SECRET || SECRET.length < 32 || invalidSecrets.includes(SECRET)) {
+    console.error('[SECURITY CRITICAL] SAFEMAP_SECRET must be set to a cryptographically secure random string of at least 32 characters in production. Deterministic fallbacks are strictly prohibited.');
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('FATAL CONFIGURATION ERROR: SAFEMAP_SECRET is missing, insecure, or under 32 characters in production.');
+    }
+  }
+} else {
+  if (!SECRET) {
     SECRET = 'watchdog_bd_dev_secret_key_8492049104810284';
   }
 }
 
-let ADMIN_PASS = (process.env.SAFEMAP_ADMIN_PASSWORD || 'admin123').trim();
-if (!process.env.SAFEMAP_ADMIN_PASSWORD) {
-  console.log('[AUTH] SAFEMAP_ADMIN_PASSWORD not set. Using default admin password: admin123');
+// 2. Administrator Password Configuration
+let ADMIN_PASS = (process.env.SAFEMAP_ADMIN_PASSWORD || '').trim();
+if (IS_PROD) {
+  const weakPasswords = [
+    '',
+    'admin123',
+    'admin',
+    'password',
+    'change_this_to_a_strong_password_in_production',
+    '12345678',
+    '1234567890'
+  ];
+  if (!ADMIN_PASS || ADMIN_PASS.length < 16 || weakPasswords.includes(ADMIN_PASS.toLowerCase())) {
+    console.error('[AUTH CRITICAL] SAFEMAP_ADMIN_PASSWORD in production must be a strong, unique secret of at least 16 characters. Weak or default passwords are strictly prohibited.');
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('FATAL CONFIGURATION ERROR: SAFEMAP_ADMIN_PASSWORD is missing, weak, or under 16 characters in production.');
+    }
+  }
 } else {
-  console.log('[AUTH] Admin password configured from environment variable.');
+  if (!ADMIN_PASS) {
+    ADMIN_PASS = 'admin123';
+    console.warn('[AUTH WARNING] SAFEMAP_ADMIN_PASSWORD not set. Using dev default password: admin123 (Change for production!)');
+  }
 }
 
 // Reliable Client IP extraction (supports Vercel, Cloudflare, proxies)
@@ -62,92 +92,126 @@ function getClientIp(req) {
   return req.headers['x-real-ip'] || req.ip || req.socket?.remoteAddress || '127.0.0.1';
 }
 
-// Memory-managed sliding window IP Rate Limiter
+// Distributed Rate Limiter (MongoDB Atlas shared collection with atomic increment + local sliding-window fallback)
 class RateLimiter {
-  constructor({ windowMs, max, message }) {
+  constructor({ windowMs, max, message, keyPrefix }) {
     this.windowMs = windowMs;
     this.max = max;
     this.message = message;
-    this.records = new Map();
-
-    const cleanup = () => {
-      const now = Date.now();
-      for (const [key, timestamps] of this.records.entries()) {
-        const valid = timestamps.filter(t => now - t < this.windowMs);
-        if (valid.length === 0) {
-          this.records.delete(key);
-        } else {
-          this.records.set(key, valid);
-        }
-      }
-    };
-    const timer = setInterval(cleanup, 2 * 60 * 1000);
-    if (timer.unref) timer.unref();
+    this.keyPrefix = keyPrefix || 'rl';
   }
 
   middleware() {
-    return (req, res, next) => {
+    return async (req, res, next) => {
       const ip = getClientIp(req);
-      const now = Date.now();
-      const timestamps = (this.records.get(ip) || []).filter(t => now - t < this.windowMs);
+      try {
+        const { isLimited, remaining, retryAfterSec } = await dbService.checkRateLimit(
+          this.keyPrefix, ip, this.windowMs, this.max
+        );
 
-      if (timestamps.length >= this.max) {
-        const oldest = timestamps[0];
-        const retryAfterSec = Math.max(1, Math.ceil((oldest + this.windowMs - now) / 1000));
-        res.setHeader('Retry-After', retryAfterSec);
         res.setHeader('X-RateLimit-Limit', this.max);
-        res.setHeader('X-RateLimit-Remaining', 0);
-        return res.status(429).json({
-          error: this.message || 'অনেক বেশি অনুরোধ করা হয়েছে। অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করে আবার চেষ্টা করুন। (Too many requests from this IP, please try again later.)',
-          retry_after_seconds: retryAfterSec
-        });
+        res.setHeader('X-RateLimit-Remaining', remaining);
+
+        if (isLimited) {
+          res.setHeader('Retry-After', retryAfterSec);
+          return res.status(429).json({
+            error: this.message || 'অনেক বেশি অনুরোধ করা হয়েছে। অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করে আবার চেষ্টা করুন। (Too many requests from this IP, please try again later.)',
+            retry_after_seconds: retryAfterSec
+          });
+        }
+        next();
+      } catch (err) {
+        console.error('[RATE LIMITER ERROR]', err.message);
+        next();
       }
-
-      timestamps.push(now);
-      this.records.set(ip, timestamps);
-
-      res.setHeader('X-RateLimit-Limit', this.max);
-      res.setHeader('X-RateLimit-Remaining', Math.max(0, this.max - timestamps.length));
-      next();
     };
   }
 }
 
-// Tiered rate limiters:
+// Tiered distributed rate limiters:
 const generalApiLimiter = new RateLimiter({
   windowMs: 60 * 1000,
   max: 150,
-  message: 'API অনুরোধের সীমা অতিক্রম হয়েছে। অনুগ্রহ করে ১ মিনিট পর আবার চেষ্টা করুন। (API rate limit exceeded. Please wait 1 minute.)'
+  message: 'API অনুরোধের সীমা অতিক্রম হয়েছে। অনুগ্রহ করে ১ মিনিট পর আবার চেষ্টা করুন। (API rate limit exceeded. Please wait 1 minute.)',
+  keyPrefix: 'api'
 });
 
 const reportSubmitLimiter = new RateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  message: 'প্রতি ১৫ মিনিটে সর্বোচ্চ ৫টি রিপোর্ট জমা দেওয়া সম্ভব। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন। (Submission limit reached: maximum 5 reports per 15 minutes per IP).'
+  message: 'প্রতি ১৫ মিনিটে সর্বোচ্চ ৫টি রিপোর্ট জমা দেওয়া সম্ভব। অনুগ্রহ করে কিছুক্ষণ পর চেষ্টা করুন। (Submission limit reached: maximum 5 reports per 15 minutes per IP).',
+  keyPrefix: 'submit'
 });
 
 const adminLoginLimiter = new RateLimiter({
   windowMs: 15 * 60 * 1000,
   max: 5,
-  message: 'অনেকবার ভুল পাসওয়ার্ড দিয়ে চেষ্টা করা হয়েছে। নিরাপত্তার স্বার্থে ১৫ মিনিট অপেক্ষা করুন। (Too many login attempts. Please wait 15 minutes before trying again.)'
+  message: 'অনেকবার ভুল পাসওয়ার্ড দিয়ে চেষ্টা করা হয়েছে। নিরাপত্তার স্বার্থে ১৫ মিনিট অপেক্ষা করুন। (Too many login attempts. Please wait 15 minutes before trying again.)',
+  keyPrefix: 'login'
 });
 
 const reportTrackLimiter = new RateLimiter({
   windowMs: 5 * 60 * 1000,
   max: 20,
-  message: 'ট্র্যাকিং অনুসন্ধানের সীমা অতিক্রম হয়েছে। অনুগ্রহ করে ৫ মিনিট অপেক্ষা করুন। (Tracking query limit reached. Please wait 5 minutes.)'
+  message: 'ট্র্যাকিং অনুসন্ধানের সীমা অতিক্রম হয়েছে। অনুগ্রহ করে ৫ মিনিট অপেক্ষা করুন। (Tracking query limit reached. Please wait 5 minutes.)',
+  keyPrefix: 'track'
 });
 
 const visitAnalyticsLimiter = new RateLimiter({
   windowMs: 60 * 60 * 1000,
   max: 30,
-  message: 'ভিজিটর রেকর্ডিংয়ের সীমা অতিক্রম হয়েছে। (Visit recording rate limit reached.)'
+  message: 'ভিজিটর রেকর্ডিংয়ের সীমা অতিক্রম হয়েছে। (Visit recording rate limit reached.)',
+  keyPrefix: 'visit'
 });
 
-// XSS Sanitizer Helper
-function sanitizeText(str) {
+// Production Hardened Input Sanitization & Helpers
+function sanitizeInputString(str, maxLen = 2000) {
   if (typeof str !== 'string') return '';
-  return str.replace(/[<>]/g, '').trim();
+  return str
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/g, '') // remove ASCII control characters
+    .replace(/<[^>]*>?/gm, '') // strip any embedded HTML tags
+    .slice(0, maxLen)
+    .trim();
+}
+
+function sanitizeText(str) {
+  return sanitizeInputString(str, 2000);
+}
+
+function sanitizeUrl(rawUrl) {
+  if (typeof rawUrl !== 'string' || !rawUrl.trim()) return null;
+  const trimmed = rawUrl.trim();
+  try {
+    const parsed = new URL(trimmed);
+    if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+      return parsed.href;
+    }
+  } catch {}
+  return null;
+}
+
+// Constant-time password verification to prevent timing side-channels
+function verifyAdminPassword(inputPassword) {
+  if (!ADMIN_PASS || typeof inputPassword !== 'string' || !inputPassword) return false;
+  const aHash = crypto.createHash('sha256').update(inputPassword).digest();
+  const bHash = crypto.createHash('sha256').update(ADMIN_PASS).digest();
+  return crypto.timingSafeEqual(aHash, bHash);
+}
+
+// Recursive NoSQL Operator Sanitization
+function stripMongoOperators(obj) {
+  if (!obj || typeof obj !== 'object') return obj;
+  for (const key of Object.keys(obj)) {
+    if (key.startsWith('$') || key.includes('.')) {
+      delete obj[key];
+    } else if (typeof obj[key] === 'object' && obj[key] !== null) {
+      stripMongoOperators(obj[key]);
+      if (Object.keys(obj[key]).length === 0 && !Array.isArray(obj[key])) {
+        delete obj[key];
+      }
+    }
+  }
+  return obj;
 }
 
 // Auth helpers
@@ -159,19 +223,38 @@ function generateToken() {
   return `${raw}.${sig}`;
 }
 
-function verifyToken(authHeader) {
+async function verifyToken(authHeader) {
   if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
   const token = authHeader.slice(7).trim();
   try {
-    const [expiryStr, nonce, sig] = token.split('.');
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    const [expiryStr, nonce, sig] = parts;
     const expiry = parseInt(expiryStr, 10);
     if (isNaN(expiry) || expiry < Math.floor(Date.now() / 1000)) return false;
+
+    // Check shared persistent token revocation in database
+    const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+    const isRevoked = await dbService.isTokenRevoked(tokenHash);
+    if (isRevoked) return false;
+
     const raw = `${expiry}.${nonce}`;
     const expected = crypto.createHmac('sha256', SECRET).update(raw).digest('hex');
+    if (sig.length !== expected.length) return false;
     return crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected));
   } catch {
     return false;
   }
+}
+
+// Server-Side Authorization Middleware
+async function requireAdminAuth(req, res, next) {
+  const authHeader = req.headers.authorization || (req.query.token ? `Bearer ${req.query.token}` : null);
+  const isAuthorized = await verifyToken(authHeader);
+  if (!isAuthorized) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+  next();
 }
 
 // Database Service with MongoDB Atlas & Vercel caching
@@ -183,6 +266,9 @@ class DatabaseService {
     this.localFilePath = path.join(DATA_DIR, 'local_reports.json');
     this.localReports = [];
     this.localVisits = [];
+    this.localRevokedTokens = new Map();
+    this.localFingerprints = new Map();
+    this.localRateLimits = new Map();
     this.initDone = false;
   }
 
@@ -209,6 +295,11 @@ class DatabaseService {
         await this.db.collection('reports').createIndex({ incident_date: -1 });
         await this.db.collection('reports').createIndex({ created_at: -1 });
         await this.db.collection('visits').createIndex({ date: -1 });
+
+        // Distributed Rate Limiting & TTL Auto-Cleanup Indexes
+        await this.db.collection('rate_limits').createIndex({ reset_at: 1 }, { expireAfterSeconds: 0 });
+        await this.db.collection('revoked_tokens').createIndex({ expires_at: 1 }, { expireAfterSeconds: 0 });
+        await this.db.collection('submission_fingerprints').createIndex({ expires_at: 1 }, { expireAfterSeconds: 0 });
 
         this.mode = 'mongodb';
         this.initDone = true;
@@ -329,6 +420,11 @@ class DatabaseService {
       updateFields['moderation.moderator_note'] = moderatorNote;
       updateFields['moderation.reviewed_at'] = reviewedAt;
     }
+    if (newStatus === 'approved') {
+      updateFields['image.status'] = 'approved';
+    } else if (newStatus === 'rejected') {
+      updateFields['image.status'] = 'rejected';
+    }
 
     if (this.mode === 'mongodb') {
       let query;
@@ -346,8 +442,34 @@ class DatabaseService {
     const item = this.localReports.find(r => r.id === rid);
     if (!item) return false;
     Object.assign(item, updateFields);
+    if (item.image) {
+      if (newStatus === 'approved') item.image.status = 'approved';
+      else if (newStatus === 'rejected') item.image.status = 'rejected';
+    }
     this.saveLocal();
     return true;
+  }
+
+  async getReportById(rid) {
+    if (!rid) return null;
+    if (this.mode === 'mongodb') {
+      let query;
+      try {
+        query = { $or: [{ _id: new ObjectId(rid) }, { id: rid }, { _id: rid }] };
+      } catch {
+        query = { $or: [{ id: rid }, { _id: rid }] };
+      }
+      return await this.db.collection('reports').findOne(query);
+    }
+    return this.localReports.find(r => r.id === rid || r._id === rid) || null;
+  }
+
+  async getReportByMediaId(mediaId) {
+    if (!mediaId) return null;
+    if (this.mode === 'mongodb') {
+      return await this.db.collection('reports').findOne({ 'image.media_id': mediaId });
+    }
+    return this.localReports.find(r => r.image && r.image.media_id === mediaId) || null;
   }
 
   async deleteReport(rid) {
@@ -514,11 +636,158 @@ class DatabaseService {
       daily_visits: dailyVisits
     };
   }
+
+  // --- Distributed Persistent Rate Limiting ---
+  async checkRateLimit(prefix, ip, windowMs, max) {
+    const now = Date.now();
+    const resetAt = new Date(now + windowMs);
+
+    if (this.mode === 'mongodb' && this.db) {
+      const key = `${prefix}:${ip}`;
+      const doc = await this.db.collection('rate_limits').findOneAndUpdate(
+        { _id: key, reset_at: { $gt: new Date(now) } },
+        { $inc: { count: 1 } },
+        { returnDocument: 'after' }
+      );
+
+      let currentCount = 1;
+      let windowResetTime = resetAt.getTime();
+
+      if (!doc) {
+        await this.db.collection('rate_limits').updateOne(
+          { _id: key },
+          { $set: { count: 1, reset_at: resetAt } },
+          { upsert: true }
+        );
+        currentCount = 1;
+      } else {
+        currentCount = doc.count;
+        if (doc.reset_at) windowResetTime = new Date(doc.reset_at).getTime();
+      }
+
+      const remaining = Math.max(0, max - currentCount);
+      const retryAfterSec = Math.max(1, Math.ceil((windowResetTime - now) / 1000));
+      const isLimited = currentCount > max;
+
+      return { isLimited, remaining, retryAfterSec };
+    }
+
+    // Local in-memory fallback
+    const key = `${prefix}:${ip}`;
+    const timestamps = (this.localRateLimits.get(key) || []).filter(t => now - t < windowMs);
+
+    if (timestamps.length >= max) {
+      const oldest = timestamps[0];
+      const retryAfterSec = Math.max(1, Math.ceil((oldest + windowMs - now) / 1000));
+      return { isLimited: true, remaining: 0, retryAfterSec };
+    }
+
+    timestamps.push(now);
+    this.localRateLimits.set(key, timestamps);
+    return { isLimited: false, remaining: Math.max(0, max - timestamps.length), retryAfterSec: 0 };
+  }
+
+  // --- Distributed Persistent Token Revocation ---
+  async revokeToken(tokenHash, expiresAtDate) {
+    if (this.mode === 'mongodb' && this.db) {
+      await this.db.collection('revoked_tokens').updateOne(
+        { _id: tokenHash },
+        { $set: { expires_at: expiresAtDate, revoked_at: new Date() } },
+        { upsert: true }
+      );
+      return;
+    }
+    this.localRevokedTokens.set(tokenHash, expiresAtDate.getTime());
+  }
+
+  async isTokenRevoked(tokenHash) {
+    if (this.mode === 'mongodb' && this.db) {
+      const doc = await this.db.collection('revoked_tokens').findOne({ _id: tokenHash });
+      if (!doc) return false;
+      if (doc.expires_at && new Date(doc.expires_at).getTime() < Date.now()) return false;
+      return true;
+    }
+    const exp = this.localRevokedTokens.get(tokenHash);
+    if (!exp) return false;
+    if (exp < Date.now()) {
+      this.localRevokedTokens.delete(tokenHash);
+      return false;
+    }
+    return true;
+  }
+
+  // --- Database-Backed Atomic Duplicate Submission Tracking ---
+  async checkAndRecordDuplicateSubmission(fingerprintHash, windowSeconds = 600) {
+    const expiresAt = new Date(Date.now() + windowSeconds * 1000);
+    if (this.mode === 'mongodb' && this.db) {
+      try {
+        await this.db.collection('submission_fingerprints').insertOne({
+          _id: fingerprintHash,
+          created_at: new Date(),
+          expires_at: expiresAt
+        });
+        return true;
+      } catch (err) {
+        if (err.code === 11000) {
+          return false; // Atomic primary key collision in MongoDB Atlas
+        }
+        throw err;
+      }
+    }
+
+    const exp = this.localFingerprints.get(fingerprintHash);
+    if (exp && exp > Date.now()) {
+      return false;
+    }
+    this.localFingerprints.set(fingerprintHash, expiresAt.getTime());
+    return true;
+  }
 }
 
 const dbService = new DatabaseService();
 
-// Middleware: Comprehensive Security Headers & DB Init
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Multipart/form-data parser middleware for single-image and field submissions
+app.use((req, res, next) => {
+  const contentType = req.headers['content-type'] || '';
+  if (contentType.includes('multipart/form-data')) {
+    const match = contentType.match(/boundary=([^\s;]+)/i);
+    if (!match) return next();
+    const boundary = match[1].replace(/^["']|["']$/g, '');
+    const chunks = [];
+    let totalBytes = 0;
+    const MAX_UPLOAD = 10 * 1024 * 1024; // 10MB
+
+    req.on('data', chunk => {
+      totalBytes += chunk.length;
+      if (totalBytes > MAX_UPLOAD) {
+        return res.status(413).json({ error: 'Payload too large. Maximum upload size is 5 MB.' });
+      }
+      chunks.push(chunk);
+    });
+
+    req.on('end', () => {
+      try {
+        const fullBuffer = Buffer.concat(chunks);
+        const { fields, file } = parseMultipartBuffer(fullBuffer, boundary);
+        req.body = { ...(req.body || {}), ...fields };
+        if (file) {
+          req.file = file;
+        }
+        next();
+      } catch (err) {
+        console.error('Multipart parse error:', err.message);
+        res.status(400).json({ error: 'Failed to parse multipart form data.' });
+      }
+    });
+    return;
+  }
+  next();
+});
+
+// Middleware: Comprehensive Security Headers, DB Init & NoSQL Sanitization
 let dbInitPromise = null;
 app.use(async (req, res, next) => {
   res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, max-age=0');
@@ -528,7 +797,31 @@ app.use(async (req, res, next) => {
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
   res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=()');
   res.setHeader('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
-  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' 'unsafe-inline' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https://unpkg.com https://*.tile.openstreetmap.org; connect-src 'self'; frame-ancestors 'none';");
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self' https://unpkg.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https://unpkg.com https://*.tile.openstreetmap.org; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';");
+
+  // Anti-CSRF Origin Check for State-Changing Requests (POST, DELETE)
+  const method = req.method.toUpperCase();
+  if (['POST', 'DELETE', 'PUT', 'PATCH'].includes(method)) {
+    const origin = req.headers['origin'];
+    const host = req.headers['host'];
+    if (origin && host) {
+      try {
+        const originHost = new URL(origin).host;
+        if (originHost !== host) {
+          return res.status(403).json({ error: 'Cross-origin request rejected for security.' });
+        }
+      } catch {
+        return res.status(403).json({ error: 'Invalid origin header.' });
+      }
+    }
+  }
+
+  // Strip NoSQL operators from query, body, and params
+  if (req.body) stripMongoOperators(req.body);
+  if (req.query) stripMongoOperators(req.query);
+  if (req.params) stripMongoOperators(req.params);
 
   if (!dbInitPromise) {
     dbInitPromise = dbService.init();
@@ -536,8 +829,6 @@ app.use(async (req, res, next) => {
   await dbInitPromise;
   next();
 });
-
-app.use(express.json({ limit: '32kb' }));
 
 // Static files
 app.use(express.static(PUBLIC_DIR));
@@ -560,8 +851,8 @@ app.get('/api/meta', (req, res) => {
 
 // 2. Statistics & Public Incidents Endpoint (PII-SCRUBBED & SANITIZED)
 app.get('/api/stats', async (req, res) => {
-  const district = (req.query.district || '').toString();
-  const category = (req.query.type || '').toString();
+  const district = (typeof req.query.district === 'string') ? req.query.district.trim() : '';
+  const category = (typeof req.query.type === 'string') ? req.query.type.trim() : '';
 
   if (district && !DISTRICT_MAP[district]) {
     return res.status(400).json({ error: 'Invalid district code' });
@@ -811,38 +1102,162 @@ app.post('/api/analytics/visit', visitAnalyticsLimiter.middleware(), async (req,
   res.json(result);
 });
 
-// 8. Submit Incident Report (3-Step Guided Backend with Tracking Reference - Strict Rate Limited & Sanitized)
+// 8. Submit Incident Report (Minimal Composer Backend with Auto-Timestamp, Single-Image Upload & Tracking Reference)
 app.post('/api/reports', reportSubmitLimiter.middleware(), async (req, res) => {
   const body = req.body || {};
   const code = String(body.district_code || '').trim().toUpperCase();
   const kind = String(body.type || '').trim().toLowerCase();
-  const location = sanitizeText(String(body.location || body.approximate_area || ''));
-  const description = sanitizeText(String(body.description || ''));
-  const day = String(body.incident_date || '').trim();
-  const clock = String(body.incident_time || '12:00').trim();
-  const witnessStatus = String(body.witness_status || (body.is_victim ? 'victim' : 'witness')).trim();
-  const reporterName = sanitizeText(String(body.reporter_name || ''));
-  const reporterContact = sanitizeText(String(body.reporter_contact || ''));
-  const referenceUrl = sanitizeText(String(body.reference_url || ''));
+  let rawLoc = String(body.location || body.approximate_area || '').trim();
+  const rawDesc = String(body.description || '').trim();
 
-  // Strict Validation
+  // Strict District & Crime Category Validation
   if (!DISTRICT_MAP[code] || !TYPES.includes(kind)) {
     return res.status(400).json({ error: 'Invalid district or incident category selected.' });
   }
-  if (location.length < 3 || location.length > 140) {
+
+  // Location: If not provided in minimal composer, fallback to district name
+  if (!rawLoc && DISTRICT_MAP[code]) {
+    rawLoc = DISTRICT_MAP[code].name;
+  }
+  if (rawLoc.length < 3 || rawLoc.length > 140) {
     return res.status(400).json({ error: 'Approximate area must be between 3 and 140 characters. (Do not provide exact residential addresses).' });
   }
-  if (description.length < 15 || description.length > 2000) {
+
+  // Description Validation: 15 to 2,000 characters
+  if (rawDesc.length < 15 || rawDesc.length > 2000) {
     return res.status(400).json({ error: 'Incident narrative must be between 15 and 2000 characters.' });
   }
 
-  const parsedDate = new Date(day + 'T00:00:00Z');
-  const now = new Date();
-  const minDate = new Date();
-  minDate.setUTCFullYear(minDate.getUTCFullYear() - 5);
+  const location = sanitizeInputString(rawLoc, 140);
+  const description = sanitizeInputString(rawDesc, 2000);
 
-  if (isNaN(parsedDate.getTime()) || parsedDate > now || parsedDate < minDate || !/^\d{2}:\d{2}$/.test(clock)) {
-    return res.status(400).json({ error: 'Invalid incident date or time format (HH:MM).' });
+  // Anonymous & Reporter Identity Protection
+  const isAnonymous = body.is_anonymous === true || body.is_anonymous === 'true' || !body.reporter_name;
+  const reporterName = isAnonymous
+    ? 'Anonymous Citizen'
+    : sanitizeInputString(String(body.reporter_name || ''), 60);
+  const reporterContact = sanitizeInputString(String(body.reporter_contact || ''), 80);
+  const referenceUrl = sanitizeUrl(body.reference_url);
+
+  const rawWitness = String(body.witness_status || '').trim().toLowerCase();
+  const allowedWitness = ['victim', 'witness', 'concerned_citizen', 'other'];
+  const witnessStatus = allowedWitness.includes(rawWitness)
+    ? rawWitness
+    : (body.is_victim ? 'victim' : 'witness');
+
+  // Automatic Server-Side Date & Time Generation
+  const nowUtc = new Date();
+  const submissionTimestampUtc = nowUtc.toISOString();
+
+  // Format in Bangladesh Time (Asia/Dhaka - UTC+6)
+  const dhakaFormatter = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Dhaka',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+  const dhakaParts = dhakaFormatter.formatToParts(nowUtc);
+  const partMap = {};
+  dhakaParts.forEach(p => partMap[p.type] = p.value);
+  const dhakaDateStr = `${partMap.year}-${partMap.month}-${partMap.day}`;
+  const dhakaTimeStr = `${partMap.hour}:${partMap.minute}`;
+  const dhakaFullString = `${dhakaDateStr} ${dhakaTimeStr}:${partMap.second} (Asia/Dhaka)`;
+
+  let day = String(body.incident_date || '').trim();
+  let clock = String(body.incident_time || '').trim();
+  let dateIsSubmissionTime = false;
+
+  if (!day && !clock) {
+    // User submitted via minimal composer: Use automatic server-side timestamp
+    day = dhakaDateStr;
+    clock = dhakaTimeStr;
+    dateIsSubmissionTime = true;
+  } else {
+    // Manual date/time provided (e.g. from existing regression test suite or API client)
+    if (!clock) clock = '12:00';
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || !/^([01]\d|2[0-3]):([0-5]\d)$/.test(clock)) {
+      return res.status(400).json({ error: 'Invalid incident date format (YYYY-MM-DD) or time format (HH:MM, 00:00-23:59).' });
+    }
+    const parsedDate = new Date(day + 'T00:00:00Z');
+    const minDate = new Date();
+    minDate.setUTCFullYear(minDate.getUTCFullYear() - 5);
+    if (isNaN(parsedDate.getTime()) || parsedDate > nowUtc || parsedDate < minDate) {
+      return res.status(400).json({ error: 'Incident date must be a valid date within the last 5 years.' });
+    }
+  }
+
+  // Anti-Spam / Deduplication Fingerprint (Atomic database-backed with TTL expiration)
+  const subFingerprint = crypto.createHash('sha256')
+    .update(`${code}:${kind}:${day}:${description.slice(0, 100)}`)
+    .digest('hex');
+  const isUnique = await dbService.checkAndRecordDuplicateSubmission(subFingerprint, 600);
+  if (!isUnique) {
+    return res.status(409).json({
+      error: 'একই ধরনের রিপোর্ট ইতিমধ্যে সিস্টেমে জমা দেওয়া হয়েছে। অনুগ্রহ করে কিছুক্ষণ অপেক্ষা করুন। (A duplicate report was already submitted recently.)'
+    });
+  }
+
+  // Optional Single-Image Upload Processing
+  let imageDoc = null;
+  let imageBuffer = null;
+  let imageFilename = 'incident.jpg';
+
+  // 1) From multipart/form-data upload
+  if (req.file && req.file.buffer && req.file.buffer.length > 0) {
+    imageBuffer = req.file.buffer;
+    imageFilename = req.file.filename || 'incident.jpg';
+  }
+  // 2) From JSON base64 upload
+  else if (body.image && (body.image.data || typeof body.image === 'string')) {
+    const rawData = body.image.data || body.image;
+    const matches = rawData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/);
+    if (matches && matches[2]) {
+      imageBuffer = Buffer.from(matches[2], 'base64');
+      imageFilename = body.image.name || body.image_name || 'incident.jpg';
+    } else if (!rawData.startsWith('data:')) {
+      imageBuffer = Buffer.from(rawData, 'base64');
+      imageFilename = body.image.name || body.image_name || 'incident.jpg';
+    }
+  } else if (body.image_base64 || body.image_data) {
+    const rawData = body.image_base64 || body.image_data;
+    const matches = typeof rawData === 'string' ? rawData.match(/^data:([A-Za-z-+\/]+);base64,(.+)$/) : null;
+    if (matches && matches[2]) {
+      imageBuffer = Buffer.from(matches[2], 'base64');
+    } else if (typeof rawData === 'string') {
+      imageBuffer = Buffer.from(rawData, 'base64');
+    }
+    imageFilename = body.image_name || 'incident.jpg';
+  }
+
+  if (imageBuffer) {
+    try {
+      // Validate magic bytes, enforce max 5MB, reject video/fake MIME, and strip EXIF
+      const validated = validateAndSanitizeImage(imageBuffer, imageFilename);
+      const mediaRef = await storageService.saveMedia(
+        validated.sanitizedBuffer,
+        validated.mimeType,
+        validated.extension,
+        validated.originalName
+      );
+
+      // Save media reference in MongoDB (NEVER save binary inside incident document!)
+      imageDoc = {
+        media_id: mediaRef.media_id,
+        storage_key: mediaRef.storage_key,
+        storage_provider: mediaRef.storage_provider,
+        filename: mediaRef.filename,
+        mime_type: mediaRef.mime_type,
+        size_bytes: mediaRef.size_bytes,
+        status: 'pending',
+        uploaded_at: mediaRef.uploaded_at
+      };
+    } catch (imgErr) {
+      return res.status(400).json({ error: imgErr.message });
+    }
   }
 
   // Generate private submitter tracking code: WD-XXXXXXXX
@@ -855,6 +1270,10 @@ app.post('/api/reports', reportSubmitLimiter.middleware(), async (req, res) => {
     type: kind,
     incident_date: day,
     incident_time: clock,
+    submission_timestamp: submissionTimestampUtc,
+    submission_time_dhaka: dhakaFullString,
+    date_is_submission_time: dateIsSubmissionTime,
+    is_timestamp_auto: dateIsSubmissionTime,
     location,
     approximate_area: location,
     description,
@@ -863,51 +1282,125 @@ app.post('/api/reports', reportSubmitLimiter.middleware(), async (req, res) => {
     verification_status: 'community_submitted',
     reference_url: referenceUrl || null,
     news_source: null,
+    image: imageDoc,
     reporter: {
-      name: reporterName || 'Anonymous Citizen',
-      contact: reporterContact || null
+      name: reporterName,
+      contact: reporterContact || null,
+      is_anonymous: isAnonymous
     },
     moderation: {
       reviewed_at: null,
       moderator_note: null
     },
-    created_at: new Date().toISOString()
+    created_at: submissionTimestampUtc
   };
 
   try {
     const rid = await dbService.insertReport(doc);
     res.status(201).json({
+      success: true,
       id: rid,
       tracking_code: trackingCode,
       status: 'pending',
       verification_status: 'community_submitted',
-      message: 'Your report has been received and queued for review.'
+      submission_timestamp: submissionTimestampUtc,
+      submission_time_dhaka: dhakaFullString,
+      date_is_submission_time: doc.date_is_submission_time,
+      has_image: !!imageDoc,
+      image: imageDoc ? {
+        media_id: imageDoc.media_id,
+        filename: imageDoc.filename,
+        mime_type: imageDoc.mime_type,
+        status: 'pending'
+      } : null,
+      message: 'আপনার রিপোর্ট জমা হয়েছে। যাচাইয়ের পর প্রকাশ করা হবে।'
     });
   } catch (err) {
-    res.status(503).json({ error: err.message || 'Unable to store report at this time.' });
+    console.error('[REPORT SUBMISSION ERROR]', err.message);
+    const clientErr = IS_PROD
+      ? 'Unable to store report at this time. Please try again later.'
+      : (err.message || 'Unable to store report at this time.');
+    res.status(503).json({ error: clientErr });
   }
 });
 
-// 9. Admin Login (Hardened & Rate-Limited)
+// 8.1 Public & Private Media Retrieval Endpoint
+app.get('/api/media/:mediaId', async (req, res) => {
+  const mediaId = String(req.params.mediaId || '').trim();
+  if (!/^m_[0-9a-fA-F]{32}$/.test(mediaId)) {
+    return res.status(400).json({ error: 'Invalid media ID parameter.' });
+  }
+
+  const report = await dbService.getReportByMediaId(mediaId);
+  if (!report || !report.image) {
+    return res.status(404).json({ error: 'Media not found.' });
+  }
+
+  // Security Rule: Images remain strictly private until admin moderation approval
+  if (report.status !== 'approved') {
+    const authHeader = req.headers.authorization || (req.query.token ? `Bearer ${req.query.token}` : null);
+    const isAuthorized = await verifyToken(authHeader);
+    if (!isAuthorized) {
+      return res.status(403).json({
+        error: 'এই মিডিয়া পর্যালোচনাধীন রয়েছে। শুধুমাত্র অ্যাডমিনদের অ্যাক্সেস অনুমোদিত। (Media is pending moderation. Access restricted to administrators).'
+      });
+    }
+  }
+
+  const buffer = await storageService.getMedia(report.image.storage_key);
+  if (!buffer) {
+    return res.status(404).json({ error: 'Media file could not be retrieved from storage.' });
+  }
+
+  res.setHeader('Content-Type', report.image.mime_type || 'image/jpeg');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Cache-Control', report.status === 'approved' ? 'public, max-age=86400' : 'no-store, must-revalidate');
+  res.send(buffer);
+});
+
+// 9. Admin Login (Timing-Safe & Distributed Rate-Limited)
 app.post('/api/admin/login', adminLoginLimiter.middleware(), (req, res) => {
-  if (IS_PROD && !ADMIN_PASS) {
-    return res.status(403).json({ error: 'Administrator access is disabled in production because SAFEMAP_ADMIN_PASSWORD is not configured.' });
+  const weakPasswords = ['admin123', 'admin', 'password', 'change_this_to_a_strong_password_in_production'];
+  if (IS_PROD && (!ADMIN_PASS || ADMIN_PASS.length < 16 || weakPasswords.includes(ADMIN_PASS.toLowerCase()))) {
+    return res.status(403).json({
+      error: 'Administrator access is locked in production: SAFEMAP_ADMIN_PASSWORD is weak, default, or under 16 characters.'
+    });
   }
 
   const password = String(req.body?.password || '').trim();
-  if (!password || password !== ADMIN_PASS) {
+  if (!password || !verifyAdminPassword(password)) {
     return res.status(401).json({ error: 'Incorrect password' });
   }
 
   res.json({ token: generateToken() });
 });
 
-// 9. Admin Reports Queue (With Verification Filtering)
-app.get('/api/admin/reports', async (req, res) => {
-  if (!verifyToken(req.headers.authorization)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+// Server-Side Authorization Enforcement: Automatically protect all other /api/admin/* endpoints
+app.use('/api/admin', (req, res, next) => {
+  if (req.path === '/login') return next();
+  return requireAdminAuth(req, res, next);
+});
 
+// 9.1. Admin Logout (Persistent Shared Session Invalidation Across All Instances)
+app.post('/api/admin/logout', requireAdminAuth, async (req, res) => {
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const token = authHeader.slice(7).trim();
+    try {
+      const parts = token.split('.');
+      const expiry = parseInt(parts[0], 10);
+      const expiresAt = !isNaN(expiry) ? new Date(expiry * 1000) : new Date(Date.now() + 12 * 3600 * 1000);
+      const tokenHash = crypto.createHash('sha256').update(token).digest('hex');
+      await dbService.revokeToken(tokenHash, expiresAt);
+    } catch (err) {
+      console.error('[LOGOUT ERROR]', err.message);
+    }
+  }
+  res.json({ success: true, message: 'Admin session invalidated across all instances.' });
+});
+
+// 9.2. Admin Reports Queue (With Verification Filtering)
+app.get('/api/admin/reports', requireAdminAuth, async (req, res) => {
   const status = (req.query.status || 'pending').toString();
   const verification = req.query.verification_status ? String(req.query.verification_status) : null;
 
@@ -920,18 +1413,23 @@ app.get('/api/admin/reports', async (req, res) => {
 });
 
 // 10. Admin Update Status & Verification Tier
-app.post('/api/admin/reports/:id/status', async (req, res) => {
-  if (!verifyToken(req.headers.authorization)) {
-    return res.status(401).json({ error: 'Unauthorized' });
+app.post('/api/admin/reports/:id/status', requireAdminAuth, async (req, res) => {
+  const rid = String(req.params.id || '').trim();
+  if (!/^[0-9a-fA-F]{24}$/.test(rid) && !/^\d+$/.test(rid)) {
+    return res.status(400).json({ error: 'Invalid report ID parameter.' });
   }
 
-  const rid = req.params.id;
   const state = req.body?.status; // 'approved' | 'rejected'
   const verificationStatus = req.body?.verification_status; // 'moderated' | 'independently_verified' | 'published_news_report' | 'withdrawn'
-  const moderatorNote = String(req.body?.moderator_note || '').trim();
+  const moderatorNote = sanitizeInputString(String(req.body?.moderator_note || ''), 500);
 
   if (!['approved', 'rejected'].includes(state)) {
     return res.status(400).json({ error: 'Invalid status. Must be approved or rejected.' });
+  }
+
+  const allowedVerification = ['moderated', 'independently_verified', 'published_news_report', 'withdrawn', 'community_submitted'];
+  if (verificationStatus && !allowedVerification.includes(verificationStatus)) {
+    return res.status(400).json({ error: 'Invalid verification status selected.' });
   }
 
   const ok = await dbService.updateReportStatus(rid, state, verificationStatus, moderatorNote, new Date().toISOString());
@@ -943,12 +1441,26 @@ app.post('/api/admin/reports/:id/status', async (req, res) => {
 });
 
 // 10.1. Admin Delete / Purge Report Permanently (e.g. Fake / Spurious Report)
-app.delete('/api/admin/reports/:id', async (req, res) => {
-  if (!verifyToken(req.headers.authorization)) {
-    return res.status(401).json({ error: 'Unauthorized' });
+app.delete('/api/admin/reports/:id', requireAdminAuth, async (req, res) => {
+  const rid = String(req.params.id || '').trim();
+  if (!/^[0-9a-fA-F]{24}$/.test(rid) && !/^\d+$/.test(rid)) {
+    return res.status(400).json({ error: 'Invalid report ID parameter.' });
   }
 
-  const rid = req.params.id;
+  // Look up existing report to purge associated media from persistent storage
+  const existing = await dbService.getReportById(rid);
+  if (!existing) {
+    return res.status(404).json({ error: 'Report not found or could not be deleted.' });
+  }
+
+  if (existing.image && existing.image.storage_key) {
+    try {
+      await storageService.deleteMedia(existing.image.storage_key);
+    } catch (err) {
+      console.error('[MEDIA PURGE ERROR]', err.message);
+    }
+  }
+
   const ok = await dbService.deleteReport(rid);
   if (!ok) {
     return res.status(404).json({ error: 'Report not found or could not be deleted.' });
@@ -957,18 +1469,31 @@ app.delete('/api/admin/reports/:id', async (req, res) => {
   res.json({ success: true, id: rid, message: 'Report permanently deleted.' });
 });
 
-// 11. Admin Detailed Analytics
-app.get('/api/admin/analytics', async (req, res) => {
-  if (!verifyToken(req.headers.authorization)) {
-    return res.status(401).json({ error: 'Unauthorized' });
+// 10.2 Admin Safe Media Preview Endpoint
+app.get('/api/admin/media/:mediaId', requireAdminAuth, async (req, res) => {
+  const mediaId = String(req.params.mediaId || '').trim();
+  const report = await dbService.getReportByMediaId(mediaId);
+  if (!report || !report.image) {
+    return res.status(404).json({ error: 'Media not found.' });
   }
+  const buffer = await storageService.getMedia(report.image.storage_key);
+  if (!buffer) {
+    return res.status(404).json({ error: 'Media file could not be retrieved from storage.' });
+  }
+  res.setHeader('Content-Type', report.image.mime_type || 'image/jpeg');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Cache-Control', 'no-store, must-revalidate');
+  res.send(buffer);
+});
 
+// 11. Admin Detailed Analytics
+app.get('/api/admin/analytics', requireAdminAuth, async (req, res) => {
   const analytics = await dbService.getFullAnalytics();
   res.json(analytics);
 });
 
 // Server bootstrap (works locally and on Vercel)
-if (!IS_PROD) {
+if (require.main === module && !IS_PROD) {
   dbService.init().then(() => {
     app.listen(PORT, '127.0.0.1', () => {
       console.log(`WatchDog BD (Node.js): http://localhost:${PORT}`);

@@ -1,5 +1,5 @@
 node_modules/
 .env
-data/local_reports.json
+data/
 *.log
 .DS_Store

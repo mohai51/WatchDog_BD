@@ -356,159 +356,150 @@
     </section>
   </main>
 
-  <!-- 3-STEP INCIDENT REPORTING MODAL -->
-  <div class="modal-backdrop" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="reportModalTitle">
-    <div class="modal">
-      <div class="modal-head">
-        <div>
-          <h2 id="reportModalTitle" data-i="modalReportTitle">ঘটনার রিপোর্ট জমা দিন</h2>
-          <p data-i="modalReportSubtitle">সচেতন নাগরিক হিসেবে সত্য তথ্য দিয়ে জননিরাপত্তায় ভূমিকা রাখুন।</p>
+  <!-- MINIMAL FACEBOOK-STYLE REPORT COMPOSER MODAL -->
+  <div class="modal-backdrop" id="reportModal" role="dialog" aria-modal="true" aria-labelledby="composerModalTitle">
+    <div class="modal composer-modal-card">
+      <!-- Composer Header -->
+      <div class="composer-header">
+        <div class="composer-title-wrap">
+          <div class="composer-shield-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#00BFA6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+          </div>
+          <h2 id="composerModalTitle" data-i="composerTitle">ঘটনা রিপোর্ট করুন</h2>
         </div>
         <button class="drawer-close" data-close="reportModal" aria-label="Close">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
       </div>
 
-      <!-- Progress Step Indicator -->
-      <div class="step-progress-bar">
-        <div class="step-bubble active" id="bubble1">১</div>
-        <div class="step-bubble" id="bubble2">২</div>
-        <div class="step-bubble" id="bubble3">৩</div>
+      <!-- Composer Form Container -->
+      <div id="composerFormWrap">
+        <form id="composerReportForm" novalidate>
+          <!-- User / Name Row with Anonymous Toggle -->
+          <div class="composer-user-row">
+            <div class="composer-input-with-icon">
+              <svg class="composer-field-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <input type="text" id="composerReporterName" name="reporter_name" maxlength="60" placeholder="আপনার নাম (ঐচ্ছিক)" data-placeholder="composerNamePlaceholder" autocomplete="name">
+            </div>
+
+            <!-- Anonymous Toggle Button -->
+            <button type="button" class="anonymous-toggle-btn" id="anonymousToggleBtn" role="switch" aria-checked="false" title="নাম গোপন রাখুন">
+              <svg class="anon-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+              </svg>
+              <span id="anonToggleLabel" data-i="composerAnon">গোপন রাখুন</span>
+            </button>
+          </div>
+
+          <!-- Two Dropdowns (Same Row on Desktop) -->
+          <div class="composer-dropdowns-row">
+            <div class="composer-select-wrap">
+              <label for="composerDistrict" class="sr-only">জেলা নির্বাচন</label>
+              <select id="composerDistrict" name="district_code" required aria-label="জেলা নির্বাচন">
+                <option value="" disabled selected data-i="selectDistrict">জেলা নির্বাচন করুন</option>
+              </select>
+            </div>
+            <div class="composer-select-wrap">
+              <label for="composerType" class="sr-only">অপরাধের ধরন</label>
+              <select id="composerType" name="type" required aria-label="অপরাধের ধরন">
+                <option value="" disabled selected data-i="selectType">অপরাধের ধরন নির্বাচন</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Main Description (Large borderless auto-expanding textarea) -->
+          <div class="composer-textarea-wrap">
+            <textarea id="composerDesc" name="description" rows="4" maxlength="2000" required placeholder="কী ঘটেছে? বিস্তারিত লিখুন..." data-placeholder="composerDescPlaceholder" aria-label="কী ঘটেছে? বিস্তারিত লিখুন..."></textarea>
+            <div class="composer-char-count" id="composerCharCount">০ / ২,০০০</div>
+          </div>
+
+          <!-- Selected Image Preview Area (Hidden by default) -->
+          <div class="composer-image-preview-card" id="composerImagePreview" hidden>
+            <div class="composer-img-thumb-wrap">
+              <img id="composerImgTag" src="" alt="Selected Photo">
+            </div>
+            <div class="composer-img-meta">
+              <span class="composer-img-name" id="composerImgName">photo.jpg</span>
+              <span class="composer-img-size" id="composerImgSize">1.2 MB</span>
+            </div>
+            <button type="button" class="composer-img-remove-btn" id="composerRemoveImgBtn" title="Remove image" aria-label="Remove image">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Bottom Toolbar (Facebook Style) -->
+          <div class="composer-toolbar">
+            <!-- Left: Add Photo Button + Hidden File Input -->
+            <label class="composer-tool-btn" id="addPhotoToolBtn" for="composerImageInput" tabindex="0">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="#00BFA6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                <circle cx="8.5" cy="8.5" r="1.5"></circle>
+                <polyline points="21 15 16 10 5 21"></polyline>
+              </svg>
+              <span data-i="composerAddPhoto">ছবি যোগ করুন</span>
+              <input type="file" id="composerImageInput" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" style="display:none" aria-label="Upload Photo">
+            </label>
+
+            <!-- Right: Auto Date & Time Badge -->
+            <div class="composer-auto-time-badge" title="সার্ভার থেকে স্বয়ংক্রিয়ভাবে দাখিলের সময় (Asia/Dhaka) রেকর্ড করা হবে">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+              <span data-i="composerAutoTime">Auto Date &amp; Time</span>
+            </div>
+          </div>
+
+          <!-- Submission Feedback / Error Alert -->
+          <div id="composerErrorMessage" class="composer-error-alert" role="alert" hidden></div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="composer-submit-btn" id="composerSubmitBtn">
+            <span class="btn-spinner" id="composerSpinner" hidden></span>
+            <span id="composerSubmitText" data-i="composerSubmit">রিপোর্ট জমা দিন</span>
+          </button>
+        </form>
       </div>
 
-      <form id="multiStepReportForm">
-        <!-- STEP 1: Basic Incident Information -->
-        <div class="step-pane active" id="step1">
-          <h3 style="font-size:14px;margin:0 0 12px" data-i="step1Title">ধাপ ১: ঘটনার প্রাথমিক তথ্য</h3>
-          <div class="form-grid">
-            <label>
-              <span data-i="fieldCategory">অপরাধের ধরন</span>
-              <select name="type" id="formType" required></select>
-            </label>
-            <label>
-              <span data-i="fieldDistrict">জেলা</span>
-              <select name="district_code" id="formDistrict" required></select>
-            </label>
-            <label>
-              <span data-i="fieldDate">ঘটনার তারিখ</span>
-              <input type="date" name="incident_date" id="formDate" required>
-            </label>
-            <label>
-              <span data-i="fieldTime">আনুমানিক সময়</span>
-              <input type="time" name="incident_time" id="formTime" required value="12:00">
-            </label>
-          </div>
-
-          <label>
-            <span data-i="fieldLocation">আনুমানিক এলাকা / স্থান (বাসা বা ব্যক্তিগত ঠিকানা দেবেন না)</span>
-            <input type="text" name="location" id="formLocation" minlength="3" maxlength="140" required placeholder="যেমন: ধানমন্ডি ২৭ সংলগ্ন রোড / মিরপুর ১০ গোলচত্বর">
-          </label>
-
-          <div class="step-actions">
-            <span></span>
-            <button type="button" class="button primary" id="nextToStep2Btn" data-i="btnNext">পরবর্তী ধাপ</button>
-          </div>
+      <!-- SUCCESS CONFIRMATION STATE (Clean, minimal, no extra pages/redirects) -->
+      <div id="composerSuccessWrap" class="composer-success-wrap" hidden>
+        <div class="composer-success-icon-wrap">
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#00BFA6" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+          </svg>
         </div>
+        <h3 class="composer-success-title" data-i="composerSuccessMessage">আপনার রিপোর্ট জমা হয়েছে। যাচাইয়ের পর প্রকাশ করা হবে।</h3>
+        <p class="composer-success-sub" id="composerSuccessTimestamp"></p>
 
-        <!-- STEP 2: Incident Narrative & Source -->
-        <div class="step-pane" id="step2">
-          <h3 style="font-size:14px;margin:0 0 12px" data-i="step2Title">ধাপ ২: ঘটনার বিস্তারিত ও সত্যতা</h3>
-          
-          <label>
-            <span data-i="fieldWitness">ঘটনায় আপনার সংশ্লিষ্টতা</span>
-            <select name="witness_status" id="formWitness" required>
-              <option value="victim" data-i="optVictim">আমি নিজেই ঘটনার ভুক্তভোগী</option>
-              <option value="witness" data-i="optWitness">আমি সরাসরি ঘটনার প্রত্যক্ষদর্শী</option>
-              <option value="informed_citizen" data-i="optInformed">আমি বিশ্বস্ত স্থানীয় সূত্র বা সংবাদ থেকে অবহিত</option>
-            </select>
-          </label>
-
-          <label>
-            <span data-i="fieldDesc">ঘটনার বস্তুনিষ্ঠ বিবরণ (কমপক্ষে ১৫ অক্ষর)</span>
-            <textarea name="description" id="formDesc" rows="4" minlength="15" maxlength="2000" required placeholder="ঘটনার প্রেক্ষাপট, কী ঘটেছিল এবং বর্তমান পরিস্থিতি সম্পর্কে লিখুন..."></textarea>
-          </label>
-
-          <label>
-            <span data-i="fieldReference">তথ্যসূত্র বা সংবাদের লিংক (যদি থাকে)</span>
-            <input type="url" name="reference_url" id="formReference" placeholder="https://example.com/news-report">
-          </label>
-
-          <div class="form-grid">
-            <label>
-              <span data-i="fieldName">আপনার নাম (ঐচ্ছিক - জনসম্মুখে গোপন রাখা হবে)</span>
-              <input type="text" name="reporter_name" id="formReporterName" placeholder="নাম প্রকাশে অনিচ্ছুক">
-            </label>
-            <label>
-              <span data-i="fieldContact">যোগাযোগের নম্বর/ইমেইল (ঐচ্ছিক - সম্পূর্ণ গোপন)</span>
-              <input type="text" name="reporter_contact" id="formReporterContact" placeholder="জরুরি যাচাইয়ের প্রয়োজনে">
-            </label>
-          </div>
-
-          <div style="background:var(--sub);padding:10px 12px;border-radius:8px;font-size:11px;color:var(--muted);margin-bottom:14px">
-            <strong>গোপনীয়তার প্রতিশ্রুতি:</strong> আপনার নাম বা ব্যক্তিগত যোগাযোগের তথ্য কখনোই পাবলিক পেজে দেখানো হবে না।
-          </div>
-
-          <div class="step-actions">
-            <button type="button" class="button ghost" id="backToStep1Btn" data-i="btnBack">পূর্ববর্তী ধাপ</button>
-            <button type="button" class="button primary" id="nextToStep3Btn" data-i="btnNext">পর্যালোচনা ও ঘোষণা</button>
-          </div>
-        </div>
-
-        <!-- STEP 3: Review, Declarations & Submission -->
-        <div class="step-pane" id="step3">
-          <h3 style="font-size:14px;margin:0 0 12px" data-i="step3Title">ধাপ ৩: চূড়ান্ত পর্যালোচনা ও জমা</h3>
-
-          <div id="step3ReviewCard" style="background:var(--sub);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:14px;font-size:12px;line-height:1.7">
-            <!-- Populated via JS -->
-          </div>
-
-          <label class="check">
-            <input type="checkbox" id="confirmAccuracy" required>
-            <span data-i="confirmDeclaration">আমি ঘোষণা করছি যে এই তথ্য আমার জানা মতে সম্পূর্ণ সত্য এবং কোনো ব্যক্তিকে হয়রানি করার উদ্দেশ্যে উদ্দেশ্যপ্রণোদিতভাবে মিথ্যা তথ্য দেওয়া হচ্ছে না।</span>
-          </label>
-
-          <div style="background:var(--red-subtle);color:var(--red);border:1px solid var(--red);border-radius:8px;padding:10px 12px;font-size:11px;margin:12px 0">
-            <strong>জরুরি সতর্কবার্তা:</strong> WatchDog BD পুলিশ বা জরুরি সেবার বিকল্প নয়। তাৎক্ষণিক বিপদে জাতীয় জরুরি সেবা <strong>৯৯৯</strong>-এ কল করুন।
-          </div>
-
-          <div id="submissionError" class="form-message" style="color:var(--red);margin:8px 0;font-weight:600"></div>
-
-          <div class="step-actions">
-            <button type="button" class="button ghost" id="backToStep2Btn" data-i="btnBack">পূর্ববর্তী ধাপ</button>
-            <button type="submit" class="button primary" id="submitReportFinalBtn" data-i="btnSubmit">জমা দিন (Submit Report)</button>
-          </div>
-        </div>
-
-        <!-- SUCCESS STATE WITH TRACKING CODE -->
-        <div class="step-pane" id="stepSuccess">
-          <div style="text-align:center;padding:20px 10px">
-            <div class="success-icon-wrap">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#2AA579" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+        <div class="composer-tracking-card">
+          <small class="composer-tracking-label" data-i="composerTrackingLabel">আপনার গোপন ট্র্যাকিং আইডি:</small>
+          <div class="composer-tracking-row">
+            <span class="composer-tracking-id" id="composerTrackingId">WD-XXXXXXXX</span>
+            <button type="button" class="composer-copy-btn" id="composerCopyBtn" aria-label="Copy Tracking ID">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
-            </div>
-            <h3 style="font-size:20px;margin:0 0 6px" data-i="successTitle">রিপোর্টটি সফলভাবে জমা হয়েছে!</h3>
-            <p style="color:var(--muted);font-size:13px;max-width:480px;margin:0 auto 16px" data-i="successSub">আমাদের মডারেশন টিম তথ্য যাচাইয়ের পর এটি প্ল্যাটফর্মে প্রকাশ করবে। আপনার রিপোর্টের অবস্থা ট্র্যাক করতে নিচের গোপন রেফারেন্স কোডটি সংরক্ষণ করুন:</p>
-
-            <div class="tracking-box">
-              <small style="color:var(--muted);font-weight:700;display:block">আপনার গোপন ট্র্যাকিং কোড (Private Reference):</small>
-              <span class="tracking-code-val" id="generatedTrackingCode">WD-XXXXXXXX</span>
-              <div>
-                <button type="button" class="button ghost" id="copyTrackingCodeBtn" style="font-size:11px;padding:6px 12px">
-                  <svg class="ui-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
-                  <span>কোড কপি করুন</span>
-                </button>
-              </div>
-            </div>
-
-            <button type="button" class="button primary" data-close="reportModal" data-i="btnClose">ঠিক আছে (সম্পন্ন)</button>
+              <span id="composerCopyBtnText" data-i="composerCopy">কপি করুন</span>
+            </button>
           </div>
         </div>
-      </form>
+
+        <button type="button" class="button primary" style="width:100%;margin-top:14px" data-close="reportModal" data-i="btnClose">সম্পন্ন</button>
+      </div>
     </div>
   </div>
 
