@@ -26,10 +26,21 @@ if (!fs.existsSync(DATA_DIR) && !IS_PROD) {
   try { fs.mkdirSync(DATA_DIR, { recursive: true }); } catch {}
 }
 
-// Load district GeoJSON
-const districtsData = JSON.parse(fs.readFileSync(path.join(PUBLIC_DIR, 'districts.geojson'), 'utf8'));
+// Load district GeoJSON (safe for Vercel serverless bundling)
+let districtsData;
+try {
+  districtsData = require('./public/districts.geojson');
+} catch {
+  try {
+    districtsData = JSON.parse(fs.readFileSync(path.join(PUBLIC_DIR, 'districts.geojson'), 'utf8'));
+  } catch (err) {
+    console.error('[CRITICAL] Failed to load districts.geojson:', err.message);
+    districtsData = { type: 'FeatureCollection', features: [] };
+  }
+}
+
 const DISTRICT_MAP = {};
-for (const f of districtsData.features) {
+for (const f of (districtsData.features || [])) {
   DISTRICT_MAP[f.properties.code] = f.properties;
 }
 
@@ -48,7 +59,10 @@ if (IS_PROD) {
   ];
   if (!SECRET || SECRET.length < 32 || invalidSecrets.includes(SECRET)) {
     console.error('[SECURITY CRITICAL] SAFEMAP_SECRET must be set to a cryptographically secure random string of at least 32 characters in production. Deterministic fallbacks are strictly prohibited.');
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.VERCEL === '1' && !SECRET) {
+      SECRET = crypto.randomBytes(32).toString('hex');
+      console.warn('[VERCEL NOTICE] Generated ephemeral SAFEMAP_SECRET. Please add SAFEMAP_SECRET to Vercel Environment Variables for multi-instance token consistency.');
+    } else if (process.env.NODE_ENV === 'production') {
       throw new Error('FATAL CONFIGURATION ERROR: SAFEMAP_SECRET is missing, insecure, or under 32 characters in production.');
     }
   }
@@ -72,7 +86,10 @@ if (IS_PROD) {
   ];
   if (!ADMIN_PASS || ADMIN_PASS.length < 16 || weakPasswords.includes(ADMIN_PASS.toLowerCase())) {
     console.error('[AUTH CRITICAL] SAFEMAP_ADMIN_PASSWORD in production must be a strong, unique secret of at least 16 characters. Weak or default passwords are strictly prohibited.');
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.VERCEL === '1' && !ADMIN_PASS) {
+      ADMIN_PASS = null; // Lock admin portal without crashing the public frontend
+      console.warn('[VERCEL NOTICE] SAFEMAP_ADMIN_PASSWORD is not set. Admin login is locked until configured in Vercel Environment Variables.');
+    } else if (process.env.NODE_ENV === 'production') {
       throw new Error('FATAL CONFIGURATION ERROR: SAFEMAP_ADMIN_PASSWORD is missing, weak, or under 16 characters in production.');
     }
   }
@@ -833,6 +850,10 @@ app.use(async (req, res, next) => {
 // Static files
 app.use(express.static(PUBLIC_DIR));
 
+app.get('/', (req, res) => {
+  res.sendFile(path.join(PUBLIC_DIR, 'index.html'));
+});
+
 // Dedicated Admin Portal
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(PUBLIC_DIR, 'admin.html'));
@@ -1490,6 +1511,16 @@ app.get('/api/admin/media/:mediaId', requireAdminAuth, async (req, res) => {
 app.get('/api/admin/analytics', requireAdminAuth, async (req, res) => {
   const analytics = await dbService.getFullAnalytics();
   res.json(analytics);
+});
+
+// Global Error Handler (prevents opaque unhandled 500 crashes)
+app.use((err, req, res, next) => {
+  console.error('[UNHANDLED SERVER ERROR]', err.stack || err.message);
+  if (res.headersSent) return next(err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: IS_PROD ? 'An unexpected error occurred. Please try again later.' : err.message
+  });
 });
 
 // Server bootstrap (works locally and on Vercel)
