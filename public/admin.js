@@ -274,15 +274,19 @@ async function loadQueue() {
       card.append(privateBox);
 
       // Attached Evidence Image Inspection (Private, Safe Admin Preview)
-      if (item.image && item.image.media_id) {
+      if (item.image && (item.image.media_id || item.image.url)) {
         const mediaCard = document.createElement('div');
         mediaCard.style.cssText = 'margin-top:10px;padding:10px;background:var(--sub);border:1px solid var(--line);border-radius:8px;display:flex;gap:12px;align-items:center';
 
         const thumb = document.createElement('img');
-        thumb.src = `/api/admin/media/${encodeURIComponent(item.image.media_id)}?token=${encodeURIComponent(adminToken)}`;
+        const adminFallbackUrl = item.image.media_id ? `/api/admin/media/${encodeURIComponent(item.image.media_id)}?token=${encodeURIComponent(adminToken)}` : '';
+        const thumbSrc = item.image.thumb_url || item.image.display_url || item.image.url || adminFallbackUrl;
+        const fullSrc = item.image.display_url || item.image.url || adminFallbackUrl;
+
+        thumb.src = thumbSrc;
         thumb.alt = 'Evidence Thumbnail';
         thumb.style.cssText = 'width:64px;height:64px;object-fit:cover;border-radius:6px;border:1px solid var(--line);cursor:pointer';
-        thumb.onclick = () => window.open(thumb.src, '_blank');
+        thumb.onclick = () => window.open(fullSrc, '_blank');
 
         const mediaDetails = document.createElement('div');
         mediaDetails.style.cssText = 'font-size:12px;line-height:1.6';
@@ -290,11 +294,13 @@ async function loadQueue() {
         const mediaTitle = document.createElement('strong');
         mediaTitle.textContent = 'সংযুক্ত প্রমাণ চিত্র (Image Attachment): ';
         const mediaFileSpan = document.createElement('span');
-        const sizeKb = (item.image.file_size ? (item.image.file_size / 1024).toFixed(1) + ' KB' : 'Unknown size');
-        mediaFileSpan.textContent = `${item.image.file_name || 'photo'} (${sizeKb}) · EXIF/GPS অপসারিত`;
+        const byteCount = item.image.size_bytes || item.image.file_size || 0;
+        const sizeKb = byteCount ? (byteCount / 1024).toFixed(1) + ' KB' : 'Unknown size';
+        const providerName = item.image.storage_provider === 'imgbb' ? 'ImgBB Cloud' : 'EXIF/GPS অপসারিত';
+        mediaFileSpan.textContent = `${item.image.filename || item.image.file_name || 'photo'} (${sizeKb}) · ${providerName}`;
 
         const viewLink = document.createElement('a');
-        viewLink.href = thumb.src;
+        viewLink.href = fullSrc;
         viewLink.target = '_blank';
         viewLink.rel = 'noopener noreferrer';
         viewLink.style.cssText = 'display:inline-block;color:var(--accent);font-weight:600;margin-top:2px';

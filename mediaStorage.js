@@ -267,6 +267,7 @@ class ObjectStorageService {
     this.accessKey = (process.env.S3_ACCESS_KEY_ID || '').trim();
     this.secretKey = (process.env.S3_SECRET_ACCESS_KEY || '').trim();
     this.publicDomain = (process.env.S3_PUBLIC_DOMAIN || '').trim();
+    this.imgbbApiKey = (process.env.IMGBB_API_KEY || '889cc1b0fdd91302b38c1c99b262f684').trim();
     this.isProd = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
 
     // Ensure local directory exists in dev/test
@@ -292,8 +293,32 @@ class ObjectStorageService {
     const mediaId = 'm_' + crypto.randomBytes(16).toString('hex');
     const storageKey = `media/${mediaId}.${extension}`;
 
+    // 1. ImgBB Storage (Preserves MongoDB Atlas database space by storing images on ImgBB)
+    if (this.imgbbApiKey) {
+      try {
+        const imgbbData = await this._uploadToImgbb(buffer, mimeType, extension, mediaId);
+        return {
+          media_id: mediaId,
+          storage_key: `imgbb://${mediaId}`,
+          storage_provider: 'imgbb',
+          url: imgbbData.url,
+          display_url: imgbbData.display_url,
+          thumb_url: imgbbData.thumb_url,
+          delete_url: imgbbData.delete_url,
+          filename: originalFilename,
+          mime_type: mimeType,
+          size_bytes: buffer.length,
+          status: 'pending',
+          uploaded_at: new Date().toISOString()
+        };
+      } catch (err) {
+        console.error('[IMGBB UPLOAD ERROR]', err.message);
+        // If ImgBB fails, fallback to other providers
+      }
+    }
+
+    // 2. S3 / Cloudflare R2 if configured
     if (this.isObjectStorageConfigured()) {
-      // In production with S3/R2 configured
       await this._putS3Object(storageKey, buffer, mimeType);
       return {
         media_id: mediaId,
@@ -307,7 +332,7 @@ class ObjectStorageService {
       };
     }
 
-    // Persistent Database Storage Fallback (stores binary in dedicated media_files collection, never in incident document)
+    // 3. Persistent Database Storage Fallback (stores binary in dedicated media_files collection, never in incident document)
     if (this.dbService && this.dbService.mode === 'mongodb' && this.dbService.db) {
       const mongoStorageKey = `mongodb://${mediaId}.${extension}`;
       await this.dbService.db.collection('media_files').insertOne({
@@ -333,7 +358,7 @@ class ObjectStorageService {
 
     if (this.isProd) {
       throw new Error(
-        'OBJECT_STORAGE_UNCONFIGURED: Persistent object storage (S3/Cloudflare R2 or MongoDB) is required in production. Please configure S3_BUCKET, S3_ACCESS_KEY_ID, and S3_SECRET_ACCESS_KEY.'
+        'OBJECT_STORAGE_UNCONFIGURED: Persistent object storage (ImgBB, S3/R2, or MongoDB) is required in production.'
       );
     }
 
@@ -358,10 +383,68 @@ class ObjectStorageService {
   }
 
   /**
+   * Upload binary buffer to ImgBB
+   */
+  async _uploadToImgbb(buffer, mimeType, extension, mediaId) {
+    const filename = `${mediaId}.${extension}`;
+    const blob = new Blob([buffer], { type: mimeType });
+    const fd = new FormData();
+    fd.append('image', blob, filename);
+
+    const res = await fetch(`https://api.imgbb.com/1/upload?key=${encodeURIComponent(this.imgbbApiKey)}`, {
+      method: 'POST',
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WatchDogBD/1.0'
+      },
+      body: fd
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.success || !data.data) {
+      const msg = data.error && data.error.message ? data.error.message : `HTTP ${res.status}`;
+      throw new Error(msg);
+    }
+
+    return {
+      url: data.data.url,
+      display_url: data.data.display_url || data.data.url,
+      thumb_url: data.data.thumb ? data.data.thumb.url : (data.data.display_url || data.data.url),
+      delete_url: data.data.delete_url || null
+    };
+  }
+
+  /**
    * Fetch media buffer from storage
    */
-  async getMedia(storageKey) {
+  async getMedia(storageKey, context = null) {
     if (!storageKey) return null;
+
+    if (storageKey.startsWith('imgbb://')) {
+      let targetUrl = context && (context.url || context.display_url);
+      if (!targetUrl && this.dbService) {
+        const mediaId = storageKey.replace('imgbb://', '');
+        const report = await this.dbService.getReportByMediaId(mediaId);
+        if (report && report.image) {
+          targetUrl = report.image.url || report.image.display_url;
+        }
+      }
+      if (targetUrl) {
+        try {
+          const res = await fetch(targetUrl, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) WatchDogBD/1.0'
+            }
+          });
+          if (res.ok) {
+            const arr = await res.arrayBuffer();
+            return Buffer.from(arr);
+          }
+        } catch (fetchErr) {
+          console.error('[IMGBB FETCH ERROR]', fetchErr.message);
+        }
+      }
+      return null;
+    }
 
     if (storageKey.startsWith('mongodb://')) {
       if (this.dbService && this.dbService.db) {
@@ -389,8 +472,25 @@ class ObjectStorageService {
   /**
    * Permanently delete media file when report is purged
    */
-  async deleteMedia(storageKey) {
+  async deleteMedia(storageKey, context = null) {
     if (!storageKey) return false;
+
+    if (storageKey.startsWith('imgbb://')) {
+      let delUrl = context && context.delete_url;
+      if (!delUrl && this.dbService) {
+        const mediaId = storageKey.replace('imgbb://', '');
+        const report = await this.dbService.getReportByMediaId(mediaId);
+        if (report && report.image) {
+          delUrl = report.image.delete_url;
+        }
+      }
+      if (delUrl) {
+        try {
+          await fetch(delUrl).catch(() => {});
+        } catch {}
+      }
+      return true;
+    }
 
     if (storageKey.startsWith('mongodb://')) {
       if (this.dbService && this.dbService.db) {

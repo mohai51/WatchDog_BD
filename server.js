@@ -1062,6 +1062,7 @@ app.get('/api/districts/:code', async (req, res) => {
     incident_time: r.incident_time,
     location: r.approximate_area || r.location,
     description: r.description,
+    image_url: r.image && (r.image.status === 'approved' || r.status === 'approved') ? (r.image.display_url || r.image.url || `/api/media/${r.image.media_id}`) : null,
     verification_status: r.verification_status || 'moderated',
     news_source: r.news_source || null,
     created_at: r.created_at
@@ -1266,11 +1267,15 @@ app.post('/api/reports', reportSubmitLimiter.middleware(), async (req, res) => {
         validated.originalName
       );
 
-      // Save media reference in MongoDB (NEVER save binary inside incident document!)
+      // Save media reference in database (stores lightweight URL, ZERO image binary in MongoDB!)
       imageDoc = {
         media_id: mediaRef.media_id,
         storage_key: mediaRef.storage_key,
         storage_provider: mediaRef.storage_provider,
+        url: mediaRef.url || null,
+        display_url: mediaRef.display_url || null,
+        thumb_url: mediaRef.thumb_url || null,
+        delete_url: mediaRef.delete_url || null,
         filename: mediaRef.filename,
         mime_type: mediaRef.mime_type,
         size_bytes: mediaRef.size_bytes,
@@ -1331,6 +1336,9 @@ app.post('/api/reports', reportSubmitLimiter.middleware(), async (req, res) => {
       has_image: !!imageDoc,
       image: imageDoc ? {
         media_id: imageDoc.media_id,
+        url: imageDoc.url || undefined,
+        display_url: imageDoc.display_url || undefined,
+        thumb_url: imageDoc.thumb_url || undefined,
         filename: imageDoc.filename,
         mime_type: imageDoc.mime_type,
         status: 'pending'
@@ -1369,7 +1377,7 @@ app.get('/api/media/:mediaId', async (req, res) => {
     }
   }
 
-  const buffer = await storageService.getMedia(report.image.storage_key);
+  const buffer = await storageService.getMedia(report.image.storage_key, report.image);
   if (!buffer) {
     return res.status(404).json({ error: 'Media file could not be retrieved from storage.' });
   }
@@ -1477,7 +1485,7 @@ app.delete('/api/admin/reports/:id', requireAdminAuth, async (req, res) => {
 
   if (existing.image && existing.image.storage_key) {
     try {
-      await storageService.deleteMedia(existing.image.storage_key);
+      await storageService.deleteMedia(existing.image.storage_key, existing.image);
     } catch (err) {
       console.error('[MEDIA PURGE ERROR]', err.message);
     }
@@ -1498,7 +1506,7 @@ app.get('/api/admin/media/:mediaId', requireAdminAuth, async (req, res) => {
   if (!report || !report.image) {
     return res.status(404).json({ error: 'Media not found.' });
   }
-  const buffer = await storageService.getMedia(report.image.storage_key);
+  const buffer = await storageService.getMedia(report.image.storage_key, report.image);
   if (!buffer) {
     return res.status(404).json({ error: 'Media file could not be retrieved from storage.' });
   }
