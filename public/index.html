@@ -422,21 +422,24 @@
             <div class="composer-char-count" id="composerCharCount">০ / ২,০০০</div>
           </div>
 
-          <!-- Selected Image Preview Area (Hidden by default) -->
-          <div class="composer-image-preview-card" id="composerImagePreview" hidden>
-            <div class="composer-img-thumb-wrap">
+          <!-- Selected Image Preview Area (Hidden by default, large Facebook-style preview on photo select) -->
+          <div class="composer-image-preview-card" id="composerImagePreview" style="display:none;" hidden>
+            <div class="composer-large-preview-wrap">
               <img id="composerImgTag" src="" alt="Selected Photo">
+              <button type="button" class="composer-large-remove-btn" id="composerRemoveImgBtn" title="Remove photo" aria-label="Remove photo">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              </button>
+              <div class="composer-large-preview-meta">
+                <div class="composer-large-file-info">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                  <span class="composer-img-name" id="composerImgName">photo.jpg</span>
+                </div>
+                <span class="composer-img-size" id="composerImgSize">1.2 MB</span>
+              </div>
             </div>
-            <div class="composer-img-meta">
-              <span class="composer-img-name" id="composerImgName">photo.jpg</span>
-              <span class="composer-img-size" id="composerImgSize">1.2 MB</span>
-            </div>
-            <button type="button" class="composer-img-remove-btn" id="composerRemoveImgBtn" title="Remove image" aria-label="Remove image">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
           </div>
 
           <!-- Bottom Toolbar (Facebook Style) -->
@@ -463,11 +466,11 @@
           </div>
 
           <!-- Submission Feedback / Error Alert -->
-          <div id="composerErrorMessage" class="composer-error-alert" role="alert" hidden></div>
+          <div id="composerErrorMessage" class="composer-error-alert" role="alert" style="display:none;" hidden></div>
 
           <!-- Submit Button -->
           <button type="submit" class="composer-submit-btn" id="composerSubmitBtn">
-            <span class="btn-spinner" id="composerSpinner" hidden></span>
+            <span class="btn-spinner" id="composerSpinner" style="display:none;" hidden></span>
             <span id="composerSubmitText" data-i="composerSubmit">রিপোর্ট জমা দিন</span>
           </button>
         </form>

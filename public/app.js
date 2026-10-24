@@ -891,17 +891,25 @@ function resetComposer() {
   selectedImageBase64 = null;
   selectedImageFile = null;
   if ($('composerImageInput')) $('composerImageInput').value = '';
-  if ($('composerImagePreview')) $('composerImagePreview').hidden = true;
+  if ($('composerImagePreview')) {
+    $('composerImagePreview').hidden = true;
+    $('composerImagePreview').style.display = 'none';
+  }
+  if ($('composerImgTag')) $('composerImgTag').src = '';
 
   const errBox = $('composerErrorMessage');
   if (errBox) {
     errBox.textContent = '';
     errBox.hidden = true;
+    errBox.style.display = 'none';
   }
 
   const submitBtn = $('composerSubmitBtn');
   if (submitBtn) submitBtn.disabled = false;
-  if ($('composerSpinner')) $('composerSpinner').hidden = true;
+  if ($('composerSpinner')) {
+    $('composerSpinner').hidden = true;
+    $('composerSpinner').style.display = 'none';
+  }
   if ($('composerSubmitText')) $('composerSubmitText').textContent = I18N[lang].composerSubmit || 'রিপোর্ট জমা দিন';
 
   if ($('composerFormWrap')) $('composerFormWrap').hidden = false;
@@ -989,7 +997,10 @@ if ($('composerImageInput')) {
         const sizeMb = (file.size / (1024 * 1024)).toFixed(2);
         $('composerImgSize').textContent = file.size > 1024 * 1024 ? `${sizeMb} MB` : `${sizeKb} KB`;
       }
-      if ($('composerImagePreview')) $('composerImagePreview').hidden = false;
+      if ($('composerImagePreview')) {
+        $('composerImagePreview').hidden = false;
+        $('composerImagePreview').style.display = 'block';
+      }
     };
     reader.onerror = () => {
       alert('Error reading selected image file.');
@@ -1005,7 +1016,10 @@ if ($('composerRemoveImgBtn')) {
     selectedImageBase64 = null;
     selectedImageFile = null;
     if ($('composerImageInput')) $('composerImageInput').value = '';
-    if ($('composerImagePreview')) $('composerImagePreview').hidden = true;
+    if ($('composerImagePreview')) {
+      $('composerImagePreview').hidden = true;
+      $('composerImagePreview').style.display = 'none';
+    }
     if ($('composerImgTag')) $('composerImgTag').src = '';
   };
 }
@@ -1030,6 +1044,7 @@ if ($('composerReportForm')) {
     if (!districtCode) {
       errBox.textContent = I18N[lang].errDistrict || 'অনুগ্রহ করে জেলা নির্বাচন করুন।';
       errBox.hidden = false;
+      errBox.style.display = 'block';
       if ($('composerDistrict')) $('composerDistrict').focus();
       return;
     }
@@ -1037,6 +1052,7 @@ if ($('composerReportForm')) {
     if (!crimeType) {
       errBox.textContent = I18N[lang].errCategory || 'অনুগ্রহ করে অপরাধের ধরন নির্বাচন করুন।';
       errBox.hidden = false;
+      errBox.style.display = 'block';
       if ($('composerType')) $('composerType').focus();
       return;
     }
@@ -1044,13 +1060,17 @@ if ($('composerReportForm')) {
     if (!description || description.length < 15 || description.length > 2000) {
       errBox.textContent = I18N[lang].errDesc || 'ঘটনার বিবরণ কমপক্ষে ১৫ অক্ষরের হতে হবে (সর্বোচ্চ ২,০০০ অক্ষর)।';
       errBox.hidden = false;
+      errBox.style.display = 'block';
       if ($('composerDesc')) $('composerDesc').focus();
       return;
     }
 
     // Disable button to prevent duplicate submissions & show spinner
     submitBtn.disabled = true;
-    if (spinner) spinner.hidden = false;
+    if (spinner) {
+      spinner.hidden = false;
+      spinner.style.display = 'inline-block';
+    }
     if (submitText) submitText.textContent = I18N[lang].composerSubmitting || 'রিপোর্ট জমা হচ্ছে...';
 
     const payload = {
@@ -1078,13 +1098,17 @@ if ($('composerReportForm')) {
 
       if ($('composerFormWrap')) $('composerFormWrap').hidden = true;
       if ($('composerSuccessWrap')) $('composerSuccessWrap').hidden = false;
-      form.reset();
+      resetComposer();
     } catch (err) {
       errBox.textContent = err.message || 'Submission error. Please try again.';
       errBox.hidden = false;
+      errBox.style.display = 'block';
     } finally {
       submitBtn.disabled = false;
-      if (spinner) spinner.hidden = true;
+      if (spinner) {
+        spinner.hidden = true;
+        spinner.style.display = 'none';
+      }
       if (submitText) submitText.textContent = I18N[lang].composerSubmit || 'রিপোর্ট জমা দিন';
     }
   };
@@ -1393,6 +1417,7 @@ async function init() {
     else $text('mapStatusIndicator', I18N[lang].mapReady);
 
     renderLanguage();
+    resetComposer();
     await recordPageHit();
     await refreshStats();
   } catch (err) {
